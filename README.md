@@ -34,6 +34,7 @@ BCS-307-Digital-Systems-Project/
 │   ├── sim/                 # Testbenches and Simulation Waveforms
 │   └── constr/              # XDC physical constraints
 └── README.md                # Project Overview (This file)
+```
 
 ---
 
