@@ -118,9 +118,23 @@ ARCHITECTURE behavioral OF config_rom IS
     -- To be populated with elevator controller state transitions
     CONSTANT elevator_rom : rom_array := (OTHERS => (OTHERS => '0'));
 
-    -- Serial Protocol ROM (Config ID = "11") - Placeholder
-    -- To be populated with UART/serial FSM state transitions
-    CONSTANT serial_rom   : rom_array := (OTHERS => (OTHERS => '0'));
+
+    -- Serial Protocol ROM (Config ID = "11")
+    CONSTANT serial_rom : rom_array := (
+        256   => rom_data("00001", x"0000", '0', '0', '0', '0'), -- SP_IDLE    + rx_valid -> SP_START
+        1280  => rom_data("00010", x"0000", '0', '0', '0', '0'), -- SP_START   + rx_valid -> SP_RX_BIT0
+        2304  => rom_data("00011", x"0000", '0', '1', '0', '0'), -- SP_RX_BIT0 + rx_valid -> SP_RX_BIT1
+        3328  => rom_data("00100", x"0000", '0', '1', '0', '0'), -- SP_RX_BIT1 + rx_valid -> SP_RX_BIT2
+        4352  => rom_data("00101", x"0000", '0', '1', '0', '0'), -- SP_RX_BIT2 + rx_valid -> SP_RX_BIT3
+        5376  => rom_data("00110", x"0000", '0', '1', '0', '0'), -- SP_RX_BIT3 + rx_valid -> SP_RX_BIT4
+        6400  => rom_data("00111", x"0000", '0', '1', '0', '0'), -- SP_RX_BIT4 + rx_valid -> SP_RX_BIT5
+        7424  => rom_data("01000", x"0000", '0', '1', '0', '0'), -- SP_RX_BIT5 + rx_valid -> SP_RX_BIT6
+        8448  => rom_data("01001", x"0000", '0', '1', '0', '0'), -- SP_RX_BIT6 + rx_valid -> SP_RX_BIT7
+        9472  => rom_data("01010", x"0000", '0', '1', '0', '0'), -- SP_RX_BIT7 + rx_valid -> SP_STOP
+        10496 => rom_data("01011", x"0100", '0', '1', '0', '0'), -- SP_STOP    + rx_valid -> SP_COMPLETE (tx_enable=1)
+        11776 => rom_data("00000", x"0000", '0', '0', '0', '0'), -- SP_COMPLETE+ tx_ready -> SP_IDLE
+        OTHERS => (OTHERS => '0')
+    );
 
 BEGIN
     -- Synchronous ROM read process
