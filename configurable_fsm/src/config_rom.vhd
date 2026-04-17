@@ -114,10 +114,90 @@ ARCHITECTURE behavioral OF config_rom IS
     -- To be populated with vending machine state transitions
     CONSTANT vending_rom  : rom_array := (OTHERS => (OTHERS => '0'));
 
-    -- Elevator ROM (Config ID = "10") - Placeholder
-    -- To be populated with elevator controller state transitions
-    CONSTANT elevator_rom : rom_array := (OTHERS => (OTHERS => '0'));
+    -- ========================================================================
+    -- ELEVATOR CONFIGURATION ROM (Config ID = "10")
+    -- 
+    -- Address Calculation: (Current_State_Code * 1024) + Event_Code
+    -- Example: EL_MOVE_UP (State 1 * 1024) + arrived (Event 4) = 1028
+    -- ========================================================================
+    
+    -- State Definitions
+    CONSTANT EL_STATE_IDLE       : STD_LOGIC_VECTOR(4 DOWNTO 0) := "00000"; -- State 0
+    CONSTANT EL_STATE_MOVE_UP    : STD_LOGIC_VECTOR(4 DOWNTO 0) := "00001"; -- State 1
+    CONSTANT EL_STATE_MOVE_DOWN  : STD_LOGIC_VECTOR(4 DOWNTO 0) := "00010"; -- State 2
+    CONSTANT EL_STATE_DOOR_OPEN  : STD_LOGIC_VECTOR(4 DOWNTO 0) := "00011"; -- State 3
+    CONSTANT EL_STATE_DOOR_CLOSE : STD_LOGIC_VECTOR(4 DOWNTO 0) := "00100"; -- State 4
 
+    CONSTANT elevator_rom : rom_array := (
+        
+        -- --------------------------------------------------------------------
+        -- STATE 0: EL_IDLE
+        -- Awaiting floor requests. FSM is stationary with doors closed.
+        -- --------------------------------------------------------------------
+        -- Event: go_up (bit 0 = 1) -> Transition to EL_MOVE_UP, Motor Up ON (0x0001)
+        1    => rom_data(EL_STATE_MOVE_UP,   x"0001", '0', '0', '0', '0'), 
+        
+        -- Event: go_down (bit 1 = 2) -> Transition to EL_MOVE_DOWN, Motor Down ON (0x0002)
+        2    => rom_data(EL_STATE_MOVE_DOWN, x"0002", '0', '0', '0', '0'), 
+        
+        -- Event: arrived (bit 2 = 4) -> Transition to EL_DOOR_OPEN, Door Motor ON (0x0004)
+        4    => rom_data(EL_STATE_DOOR_OPEN, x"0004", '0', '0', '0', '0'),
+
+        -- --------------------------------------------------------------------
+        -- STATE 1: EL_MOVE_UP
+        -- Elevator is actively moving to a higher floor.
+        -- --------------------------------------------------------------------
+        -- Event: arrived (bit 2 = 4) -> Transition to EL_DOOR_OPEN, Door Motor ON (0x0004)
+        1028 => rom_data(EL_STATE_DOOR_OPEN, x"0004", '0', '1', '0', '0'), 
+        
+        -- Event: weight_sensor (bit 5 = 32) -> Overload! Transition to IDLE, Alarm ON (0x0008)
+        1056 => rom_data(EL_STATE_IDLE,      x"0008", '0', '1', '0', '0'), 
+        
+        -- Event: emergency_btn (bit 6 = 64) -> Interrupt! Transition to IDLE, All OFF (0x0000)
+        1088 => rom_data(EL_STATE_IDLE,      x"0000", '0', '1', '0', '0'),
+
+        -- --------------------------------------------------------------------
+        -- STATE 2: EL_MOVE_DOWN
+        -- Elevator is actively moving to a lower floor.
+        -- --------------------------------------------------------------------
+        -- Event: arrived (bit 2 = 4) -> Transition to EL_DOOR_OPEN, Door Motor ON (0x0004)
+        2052 => rom_data(EL_STATE_DOOR_OPEN, x"0004", '0', '1', '0', '0'), 
+        
+        -- Event: weight_sensor (bit 5 = 32) -> Overload! Transition to IDLE, Alarm ON (0x0008)
+        2080 => rom_data(EL_STATE_IDLE,      x"0008", '0', '1', '0', '0'), 
+        
+        -- Event: emergency_btn (bit 6 = 64) -> Interrupt! Transition to IDLE, All OFF (0x0000)
+        2112 => rom_data(EL_STATE_IDLE,      x"0000", '0', '1', '0', '0'),
+
+        -- --------------------------------------------------------------------
+        -- STATE 3: EL_DOOR_OPEN
+        -- Doors are open. FSM will hold this state if door sensor is blocked.
+        -- --------------------------------------------------------------------
+        -- Event: door_sensor clear (0) -> Transition to EL_DOOR_CLOSE, All OFF (0x0000)
+        3072 => rom_data(EL_STATE_DOOR_CLOSE,x"0000", '0', '1', '0', '0'), 
+        
+        -- Event: door_sensor blocked (bit 4 = 16) -> Hold State, Door Motor remains ON (0x0004)
+        3088 => rom_data(EL_STATE_DOOR_OPEN, x"0004", '1', '1', '0', '0'), 
+        
+        -- Event: emergency_btn (bit 6 = 64) -> Interrupt! Transition to IDLE, All OFF (0x0000)
+        3136 => rom_data(EL_STATE_IDLE,      x"0000", '0', '1', '0', '0'),
+
+        -- --------------------------------------------------------------------
+        -- STATE 4: EL_DOOR_CLOSE
+        -- Doors are actively closing.
+        -- --------------------------------------------------------------------
+        -- Event: door_sensor blocked (bit 4 = 16) -> Safety trip! Return to IDLE, All OFF
+        4112 => rom_data(EL_STATE_IDLE,      x"0000", '0', '0', '0', '0'), 
+        
+        -- Event: emergency_btn (bit 6 = 64) -> Interrupt! Transition to IDLE, All OFF (0x0000)
+        4160 => rom_data(EL_STATE_IDLE,      x"0000", '0', '1', '0', '0'),
+
+        -- --------------------------------------------------------------------
+        -- DEFAULT / UNMAPPED STATES
+        -- All undefined state/event combinations return zeros (hold state, no outputs).
+        -- --------------------------------------------------------------------
+        OTHERS => (OTHERS => '0')
+    );
 
     -- Serial Protocol ROM (Config ID = "11")
     CONSTANT serial_rom : rom_array := (
