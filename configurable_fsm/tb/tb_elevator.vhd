@@ -112,7 +112,7 @@ begin
     -- Expected: state = IDLE (00000), all outputs '0'
     -- =====================================================================
     report "----------------------------------------" SEVERITY NOTE;
-      report "TEST 1: Power-on reset" severity NOTE;
+      report "TEST 1-4: Power-on reset" severity NOTE;
     report "  Expected: IDLE state, all outputs low" severity NOTE;
     reset <= '1';
     wait_cycles(4);
@@ -133,7 +133,7 @@ begin
     -- Expected: IDLE -> MOVE_UP -> MOVE_UP -> MOVE_UP -> DOOR_OPEN
     -- =====================================================================
     report "----------------------------------------" SEVERITY NOTE;
-      report "TEST 2: Floor request 0 -> 3 (go_up x3)" severity NOTE;
+      report "TEST 5-7: Floor request 0 -> 3 (go_up x3)" severity NOTE;
     report "  Expected: MOVE_UP x3, then DOOR_OPEN at floor 3" severity NOTE;
     floor_request <= "0011";
     wait_cycles(20);
@@ -150,7 +150,7 @@ begin
     -- Expected: remain in DOOR_OPEN while door_sensor is asserted
     -- =====================================================================
     report "----------------------------------------" SEVERITY NOTE;
-      report "TEST 3: Door obstruction detected" severity NOTE;
+      report "TEST 8-9: Door obstruction detected" severity NOTE;
     report "  Expected: stay in DOOR_OPEN while obstruction present" severity NOTE;
     door_sensor <= '1';
     wait_cycles(6);
@@ -168,7 +168,7 @@ begin
     -- Expected: door_clear causes transition to IDLE
     -- =====================================================================
     report "----------------------------------------" SEVERITY NOTE;
-      report "TEST 4: Door cleared" severity NOTE;
+      report "TEST 10-11: Door cleared" severity NOTE;
     report "  Expected: IDLE after door_clear asserted" severity NOTE;
     door_clear <= '1';
     wait_cycles(4);
@@ -185,7 +185,7 @@ begin
     -- Expected: IDLE -> MOVE_DOWN -> MOVE_DOWN -> DOOR_OPEN
     -- =====================================================================
     report "----------------------------------------" SEVERITY NOTE;
-      report "TEST 5: Floor request 3 -> 1 (go_down x2)" severity NOTE;
+      report "TEST 12-14: Floor request 3 -> 1 (go_down x2)" severity NOTE;
     report "  Expected: MOVE_DOWN x2, then DOOR_OPEN at floor 1" severity NOTE;
     floor_request <= "0001";
     wait_cycles(20);
@@ -209,7 +209,7 @@ begin
     -- Expected: FSM forced to IDLE, motor_up off
     -- =====================================================================
     report "----------------------------------------" SEVERITY NOTE;
-      report "TEST 6: Emergency button during upward travel" severity NOTE;
+      report "TEST 15-17: Emergency button during upward travel" severity NOTE;
     report "  Expected: IDLE state, motor_up off after emergency" severity NOTE;
     floor_request <= "0101";
     wait_cycles(8);
@@ -230,7 +230,7 @@ begin
     -- Expected: motors stay off when target = current floor
     -- =====================================================================
     report "----------------------------------------" SEVERITY NOTE;
-      report "TEST 7: Same-floor request (no movement)" severity NOTE;
+      report "TEST 18-20: Same-floor request (no movement)" severity NOTE;
     report "  Expected: motors stay off for same-floor request" severity NOTE;
     floor_request <= current_floor;
     wait_cycles(10);
