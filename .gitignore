@@ -2,3 +2,6 @@
 *.log
 *.Xil/
 *.str
+*.vcd
+*.cf
+work-*/
