@@ -1,0 +1,22 @@
+ghdl -a --std=08 src/config_rom.vhd
+ghdl -a --std=08 src/generic_fsm.vhd
+ghdl -a --std=08 src/traffic_light_wrapper.vhd
+ghdl -a --std=08 src/vending_wrapper.vhd
+ghdl -a --std=08 src/serial_wrapper.vhd
+ghdl -a --std=08 src/elevator_wrapper.vhd
+ghdl -a --std=08 tb/tb_elevator.vhd
+ghdl -a --std=08 tb/tb_serial.vhd
+ghdl -a --std=08 tb/tb_traffic_light.vhd
+ghdl -a --std=08 tb/tb_vending.vhd
+
+ghdl -e --std=08 tb_traffic_light        
+ghdl -r --std=08 tb_traffic_light
+
+ghdl -e --std=08 tb_elevator     
+ghdl -r --std=08 tb_elevator
+
+ghdl -e --std=08 tb_serial  
+ghdl -r --std=08 tb_serial
+
+ghdl -e --std=08 tb_vending  
+ghdl -r --std=08 tb_vending

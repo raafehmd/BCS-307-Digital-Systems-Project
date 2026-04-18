@@ -1,8 +1,6 @@
 -- ============================================================================
 -- TRAFFIC LIGHT WRAPPER
 -- Application wrapper for configurable FSM core
---
--- Reference: Configurable FSM Master Doc, Section 5.1, 7.4.1
 -- ============================================================================
 
 LIBRARY IEEE;

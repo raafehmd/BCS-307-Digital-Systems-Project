@@ -1,3 +1,8 @@
+-- ============================================================================
+-- SERIAL PROTOCOL WRAPPER
+-- Application wrapper for configurable FSM core
+-- ============================================================================
+
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.NUMERIC_STD.ALL;
@@ -39,6 +44,8 @@ ARCHITECTURE behavioral OF serial_wrapper IS
 
     -- Rising-edge detect for rx_valid (latch each bit exactly once)
     SIGNAL rx_valid_prev : STD_LOGIC := '0';
+    -- Rising-edge detect for tx_ready
+    SIGNAL tx_ready_prev : STD_LOGIC := '0';
 
     -- Parity error detection
     SIGNAL prev_state    : STD_LOGIC_VECTOR(4 DOWNTO 0) := (OTHERS => '0');
@@ -82,21 +89,31 @@ BEGIN
     -- only needs 12 entries (one per transition) instead of 3072.
     -- rx_data is separately latched in rx_latch_proc for forwarding at COMPLETE.
     -- =========================================================================
-    input_encoder: PROCESS(rx_valid, tx_ready, rx_parity_ok)
+    -- =========================================================================
+    -- Combinatorial input encoder — EDGE-TRIGGERED
+    -- event_code fires for exactly one clock cycle per rx_valid / tx_ready
+    -- rising edge. This prevents the pipeline re-entry race that caused a
+    -- double state advance per pulse: after stage1 clears fsm_busy, the input
+    -- is still combinatorially high, so stage1 would capture a second event
+    -- before the state register has updated. With edge detection, event_code
+    -- returns to 0 on the cycle after the rising edge, so the pipeline sees
+    -- exactly one non-zero event per pulse regardless of how long the input
+    -- stays high.
+    -- =========================================================================
+    input_encoder: PROCESS(rx_valid, rx_valid_prev, tx_ready, tx_ready_prev, rx_parity_ok)
     BEGIN
         event_code <= (OTHERS => '0');  -- default: no event
 
-        IF rx_valid = '1' THEN
+        IF rx_valid = '1' AND rx_valid_prev = '0' THEN
+            -- Rising edge of rx_valid detected
             IF rx_parity_ok = '1' THEN
-                -- Good parity: rx_valid flag only, data=0x00
-                event_code <= "0100000000";  -- bit8=1, bits[7:0]=0
+                event_code <= "0100000000";  -- bit8=1: good parity rx pulse
             ELSE
-                -- Bad parity: drive interrupt sentinel
-                event_code <= SP_INTERRUPT_EVENT;
+                event_code <= SP_INTERRUPT_EVENT;  -- bad parity: trigger interrupt
             END IF;
-        ELSIF tx_ready = '1' THEN
-            -- tx_ready flag only, data=0x00
-            event_code <= "1000000000";  -- bit9=1, bits[8:0]=0
+        ELSIF tx_ready = '1' AND tx_ready_prev = '0' THEN
+            -- Rising edge of tx_ready detected
+            event_code <= "1000000000";  -- bit9=1: tx_ready pulse
         END IF;
     END PROCESS input_encoder;
 
@@ -112,8 +129,10 @@ BEGIN
             IF reset = '1' THEN
                 rx_latch      <= (OTHERS => '0');
                 rx_valid_prev <= '0';
+                tx_ready_prev <= '0';
             ELSE
                 rx_valid_prev <= rx_valid;
+                tx_ready_prev <= tx_ready;
                 -- Only latch on rising edge of rx_valid, during data bit states
                 IF rx_valid = '1' AND rx_valid_prev = '0'
                         AND rx_parity_ok = '1'

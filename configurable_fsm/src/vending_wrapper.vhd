@@ -1,13 +1,11 @@
 -- ============================================================================
 -- VENDING MACHINE WRAPPER
 -- Application wrapper for configurable FSM core
---
--- Reference: Configurable FSM Master Doc, Section 5.2
 -- ============================================================================
 
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
 
 entity vending_wrapper is
   port (

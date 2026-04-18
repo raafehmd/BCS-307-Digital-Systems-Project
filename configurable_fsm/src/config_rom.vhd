@@ -255,6 +255,13 @@ architecture behavioral of config_rom is
   -- falling through to the 'others => 0' default (which would go to IDLE).
   1024 => rom_data(EL_STATE_MOVE_UP, x"0001", '1', '0', '0', '0'),
 
+  -- go_up (bit 0, event=1): spurious re-assertion of go_up while already
+  -- in MOVE_UP. This occurs because fsm_busy clears one cycle before
+  -- state_code updates to MOVE_UP, so the input_decoder re-fires go_up
+  -- from IDLE->MOVE_UP pipeline transition. Without this entry the
+  -- 'others=>0' default decodes to next_state=IDLE, killing the motor.
+  1025 => rom_data(EL_STATE_MOVE_UP, x"0001", '1', '0', '0', '0'),
+
   -- arrived (bit 2, event=4):  floor reached → open door
   1028 => rom_data(EL_STATE_DOOR_OPEN, x"0004", '0', '1', '0', '0'),
   -- weight_sensor (bit 5, event=32): overload → IDLE + alarm
@@ -267,6 +274,12 @@ architecture behavioral of config_rom is
   -- -----------------------------------------------------------------------
   -- no-event default (event=0): hold in MOVE_DOWN, keep motor_down active
   2048 => rom_data(EL_STATE_MOVE_DOWN, x"0002", '1', '0', '0', '0'),
+
+  -- go_down (bit 1, event=2): spurious re-assertion while already in MOVE_DOWN.
+  -- Same pipeline re-entry race as go_up above (addr 1025).
+  -- event value = 2 (bit 1 set), so address = 2048 + 2 = 2050.
+  -- Without this entry the FSM falls through to next_state=IDLE via 'others=>0'.
+  2050 => rom_data(EL_STATE_MOVE_DOWN, x"0002", '1', '0', '0', '0'),
 
   -- arrived (bit 2, event=4): floor reached → open door
   2052 => rom_data(EL_STATE_DOOR_OPEN, x"0004", '0', '1', '0', '0'),
