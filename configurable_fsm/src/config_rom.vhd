@@ -31,88 +31,199 @@ architecture behavioral of config_rom is
     & timer_reset & timer_start & interrupt_en & hold_state;
   end function rom_data;
 
+  -- ========================================================================
+  -- TRAFFIC LIGHT CONFIGURATION (Config ID = "00")
+  -- ========================================================================
+
   -- Pre-calculated addresses for Traffic Light (Config ID = "00")
   -- Address format: config_id[16:15] & state[14:10] & event[9:0]
   -- For config_id = "00", addresses range from 0 to 32767
-
+  
   -- State definitions
-  constant STATE_IDLE      : std_logic_vector(4 downto 0) := "00000";
-  constant STATE_RED       : std_logic_vector(4 downto 0) := "00001";
-  constant STATE_GREEN     : std_logic_vector(4 downto 0) := "00010";
-  constant STATE_YELLOW    : std_logic_vector(4 downto 0) := "00011";
-  constant STATE_PED_WAIT  : std_logic_vector(4 downto 0) := "00100";
-  constant STATE_PED_CROSS : std_logic_vector(4 downto 0) := "00101";
-
-  -- Event codes
-  constant EVENT_CAR_ARRIVAL  : integer := 1;
-  constant EVENT_PED_REQUEST  : integer := 2;
-  constant EVENT_TIMER_EXPIRE : integer := 3;
+  constant STATE_IDLE    : std_logic_vector(4 downto 0) := "00000";
+  constant STATE_RED     : std_logic_vector(4 downto 0) := "00001";
+  constant STATE_GREEN   : std_logic_vector(4 downto 0) := "00010";
+  constant STATE_YELLOW  : std_logic_vector(4 downto 0) := "00011";
+  constant STATE_PED_WAIT: std_logic_vector(4 downto 0) := "00100";
+  constant STATE_PED_CROSS:std_logic_vector(4 downto 0) := "00101";
+  
+  -- Event codes (10-bit bitmask integers matching wrapper encoding)
+  -- Wrapper sends: bit0=pedestrian_btn, bit1=car_sensor, bit2=timer_done
+  constant EVENT_PED_REQUEST  : integer := 1;   -- bit 0 = 0000000001
+  constant EVENT_CAR_ARRIVAL  : integer := 2;   -- bit 1 = 0000000010
+  constant EVENT_TIMER_EXPIRE : integer := 4;   -- bit 2 = 0000000100
   constant EVENT_INTERRUPT    : integer := 0;
-
+  
   -- Output action codes (16-bit masks for traffic light signals)
-  constant OUT_RED_ON    : std_logic_vector(15 downto 0) := x"0001";
-  constant OUT_GREEN_ON  : std_logic_vector(15 downto 0) := x"0002";
-  constant OUT_YELLOW_ON : std_logic_vector(15 downto 0) := x"0004";
-  constant OUT_PED_WALK  : std_logic_vector(15 downto 0) := x"0008";
-  constant OUT_PED_DONT  : std_logic_vector(15 downto 0) := x"0010";
+  -- Wrapper decodes: bit0=red_led, bit1=yellow_led, bit2=green_led, bit3=ped_signal
+  constant OUT_RED_ON      : std_logic_vector(15 downto 0) := x"0001";  -- bit0 = red
+  constant OUT_YELLOW_ON   : std_logic_vector(15 downto 0) := x"0002";  -- bit1 = yellow
+  constant OUT_GREEN_ON    : std_logic_vector(15 downto 0) := x"0004";  -- bit2 = green
+  constant OUT_PED_WALK    : std_logic_vector(15 downto 0) := x"0009";  -- bit0+bit3 = red + ped_signal
+  constant OUT_PED_DONT    : std_logic_vector(15 downto 0) := x"0001";  -- bit0 = red held, ped off
 
-  -- Traffic Light ROM (Config ID = "00")
   constant traffic_rom : rom_array := (
-  -- IDLE State: Wait for car or pedestrian
-  -- Addr = 0x00000 (config_id=00, state=00000, event=0000)
-  0 => rom_data(STATE_IDLE, OUT_RED_ON, '1', '0', '0', '0'),
+  -- =========================================================================
+  -- TRAFFIC LIGHT ROM (Config ID = "00")
+  -- Safe for generic_fsm event-driven pipeline
+  -- Uses explicit HOLD rows for ignored events
+  -- =========================================================================
 
-  -- RED state, CAR_ARRIVAL event (addr = 0x00100 + 1)
-  -- => Transition to GREEN with timer enabled
-  257 => rom_data(STATE_GREEN, OUT_GREEN_ON, '0', '0', '1', '1'),
+  -- IDLE (base 0)
+  0    => rom_data(STATE_IDLE,      x"0000",      '1','0','0','0'),
+  1    => rom_data(STATE_RED,       OUT_RED_ON,   '0','0','1','1'),
+  2    => rom_data(STATE_RED,       OUT_RED_ON,   '0','0','1','1'),
+  4    => rom_data(STATE_IDLE,      x"0000",      '1','0','0','0'),
 
-  -- RED state, PED_REQUEST event (addr = 0x00200 + 2)
-  -- => Go to PED_WAIT state with hold (acknowledge request)
-  514 => rom_data(STATE_PED_WAIT, OUT_PED_DONT, '0', '0', '0', '0'),
+  -- RED (base 1024)
+  1024 => rom_data(STATE_RED,       OUT_RED_ON,   '1','0','0','0'),
+  1025 => rom_data(STATE_PED_WAIT,  OUT_PED_DONT, '0','0','1','1'),
+  1026 => rom_data(STATE_RED,       OUT_RED_ON,   '1','0','0','0'),
+  1028 => rom_data(STATE_GREEN,     OUT_GREEN_ON, '0','0','1','1'),
 
-  -- RED state, TIMER_EXPIRE event (addr = 0x00300 + 3)
-  -- => Stay in RED until event clears
-  771 => rom_data(STATE_RED, OUT_RED_ON, '1', '0', '0', '0'),
+  -- GREEN (base 2048)
+  2048 => rom_data(STATE_GREEN,     OUT_GREEN_ON, '1','0','0','0'),
+  2049 => rom_data(STATE_PED_WAIT,  OUT_PED_DONT, '0','0','1','1'),
+  2050 => rom_data(STATE_GREEN,     OUT_GREEN_ON, '1','0','0','0'),
+  2052 => rom_data(STATE_YELLOW,    OUT_YELLOW_ON,'0','0','1','1'),
 
-  -- GREEN state, CAR_ARRIVAL event (addr = 0x08100 + 1)
-  -- => Stay in GREEN with timer active
-  2049 => rom_data(STATE_GREEN, OUT_GREEN_ON, '0', '0', '1', '1'),
+  -- YELLOW (base 3072)
+  3072 => rom_data(STATE_YELLOW,    OUT_YELLOW_ON,'1','0','0','0'),
+  3073 => rom_data(STATE_YELLOW,    OUT_YELLOW_ON,'1','0','0','0'),
+  3074 => rom_data(STATE_YELLOW,    OUT_YELLOW_ON,'1','0','0','0'),
+  3076 => rom_data(STATE_RED,       OUT_RED_ON,   '0','0','1','1'),
 
-  -- GREEN state, PED_REQUEST event (addr = 0x08200 + 2)
-  -- => Move to YELLOW state to begin transition
-  2306 => rom_data(STATE_YELLOW, OUT_YELLOW_ON, '0', '0', '1', '1'),
+  -- PED_WAIT (base 4096)
+  4096 => rom_data(STATE_PED_WAIT,  OUT_PED_DONT, '1','0','0','0'),
+  4097 => rom_data(STATE_PED_WAIT,  OUT_PED_DONT, '1','0','0','0'),
+  4098 => rom_data(STATE_PED_WAIT,  OUT_PED_DONT, '1','0','0','0'),
+  4100 => rom_data(STATE_PED_CROSS, OUT_PED_WALK, '0','0','1','1'),
 
-  -- GREEN state, TIMER_EXPIRE event (addr = 0x08300 + 3)
-  -- => Transition to YELLOW (green time exhausted)
-  2563 => rom_data(STATE_YELLOW, OUT_YELLOW_ON, '0', '0', '1', '1'),
+  -- PED_CROSS (base 5120)
+  5120 => rom_data(STATE_PED_CROSS, OUT_PED_WALK, '1','0','0','0'),
+  5121 => rom_data(STATE_PED_CROSS, OUT_PED_WALK, '1','0','0','0'),
+  5122 => rom_data(STATE_PED_CROSS, OUT_PED_WALK, '1','0','0','0'),
+  5124 => rom_data(STATE_RED,       OUT_RED_ON,   '0','0','1','1'),
 
-  -- YELLOW state, CAR_ARRIVAL event (addr = 0x10100 + 1)
-  -- => Stay in YELLOW (timer must expire first)
-  4097 => rom_data(STATE_YELLOW, OUT_YELLOW_ON, '1', '0', '0', '0'),
-
-  -- YELLOW state, PED_REQUEST event (addr = 0x10200 + 2)
-  -- => Stay in YELLOW (non-blocking)
-  4354 => rom_data(STATE_YELLOW, OUT_YELLOW_ON, '1', '0', '0', '0'),
-
-  -- YELLOW state, TIMER_EXPIRE event (addr = 0x10300 + 3)
-  -- => Return to RED after yellow timeout
-  4611 => rom_data(STATE_RED, OUT_RED_ON, '0', '0', '1', '1'),
-
-  -- PED_WAIT state, TIMER_EXPIRE event (addr = 0x18300 + 3)
-  -- => Transition to PED_CROSS for pedestrian crossing
-  6403 => rom_data(STATE_PED_CROSS, OUT_PED_WALK, '0', '0', '1', '1'),
-
-  -- PED_CROSS state, TIMER_EXPIRE event (addr = 0x20300 + 3)
-  -- => Return to IDLE after pedestrian crosses
-  8195 => rom_data(STATE_IDLE, OUT_RED_ON, '0', '0', '0', '0'),
-
-  -- Default entries (undefined states/events return 0 = hold state, no action)
   others => (others => '0')
-  );
+);
+  -- ========================================================================
+  -- VENDING MACHINE CONFIGURATION (Config ID = "01")
+  --
+  -- States (5-bit): IDLE=00000, SELECT=00001, COLLECT=00010,
+  --                 DISPENSE=00011, CHANGE=00100
+  --
+  -- Event bitmasks (spec 5.2.3):
+  --   [0]   coin_insert    (0x001)
+  --   [2:1] selection_btn  (0x002 / 0x004 / 0x006)
+  --   [3]   item_empty     (0x008)
+  --   [4]   dispense_done  (0x010)
+  --   [5]   cancel_btn     (0x020 = VM_INTERRUPT_EVENT)
+  --   [6]   change_done    (0x040)
+  --
+  -- Output bit layout (spec 5.2.4 / 5.2.8):
+  --   [0]   dispense_motor
+  --   [1]   change_return
+  --   [9:2] display_msg (8 bits)
+  --
+  -- Per-state outputs:
+  --   IDLE     = 0x0000  (display 0x00)
+  --   COLLECT  = 0x0004  (display 0x01)
+  --   SELECT   = 0x0008  (display 0x02)
+  --   DISPENSE = 0x000D  (dispense_motor=1, display 0x03)
+  --   CHANGE   = 0x0012  (change_return=1, display 0x04)
+  --
+  -- interrupt_en=1 ONLY on VM_COLLECT rows (spec 5.2.6).
+  -- Index = state_code * 1024 + event_bitmask
+  -- ========================================================================
 
-  -- Vending Machine ROM (Config ID = "01") - Placeholder
-  -- To be populated with vending machine state transitions
-  constant vending_rom : rom_array := (others => (others => '0'));
+  constant VM_STATE_IDLE     : std_logic_vector(4 downto 0) := "00000";
+  constant VM_STATE_SELECT   : std_logic_vector(4 downto 0) := "00001";
+  constant VM_STATE_COLLECT  : std_logic_vector(4 downto 0) := "00010";
+  constant VM_STATE_DISPENSE : std_logic_vector(4 downto 0) := "00011";
+  constant VM_STATE_CHANGE   : std_logic_vector(4 downto 0) := "00100";
+
+  constant VM_OUT_IDLE     : std_logic_vector(15 downto 0) := x"0000";
+  constant VM_OUT_COLLECT  : std_logic_vector(15 downto 0) := x"0004";
+  constant VM_OUT_SELECT   : std_logic_vector(15 downto 0) := x"0008";
+  constant VM_OUT_DISPENSE : std_logic_vector(15 downto 0) := x"000D";
+  constant VM_OUT_CHANGE   : std_logic_vector(15 downto 0) := x"0012";
+
+  constant vending_rom : rom_array := (
+    -- =========================================================================
+    -- VENDING MACHINE ROM (Config ID = "01")
+    -- Safe for generic_fsm event-driven pipeline
+    -- Adds explicit HOLD rows for no-event and ignored events
+    -- =========================================================================
+  
+    -- Event codes used:
+    --   0   = no event
+    --   1   = coin_insert
+    --   2   = selection_btn = "01"
+    --   4   = selection_btn = "10"
+    --   6   = selection_btn = "11"
+    --   8   = item_empty
+    --   16  = dispense_done
+    --   32  = cancel_btn
+    --   64  = change_done
+  
+    -- IDLE (base 0)
+    0   => rom_data(VM_STATE_IDLE,    VM_OUT_IDLE,     '1','0','0','0'),
+    1   => rom_data(VM_STATE_COLLECT, VM_OUT_COLLECT,  '0','0','0','0'),
+    2   => rom_data(VM_STATE_IDLE,    VM_OUT_IDLE,     '1','0','0','0'),
+    4   => rom_data(VM_STATE_IDLE,    VM_OUT_IDLE,     '1','0','0','0'),
+    6   => rom_data(VM_STATE_IDLE,    VM_OUT_IDLE,     '1','0','0','0'),
+    8   => rom_data(VM_STATE_IDLE,    VM_OUT_IDLE,     '1','0','0','0'),
+    16  => rom_data(VM_STATE_IDLE,    VM_OUT_IDLE,     '1','0','0','0'),
+    32  => rom_data(VM_STATE_IDLE,    VM_OUT_IDLE,     '1','0','0','0'),
+    64  => rom_data(VM_STATE_IDLE,    VM_OUT_IDLE,     '1','0','0','0'),
+  
+    -- SELECT (base 1024)
+    1024 => rom_data(VM_STATE_SELECT,   VM_OUT_SELECT,   '1','0','0','0'),
+    1025 => rom_data(VM_STATE_COLLECT,  VM_OUT_COLLECT,  '0','0','0','0'),
+    1026 => rom_data(VM_STATE_DISPENSE, VM_OUT_DISPENSE, '0','0','0','0'),
+    1028 => rom_data(VM_STATE_SELECT,   VM_OUT_SELECT,   '1','0','0','0'),
+    1030 => rom_data(VM_STATE_SELECT,   VM_OUT_SELECT,   '1','0','0','0'),
+    1032 => rom_data(VM_STATE_CHANGE,   VM_OUT_CHANGE,   '0','0','0','0'),
+    1040 => rom_data(VM_STATE_SELECT,   VM_OUT_SELECT,   '1','0','0','0'),
+    1056 => rom_data(VM_STATE_SELECT,   VM_OUT_SELECT,   '1','0','0','0'),
+    1088 => rom_data(VM_STATE_SELECT,   VM_OUT_SELECT,   '1','0','0','0'),
+  
+    -- COLLECT (base 2048)
+    2048 => rom_data(VM_STATE_COLLECT,  VM_OUT_COLLECT,  '1','0','0','0'),
+    2049 => rom_data(VM_STATE_COLLECT,  VM_OUT_COLLECT,  '1','0','0','0'),
+    2050 => rom_data(VM_STATE_SELECT,   VM_OUT_SELECT,   '0','1','0','0'),
+    2052 => rom_data(VM_STATE_SELECT,   VM_OUT_SELECT,   '0','1','0','0'),
+    2054 => rom_data(VM_STATE_SELECT,   VM_OUT_SELECT,   '0','1','0','0'),
+    2056 => rom_data(VM_STATE_COLLECT,  VM_OUT_COLLECT,  '1','0','0','0'),
+    2064 => rom_data(VM_STATE_COLLECT,  VM_OUT_COLLECT,  '1','0','0','0'),
+    2080 => rom_data(VM_STATE_IDLE,     VM_OUT_IDLE,     '0','1','0','0'),
+    2112 => rom_data(VM_STATE_COLLECT,  VM_OUT_COLLECT,  '1','0','0','0'),
+  
+    -- DISPENSE (base 3072)
+    3072 => rom_data(VM_STATE_DISPENSE, VM_OUT_DISPENSE, '1','0','0','0'),
+    3073 => rom_data(VM_STATE_DISPENSE, VM_OUT_DISPENSE, '1','0','0','0'),
+    3074 => rom_data(VM_STATE_DISPENSE, VM_OUT_DISPENSE, '1','0','0','0'),
+    3076 => rom_data(VM_STATE_DISPENSE, VM_OUT_DISPENSE, '1','0','0','0'),
+    3078 => rom_data(VM_STATE_DISPENSE, VM_OUT_DISPENSE, '1','0','0','0'),
+    3080 => rom_data(VM_STATE_CHANGE,   VM_OUT_CHANGE,   '0','0','0','0'),
+    3088 => rom_data(VM_STATE_CHANGE,   VM_OUT_CHANGE,   '0','0','0','0'),
+    3104 => rom_data(VM_STATE_DISPENSE, VM_OUT_DISPENSE, '1','0','0','0'),
+    3136 => rom_data(VM_STATE_DISPENSE, VM_OUT_DISPENSE, '1','0','0','0'),
+  
+    -- CHANGE (base 4096)
+    4096 => rom_data(VM_STATE_CHANGE,   VM_OUT_CHANGE,   '1','0','0','0'),
+    4097 => rom_data(VM_STATE_CHANGE,   VM_OUT_CHANGE,   '1','0','0','0'),
+    4098 => rom_data(VM_STATE_CHANGE,   VM_OUT_CHANGE,   '1','0','0','0'),
+    4100 => rom_data(VM_STATE_CHANGE,   VM_OUT_CHANGE,   '1','0','0','0'),
+    4102 => rom_data(VM_STATE_CHANGE,   VM_OUT_CHANGE,   '1','0','0','0'),
+    4104 => rom_data(VM_STATE_CHANGE,   VM_OUT_CHANGE,   '1','0','0','0'),
+    4112 => rom_data(VM_STATE_CHANGE,   VM_OUT_CHANGE,   '1','0','0','0'),
+    4128 => rom_data(VM_STATE_CHANGE,   VM_OUT_CHANGE,   '1','0','0','0'),
+    4160 => rom_data(VM_STATE_IDLE,     VM_OUT_IDLE,     '0','0','0','0'),
+  
+    others => (others => '0')
+  );
 
   -- ========================================================================
   -- ELEVATOR CONFIGURATION ROM (Config ID = "10")
@@ -240,37 +351,39 @@ architecture behavioral of config_rom is
   );
 
 begin
-  -- Synchronous ROM read process
-  -- On each rising clock edge, output the ROM data at the given address
-  read_process : process (clk)
+  -- Combinational ROM read.
+  -- generic_fsm.vhd pipeline_stage2 already registers config_data into
+  -- config_data_p2.  A clocked (synchronous) read here would add a 3rd
+  -- pipeline stage, causing state_update to consume stale all-zero data
+  -- and the FSM would never advance past IDLE.  Combinational read gives
+  -- the correct 2-cycle total latency the spec prescribes.
+  read_process : process (addr)
     variable addr_int : integer;
   begin
-    if rising_edge(clk) then
-      addr_int := to_integer(unsigned(addr(14 downto 0)));
+    addr_int := to_integer(unsigned(addr(14 downto 0)));
 
-      -- Decode config_id (upper 2 bits of address) to select ROM
-      case addr(16 downto 15) is
-        when "00" =>
-          -- Traffic Light Config
-          data_out <= traffic_rom(addr_int);
+    -- Decode config_id (upper 2 bits of address) to select ROM
+    case addr(16 downto 15) is
+      when "00" =>
+        -- Traffic Light Config
+        data_out <= traffic_rom(addr_int);
 
-        when "01" =>
-          -- Vending Machine Config
-          data_out <= vending_rom(addr_int);
+      when "01" =>
+        -- Vending Machine Config
+        data_out <= vending_rom(addr_int);
 
-        when "10" =>
-          -- Elevator Config
-          data_out <= elevator_rom(addr_int);
+      when "10" =>
+        -- Elevator Config
+        data_out <= elevator_rom(addr_int);
 
-        when "11" =>
-          -- Serial Protocol Config
-          data_out <= serial_rom(addr_int);
+      when "11" =>
+        -- Serial Protocol Config
+        data_out <= serial_rom(addr_int);
 
-        when others =>
-          -- Safety fallback
-          data_out <= (others => '0');
-      end case;
-    end if;
+      when others =>
+        -- Safety fallback
+        data_out <= (others => '0');
+    end case;
   end process read_process;
 
 end architecture behavioral;
