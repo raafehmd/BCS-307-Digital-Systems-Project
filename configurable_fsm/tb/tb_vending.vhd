@@ -78,7 +78,7 @@ BEGIN
             END LOOP;
         END PROCEDURE;
 
-        PROCEDURE do_reset IS
+        PROCEDURE do_reset(label_txt : IN STRING) IS
         BEGIN
             rst <= '1';
             WAIT FOR CLK_PERIOD * 3;
@@ -86,18 +86,10 @@ BEGIN
             rst <= '0';
             settle_cycles(4);
 
-            check(state_code = VM_IDLE,
-                  "VM_IDLE after reset",
-                  "Expected VM_IDLE after reset");
-            check(dispense_motor = '0',
-                  "dispense_motor=0 after reset",
-                  "dispense_motor should be 0 after reset");
-            check(change_return = '0',
-                  "change_return=0 after reset",
-                  "change_return should be 0 after reset");
-            check(display_msg = x"00",
-                  "display_msg=00 after reset",
-                  "display_msg should be 00 after reset");
+            check(state_code = VM_IDLE AND dispense_motor = '0'
+                  AND change_return = '0' AND display_msg = x"00",
+                  label_txt,
+                  label_txt & " wrong outputs after reset");
         END PROCEDURE;
 
         PROCEDURE pulse_sig(SIGNAL s : OUT STD_LOGIC) IS
@@ -128,56 +120,45 @@ BEGIN
             label_txt  : IN STRING
         ) IS
         BEGIN
-            check(state_code = exp_state,
-                  label_txt & " state",
-                  label_txt & " wrong state");
-
-            check(dispense_motor = exp_motor,
-                  label_txt & " dispense_motor",
-                  label_txt & " wrong dispense_motor");
-
-            check(change_return = exp_change,
-                  label_txt & " change_return",
-                  label_txt & " wrong change_return");
-
-            check(display_msg = exp_msg,
-                  label_txt & " display_msg",
-                  label_txt & " wrong display_msg");
+            check(state_code = exp_state AND dispense_motor = exp_motor
+                  AND change_return = exp_change AND display_msg = exp_msg,
+                  label_txt,
+                  label_txt & " wrong outputs");
         END PROCEDURE;
 
     BEGIN
 
-        -- ============================================================
-        -- Scenario 1: Normal purchase
+        -- ================================================================
+        -- TEST 1-6: Normal purchase
         -- IDLE -> COLLECT -> SELECT -> DISPENSE -> CHANGE -> IDLE
-        -- ============================================================
-        REPORT "--- SCENARIO 1: Normal purchase ---";
-        do_reset;
+        -- ================================================================
+        REPORT "--- TEST 1-6: Normal purchase ---";
+        do_reset("T1 reset to IDLE");
 
         pulse_sig(coin_insert);
-        check_vm(VM_COLLECT, '0', '0', x"01", "S1 IDLE->COLLECT");
+        check_vm(VM_COLLECT, '0', '0', x"01", "T2 IDLE->COLLECT");
 
         select_sig("01");
-        check_vm(VM_SELECT, '0', '0', x"02", "S1 COLLECT->SELECT");
+        check_vm(VM_SELECT, '0', '0', x"02", "T3 COLLECT->SELECT");
 
         select_sig("01");
-        check_vm(VM_DISPENSE, '1', '0', x"03", "S1 SELECT->DISPENSE");
+        check_vm(VM_DISPENSE, '1', '0', x"03", "T4 SELECT->DISPENSE");
 
         pulse_sig(dispense_done);
-        check_vm(VM_CHANGE, '0', '1', x"04", "S1 DISPENSE->CHANGE");
+        check_vm(VM_CHANGE, '0', '1', x"04", "T5 DISPENSE->CHANGE");
 
         pulse_sig(change_done);
-        check_vm(VM_IDLE, '0', '0', x"00", "S1 CHANGE->IDLE");
+        check_vm(VM_IDLE, '0', '0', x"00", "T6 CHANGE->IDLE");
 
-        -- ============================================================
-        -- Scenario 2: Cancel during collection
+        -- ================================================================
+        -- TEST 7-10: Cancel during collection
         -- IDLE -> COLLECT -> IDLE with refund pulse
-        -- ============================================================
-        REPORT "--- SCENARIO 2: Cancel during collection ---";
-        do_reset;
+        -- ================================================================
+        REPORT "--- TEST 7-10: Cancel during collection ---";
+        do_reset("T7 reset to IDLE");
 
         pulse_sig(coin_insert);
-        check_vm(VM_COLLECT, '0', '0', x"01", "S2 IDLE->COLLECT");
+        check_vm(VM_COLLECT, '0', '0', x"01", "T8 IDLE->COLLECT");
 
         seen_change_pulse := FALSE;
         cancel_btn <= '1';
@@ -193,83 +174,84 @@ BEGIN
         END LOOP;
 
         check(state_code = VM_IDLE,
-              "S2 COLLECT->IDLE via cancel",
-              "S2 expected return to IDLE after cancel");
+              "T9 COLLECT->IDLE via cancel",
+              "T9 expected return to IDLE after cancel");
 
         check(seen_change_pulse,
-              "S2 refund pulse seen",
-              "S2 expected change_return pulse was not seen");
+              "T10 refund pulse seen",
+              "T10 expected change_return pulse was not seen");
 
-        -- ============================================================
-        -- Scenario 3: Out-of-stock
+        -- ================================================================
+        -- TEST 11-15: Out-of-stock
         -- IDLE -> COLLECT -> SELECT -> CHANGE -> IDLE
-        -- ============================================================
-        REPORT "--- SCENARIO 3: Out-of-stock ---";
-        do_reset;
+        -- ================================================================
+        REPORT "--- TEST 11-15: Out-of-stock ---";
+        do_reset("T11 reset to IDLE");
 
         pulse_sig(coin_insert);
-        check_vm(VM_COLLECT, '0', '0', x"01", "S3 IDLE->COLLECT");
+        check_vm(VM_COLLECT, '0', '0', x"01", "T12 IDLE->COLLECT");
 
         select_sig("01");
-        check_vm(VM_SELECT, '0', '0', x"02", "S3 COLLECT->SELECT");
+        check_vm(VM_SELECT, '0', '0', x"02", "T13 COLLECT->SELECT");
 
         pulse_sig(item_empty);
-        check_vm(VM_CHANGE, '0', '1', x"04", "S3 SELECT->CHANGE");
+        check_vm(VM_CHANGE, '0', '1', x"04", "T14 SELECT->CHANGE");
 
         pulse_sig(change_done);
-        check_vm(VM_IDLE, '0', '0', x"00", "S3 CHANGE->IDLE");
+        check_vm(VM_IDLE, '0', '0', x"00", "T15 CHANGE->IDLE");
 
-        -- ============================================================
-        -- Scenario 4: Additional coins needed
+        -- ================================================================
+        -- TEST 16-23: Additional coins needed
         -- IDLE -> COLLECT -> SELECT -> COLLECT -> SELECT -> DISPENSE
         -- -> CHANGE -> IDLE
-        -- ============================================================
-        REPORT "--- SCENARIO 4: Additional coins needed ---";
-        do_reset;
+        -- ================================================================
+        REPORT "--- TEST 16-23: Additional coins needed ---";
+        do_reset("T16 reset to IDLE");
 
         pulse_sig(coin_insert);
-        check_vm(VM_COLLECT, '0', '0', x"01", "S4 IDLE->COLLECT");
+        check_vm(VM_COLLECT, '0', '0', x"01", "T17 IDLE->COLLECT");
 
         select_sig("10");
-        check_vm(VM_SELECT, '0', '0', x"02", "S4 COLLECT->SELECT");
+        check_vm(VM_SELECT, '0', '0', x"02", "T18 COLLECT->SELECT");
 
         pulse_sig(coin_insert);
-        check_vm(VM_COLLECT, '0', '0', x"01", "S4 SELECT->COLLECT");
+        check_vm(VM_COLLECT, '0', '0', x"01", "T19 SELECT->COLLECT");
 
         select_sig("11");
-        check_vm(VM_SELECT, '0', '0', x"02", "S4 COLLECT->SELECT again");
+        check_vm(VM_SELECT, '0', '0', x"02", "T20 COLLECT->SELECT again");
 
         select_sig("01");
-        check_vm(VM_DISPENSE, '1', '0', x"03", "S4 SELECT->DISPENSE");
+        check_vm(VM_DISPENSE, '1', '0', x"03", "T21 SELECT->DISPENSE");
 
         pulse_sig(dispense_done);
-        check_vm(VM_CHANGE, '0', '1', x"04", "S4 DISPENSE->CHANGE");
+        check_vm(VM_CHANGE, '0', '1', x"04", "T22 DISPENSE->CHANGE");
 
         pulse_sig(change_done);
-        check_vm(VM_IDLE, '0', '0', x"00", "S4 CHANGE->IDLE");
+        check_vm(VM_IDLE, '0', '0', x"00", "T23 CHANGE->IDLE");
 
-        -- ============================================================
-        -- Scenario 5: Dispense failure mid-cycle
+        -- ================================================================
+        -- TEST 24-29: Dispense failure mid-cycle
         -- IDLE -> COLLECT -> SELECT -> DISPENSE -> CHANGE -> IDLE
-        -- ============================================================
-        REPORT "--- SCENARIO 5: Dispense failure ---";
-        do_reset;
+        -- ================================================================
+        REPORT "--- TEST 24-29: Incorrect Dispense ---";
+        do_reset("T24 reset to IDLE");
 
         pulse_sig(coin_insert);
-        check_vm(VM_COLLECT, '0', '0', x"01", "S5 IDLE->COLLECT");
+        check_vm(VM_COLLECT, '0', '0', x"01", "T25 IDLE->COLLECT");
 
         select_sig("01");
-        check_vm(VM_SELECT, '0', '0', x"02", "S5 COLLECT->SELECT");
+        check_vm(VM_SELECT, '0', '0', x"02", "T26 COLLECT->SELECT");
 
         select_sig("01");
-        check_vm(VM_DISPENSE, '1', '0', x"03", "S5 SELECT->DISPENSE");
+        check_vm(VM_DISPENSE, '1', '0', x"03", "T27 SELECT->DISPENSE");
 
         pulse_sig(item_empty);
-        check_vm(VM_CHANGE, '0', '1', x"04", "S5 DISPENSE->CHANGE");
+        check_vm(VM_CHANGE, '0', '1', x"04", "T28 DISPENSE->CHANGE");
 
         pulse_sig(change_done);
-        check_vm(VM_IDLE, '0', '0', x"00", "S5 CHANGE->IDLE");
+        check_vm(VM_IDLE, '0', '0', x"00", "T29 CHANGE->IDLE");
 
+        -- ================================================================
         WAIT FOR CLK_PERIOD * 5;
         REPORT "========================================";
         REPORT "RESULTS: " & integer'image(n_pass) & " PASSED, "

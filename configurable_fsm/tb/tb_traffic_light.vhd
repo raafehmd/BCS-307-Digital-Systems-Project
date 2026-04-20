@@ -83,44 +83,33 @@ BEGIN
         END PROCEDURE;
 
         PROCEDURE check_lights(
-            exp_red  : IN STD_LOGIC;
-            exp_yel  : IN STD_LOGIC;
-            exp_grn  : IN STD_LOGIC;
-            exp_ped  : IN STD_LOGIC;
+            exp_red   : IN STD_LOGIC;
+            exp_yel   : IN STD_LOGIC;
+            exp_grn   : IN STD_LOGIC;
+            exp_ped   : IN STD_LOGIC;
             label_txt : IN STRING
         ) IS
         BEGIN
-            check(red_led = exp_red,
-                  label_txt & " red_led",
-                  label_txt & " wrong red_led");
-
-            check(yellow_led = exp_yel,
-                  label_txt & " yellow_led",
-                  label_txt & " wrong yellow_led");
-
-            check(green_led = exp_grn,
-                  label_txt & " green_led",
-                  label_txt & " wrong green_led");
-
-            check(ped_signal = exp_ped,
-                  label_txt & " ped_signal",
-                  label_txt & " wrong ped_signal");
+            check(red_led = exp_red AND yellow_led = exp_yel
+                  AND green_led = exp_grn AND ped_signal = exp_ped,
+                  label_txt,
+                  label_txt & " wrong outputs");
         END PROCEDURE;
 
     BEGIN
 
-        -- ============================================================
+        -- ================================================================
         -- TEST 1: Reset / IDLE
-        -- ============================================================
+        -- ================================================================
         REPORT "--- TEST 1: Reset -> IDLE ---";
         do_reset;
         check_lights('0', '0', '0', '0', "T1 reset to IDLE");
 
-        -- ============================================================
-        -- TEST 2: Normal car cycle
+        -- ================================================================
+        -- TEST 2-5: Normal car cycle
         -- IDLE -> RED -> GREEN -> YELLOW -> RED
-        -- ============================================================
-        REPORT "--- TEST 2: Normal car cycle ---";
+        -- ================================================================
+        REPORT "--- TEST 2-5: Normal car cycle ---";
         do_reset;
 
         pulse_sig(car_sensor);
@@ -129,155 +118,155 @@ BEGIN
 
         pulse_sig(timer_done);
         settle_cycles(3);
-        check_lights('0', '0', '1', '0', "T2 RED->GREEN");
+        check_lights('0', '0', '1', '0', "T3 RED->GREEN");
 
         pulse_sig(timer_done);
         settle_cycles(3);
-        check_lights('0', '1', '0', '0', "T2 GREEN->YELLOW");
+        check_lights('0', '1', '0', '0', "T4 GREEN->YELLOW");
 
         pulse_sig(timer_done);
         settle_cycles(3);
-        check_lights('1', '0', '0', '0', "T2 YELLOW->RED");
+        check_lights('1', '0', '0', '0', "T5 YELLOW->RED");
 
-        -- ============================================================
-        -- TEST 3: Ignore car while already RED
-        -- ============================================================
-        REPORT "--- TEST 3: Ignore car while RED ---";
+        -- ================================================================
+        -- TEST 6-7: Ignore car while already RED
+        -- ================================================================
+        REPORT "--- TEST 6-7: Ignore car while RED ---";
         do_reset;
 
         pulse_sig(car_sensor);
         settle_cycles(3);
-        check_lights('1', '0', '0', '0', "T3 enter RED");
+        check_lights('1', '0', '0', '0', "T6 enter RED");
 
         pulse_sig(car_sensor);
         settle_cycles(3);
-        check_lights('1', '0', '0', '0', "T3 RED holds on car");
+        check_lights('1', '0', '0', '0', "T7 RED holds on car");
 
-        -- ============================================================
-        -- TEST 4: Ignore car while GREEN
-        -- ============================================================
-        REPORT "--- TEST 4: Ignore car while GREEN ---";
-        do_reset;
-
-        pulse_sig(car_sensor);
-        settle_cycles(3);
-        pulse_sig(timer_done);
-        settle_cycles(3);
-        check_lights('0', '0', '1', '0', "T4 enter GREEN");
-
-        pulse_sig(car_sensor);
-        settle_cycles(3);
-        check_lights('0', '0', '1', '0', "T4 GREEN holds on car");
-
-        -- ============================================================
-        -- TEST 5: Ignore pedestrian while YELLOW
-        -- ============================================================
-        REPORT "--- TEST 5: Ignore pedestrian while YELLOW ---";
+        -- ================================================================
+        -- TEST 8-9: Ignore car while GREEN
+        -- ================================================================
+        REPORT "--- TEST 8-9: Ignore car while GREEN ---";
         do_reset;
 
         pulse_sig(car_sensor);
         settle_cycles(3);
         pulse_sig(timer_done);
         settle_cycles(3);
+        check_lights('0', '0', '1', '0', "T8 enter GREEN");
+
+        pulse_sig(car_sensor);
+        settle_cycles(3);
+        check_lights('0', '0', '1', '0', "T9 GREEN holds on car");
+
+        -- ================================================================
+        -- TEST 10-11: Ignore pedestrian while YELLOW
+        -- ================================================================
+        REPORT "--- TEST 10-11: Ignore pedestrian while YELLOW ---";
+        do_reset;
+
+        pulse_sig(car_sensor);
+        settle_cycles(3);
         pulse_sig(timer_done);
         settle_cycles(3);
-        check_lights('0', '1', '0', '0', "T5 enter YELLOW");
+        pulse_sig(timer_done);
+        settle_cycles(3);
+        check_lights('0', '1', '0', '0', "T10 enter YELLOW");
 
         pulse_sig(pedestrian_btn);
         settle_cycles(3);
-        check_lights('0', '1', '0', '0', "T5 YELLOW holds on ped");
+        check_lights('0', '1', '0', '0', "T11 YELLOW holds on ped");
 
-        -- ============================================================
-        -- TEST 6: Pedestrian request from GREEN
+        -- ================================================================
+        -- TEST 12-15: Pedestrian request from GREEN
         -- IDLE -> RED -> GREEN -> PED_WAIT -> PED_CROSS -> RED
-        -- ============================================================
-        REPORT "--- TEST 6: Pedestrian from GREEN ---";
+        -- ================================================================
+        REPORT "--- TEST 12-15: Pedestrian from GREEN ---";
         do_reset;
 
         pulse_sig(car_sensor);
         settle_cycles(3);
         pulse_sig(timer_done);
         settle_cycles(3);
-        check_lights('0', '0', '1', '0', "T6 enter GREEN");
+        check_lights('0', '0', '1', '0', "T12 enter GREEN");
 
         pulse_sig(pedestrian_btn);
         settle_cycles(3);
-        check_lights('1', '0', '0', '0', "T6 GREEN->PED_WAIT");
+        check_lights('1', '0', '0', '0', "T13 GREEN->PED_WAIT");
 
         pulse_sig(timer_done);
         settle_cycles(3);
-        check_lights('1', '0', '0', '1', "T6 PED_WAIT->PED_CROSS");
+        check_lights('1', '0', '0', '1', "T14 PED_WAIT->PED_CROSS");
 
         pulse_sig(timer_done);
         settle_cycles(3);
-        check_lights('1', '0', '0', '0', "T6 PED_CROSS->RED");
+        check_lights('1', '0', '0', '0', "T15 PED_CROSS->RED");
 
-        -- ============================================================
-        -- TEST 7: Pedestrian request from RED
+        -- ================================================================
+        -- TEST 16-19: Pedestrian request from RED
         -- IDLE -> RED -> PED_WAIT -> PED_CROSS -> RED
-        -- ============================================================
-        REPORT "--- TEST 7: Pedestrian from RED ---";
+        -- ================================================================
+        REPORT "--- TEST 16-19: Pedestrian from RED ---";
         do_reset;
 
         pulse_sig(car_sensor);
         settle_cycles(3);
-        check_lights('1', '0', '0', '0', "T7 enter RED");
+        check_lights('1', '0', '0', '0', "T16 enter RED");
 
         pulse_sig(pedestrian_btn);
         settle_cycles(3);
-        check_lights('1', '0', '0', '0', "T7 RED->PED_WAIT");
+        check_lights('1', '0', '0', '0', "T17 RED->PED_WAIT");
 
         pulse_sig(timer_done);
         settle_cycles(3);
-        check_lights('1', '0', '0', '1', "T7 PED_WAIT->PED_CROSS");
+        check_lights('1', '0', '0', '1', "T18 PED_WAIT->PED_CROSS");
 
         pulse_sig(timer_done);
         settle_cycles(3);
-        check_lights('1', '0', '0', '0', "T7 PED_CROSS->RED");
+        check_lights('1', '0', '0', '0', "T19 PED_CROSS->RED");
 
-        -- ============================================================
-        -- TEST 8: Pedestrian request from IDLE
-        -- Current ROM/test intent: IDLE -> RED -> GREEN -> YELLOW -> RED
-        -- ============================================================
-        REPORT "--- TEST 8: Pedestrian from IDLE ---";
+        -- ================================================================
+        -- TEST 20-23: Pedestrian request from IDLE
+        -- IDLE -> RED -> GREEN -> YELLOW -> RED
+        -- ================================================================
+        REPORT "--- TEST 20-23: Pedestrian from IDLE ---";
         do_reset;
 
         pulse_sig(pedestrian_btn);
         settle_cycles(3);
-        check_lights('1', '0', '0', '0', "T8 IDLE->RED by ped");
+        check_lights('1', '0', '0', '0', "T20 IDLE->RED by ped");
 
         pulse_sig(timer_done);
         settle_cycles(3);
-        check_lights('0', '0', '1', '0', "T8 RED->GREEN");
+        check_lights('0', '0', '1', '0', "T21 RED->GREEN");
 
         pulse_sig(timer_done);
         settle_cycles(3);
-        check_lights('0', '1', '0', '0', "T8 GREEN->YELLOW");
+        check_lights('0', '1', '0', '0', "T22 GREEN->YELLOW");
 
         pulse_sig(timer_done);
         settle_cycles(3);
-        check_lights('1', '0', '0', '0', "T8 YELLOW->RED");
+        check_lights('1', '0', '0', '0', "T23 YELLOW->RED");
 
-        -- ============================================================
-        -- TEST 9: Reset during active state
-        -- ============================================================
-        REPORT "--- TEST 9: Reset during active state ---";
+        -- ================================================================
+        -- TEST 24-25: Reset during active state
+        -- ================================================================
+        REPORT "--- TEST 24-25: Reset during active state ---";
         do_reset;
 
         pulse_sig(car_sensor);
         settle_cycles(3);
         pulse_sig(timer_done);
         settle_cycles(3);
-        check_lights('0', '0', '1', '0', "T9 active GREEN before reset");
+        check_lights('0', '0', '1', '0', "T24 active GREEN before reset");
 
         reset <= '1';
         WAIT FOR CLK_PERIOD * 2;
         WAIT UNTIL rising_edge(clk);
         reset <= '0';
         settle_cycles(4);
-        check_lights('0', '0', '0', '0', "T9 reset back to IDLE");
+        check_lights('0', '0', '0', '0', "T25 reset back to IDLE");
 
-        -- ============================================================
+        -- ================================================================
         WAIT FOR CLK_PERIOD * 5;
         REPORT "========================================";
         REPORT "RESULTS: " & integer'image(n_pass) & " PASSED, "

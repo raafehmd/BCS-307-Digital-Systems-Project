@@ -85,9 +85,9 @@ begin
     "Initialized at Floor 1", "Did not initialize to Floor 1");
 
     -- ====================================================================
-    -- TEST 2, 4, 10: Up request & Floor tracking & Arrival
+    -- TEST 2, 3, 4: Up request & Floor tracking & Arrival
     -- ====================================================================
-    report "--- TEST 2, 4, 10: Up request to Floor 3 ---";
+    report "--- TEST 2, 3, 4: Up request to Floor 3 ---";
       floor_request <= "0011"; -- Request Floor 3
     wait for CLK_PERIOD * 6; -- FSM pipeline needs ~5-6 cycles to settle
 
@@ -129,9 +129,9 @@ begin
     "Elevator confirmed idle at Floor 3", "Elevator did not return to idle");
 
     -- ====================================================================
-    -- TEST 3, 11, 12, 13: Journey to boundary (Top), Down Request
+    -- TEST 8, 9, 10: Journey to boundary (Top), Down Request
     -- ====================================================================
-    report "--- TEST 3, 11, 12: Journey to top boundary (Floor 11) ---";
+    report "--- TEST 8, 9, 10: Journey to top boundary (Floor 11) ---";
       floor_request <= "1011"; -- Request Floor 11
     wait until floor_display = "1011" for 1000 ns;
     wait for CLK_PERIOD * 6;
@@ -147,7 +147,6 @@ begin
     door_sensor <= '0';
     wait for CLK_PERIOD * 6;
 
-    report "--- TEST 3: Down request from Floor 11 ---";
       floor_request <= "0001"; -- Request Floor 1
     wait for CLK_PERIOD * 8;
 
@@ -160,9 +159,9 @@ begin
     "Floor counter decrementing properly", "Floor counter did not decrement");
 
     -- ====================================================================
-    -- TEST 9, 15: Emergency Stop & Light Abort
+    -- TEST 11, 12: Emergency Stop & Light Abort
     -- ====================================================================
-    report "--- TEST 9, 15: Emergency interrupt mid-journey ---";
+    report "--- TEST 11, 12: Emergency interrupt mid-journey ---";
       -- We are currently moving down. Trigger emergency.
       -- emergency_light is a 1-cycle pulse from abort_detect.
       -- It fires on the cycle prev_state /= IDLE AND state = IDLE.
@@ -182,9 +181,9 @@ begin
     "Motors halted due to emergency return to idle", "Motors did not halt");
 
     -- ====================================================================
-    -- TEST 8: Overload Detection
+    -- TEST 13: Overload Detection
     -- ====================================================================
-    report "--- TEST 8: Overload detection ---";
+    report "--- TEST 13: Overload detection ---";
       -- Set a new destination
       floor_request <= "1000"; -- Floor 8
     wait for CLK_PERIOD * 16; -- Wait for FSM to exit door sequence and enter MOVE_UP
