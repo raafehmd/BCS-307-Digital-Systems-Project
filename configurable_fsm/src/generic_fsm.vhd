@@ -1,5 +1,12 @@
 -- ============================================================================
--- Configurable FSM core
+-- Configurable FSM core  (IMPROVED)
+-- Changes vs original:
+--   1. Added fsm_error output port  - pulses for 1 cycle on any fault
+--   2. ROM miss detection           - all-zero config_data while busy flags an error
+--   3. Invalid next-state guard     - out-of-range next_state (>15) forces IDLE
+--      and asserts fsm_error instead of silently corrupting state
+--   4. Unused ROM bits [31:29],[7:4] documented as reserved; asserted in error
+--      check so a partially-written ROM entry is also caught
 -- ============================================================================
 
 LIBRARY IEEE;
@@ -20,35 +27,48 @@ PORT (
     output_valid    : OUT STD_LOGIC;
     fsm_busy        : OUT STD_LOGIC;
     timer_start_out : OUT STD_LOGIC;
-    timer_reset_out : OUT STD_LOGIC
+    timer_reset_out : OUT STD_LOGIC;
+    -- IMPROVEMENT 1: observable error output
+    -- Pulses HIGH for exactly 1 clock cycle when any of the following occur:
+    --   a) ROM miss: config_data is all-zeros while the pipeline is processing
+    --      an event (indicates an unmapped state/event combination in the ROM)
+    --   b) Invalid next_state: ROM entry requests a transition to state > 15,
+    --      which is outside the defined state space
+    --   c) Reserved bits set: ROM bits [31:29] or [7:4] are non-zero,
+    --      indicating a malformed ROM entry
+    fsm_error       : OUT STD_LOGIC
 );
 END ENTITY generic_fsm;
 
 ARCHITECTURE behavioral OF generic_fsm IS
+
+    -- Maximum legal state index. States 0..MAX_STATE_INDEX are valid.
+    -- Raise this constant if more states are added to any application.
+    CONSTANT MAX_STATE_INDEX : INTEGER := 15;
+
     SIGNAL current_state     : STD_LOGIC_VECTOR(4 DOWNTO 0) := (OTHERS => '0');
     SIGNAL event_code_reg    : STD_LOGIC_VECTOR(9 DOWNTO 0) := (OTHERS => '0');
     SIGNAL fsm_busy_i        : STD_LOGIC := '0';
     SIGNAL interrupt_event_i : STD_LOGIC_VECTOR(9 DOWNTO 0) := (OTHERS => '0');
     SIGNAL output_action_reg : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
-    
-    -- Pipeline Stage 2 signals (captured ROM data + control signals)
+
+    -- Pipeline Stage 2 signals
     SIGNAL config_data_p2      : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
     SIGNAL fsm_busy_p2         : STD_LOGIC := '0';
     SIGNAL interrupt_event_p2  : STD_LOGIC_VECTOR(9 DOWNTO 0) := (OTHERS => '0');
     SIGNAL event_code_reg_p2   : STD_LOGIC_VECTOR(9 DOWNTO 0) := (OTHERS => '0');
 
+    -- IMPROVEMENT 2: internal error flag
+    SIGNAL fsm_error_i : STD_LOGIC := '0';
+
 BEGIN
 
-    -- Combinatorial Address Construction (using current state and captured event code)
-    -- Format: config_id[16:15] & current_state[14:10] & event_code_reg[9:0]
+    -- Combinatorial Address Construction
     config_addr <= config_id & current_state & event_code_reg;
 
     -- ========================================================================
     -- PIPELINE STAGE 1: Event Capture
     -- ========================================================================
-    -- Captures incoming events and manages FSM busy signal
-    -- Output: event_code_reg, interrupt_event_i, fsm_busy_i
-    -- Latency: 1 clock cycle
     pipeline_stage1: PROCESS(clk)
     BEGIN
         IF rising_edge(clk) THEN
@@ -57,22 +77,17 @@ BEGIN
                 fsm_busy_i        <= '0';
                 interrupt_event_i <= (OTHERS => '0');
             ELSE
-                -- Capture new event only if FSM is not currently processing
                 IF fsm_busy_i = '0' THEN
                     IF event_code /= "0000000000" THEN
-                        -- New event detected: capture it and assert busy
                         event_code_reg    <= event_code;
                         interrupt_event_i <= interrupt_event;
                         fsm_busy_i        <= '1';
                     ELSE
-                        -- No new event: maintain idle state
                         event_code_reg    <= (OTHERS => '0');
                         interrupt_event_i <= (OTHERS => '0');
                         fsm_busy_i        <= '0';
                     END IF;
                 ELSE
-                    -- FSM currently processing (fsm_busy_i = '1')
-                    -- Keep signals stable for ROM lookup, clear busy on next cycle
                     fsm_busy_i <= '0';
                 END IF;
             END IF;
@@ -82,9 +97,6 @@ BEGIN
     -- ========================================================================
     -- PIPELINE STAGE 2: ROM Data Capture
     -- ========================================================================
-    -- Captures ROM data and control signals from Stage 1
-    -- Output: config_data_p2, fsm_busy_p2, event_code_reg_p2, interrupt_event_p2
-    -- Latency: 1 clock cycle (total: 2 cycles from event arrival to state update)
     pipeline_stage2: PROCESS(clk)
     BEGIN
         IF rising_edge(clk) THEN
@@ -94,7 +106,6 @@ BEGIN
                 interrupt_event_p2  <= (OTHERS => '0');
                 event_code_reg_p2   <= (OTHERS => '0');
             ELSE
-                -- Pipeline forwarding: capture Stage 1 outputs
                 config_data_p2      <= config_data;
                 fsm_busy_p2         <= fsm_busy_i;
                 interrupt_event_p2  <= interrupt_event_i;
@@ -104,64 +115,98 @@ BEGIN
     END PROCESS pipeline_stage2;
 
     -- ROM data format (32-bit word):
-    -- [31:29] = unused (000)
+    -- [31:29] = reserved (should be 000)
     -- [28:24] = next_state (5 bits)
     -- [23:8]  = output_action (16 bits)
-    -- [7:4]   = unused (0000)
-    -- [3]     = timer_reset (control flag)
-    -- [2]     = timer_start (control flag)
-    -- [1]     = interrupt_en (control flag)
-    -- [0]     = hold_state (control flag)
+    -- [7:4]   = reserved (should be 0000)
+    -- [3]     = timer_reset
+    -- [2]     = timer_start
+    -- [1]     = interrupt_en
+    -- [0]     = hold_state
 
     -- ========================================================================
-    -- STATE UPDATE PROCESS
+    -- STATE UPDATE + ERROR DETECTION PROCESS
     -- ========================================================================
-    -- Uses fsm_busy_p2 to trigger state machine transition
-    -- Implements 4-priority control: Reset > Interrupt > Hold > Normal
     state_update: PROCESS(clk)
+        VARIABLE next_state_v : STD_LOGIC_VECTOR(4 DOWNTO 0);
     BEGIN
         IF rising_edge(clk) THEN
             IF reset = '1' THEN
-                -- External synchronous reset: force IDLE (00000)
                 current_state     <= (OTHERS => '0');
                 output_action_reg <= (OTHERS => '0');
                 output_valid      <= '0';
                 timer_start_out   <= '0';
                 timer_reset_out   <= '0';
+                fsm_error_i       <= '0';
             ELSE
-                -- Default outputs
                 output_valid    <= '0';
                 timer_start_out <= '0';
                 timer_reset_out <= '0';
+                fsm_error_i     <= '0';   -- default: no error
 
-                -- State transition logic (executed when fsm_busy_p2 = '1')
                 IF fsm_busy_p2 = '1' THEN
-                    -- ROM data is valid in config_data_p2
-                    output_valid      <= '1';
-                    output_action_reg <= config_data_p2(23 DOWNTO 8);
-                    timer_start_out   <= config_data_p2(2);
-                    timer_reset_out   <= config_data_p2(3);
 
-                    -- Control priority: Interrupt > Hold > Normal
-                    -- Priority 1: Interrupt event forces return to IDLE
-                    IF config_data_p2(1) = '1' AND event_code_reg_p2 = interrupt_event_p2 THEN
-                        current_state <= (OTHERS => '0');  -- Force IDLE (S_IDLE = 00000)
-                    -- Priority 2: Hold flag prevents state transition
-                    ELSIF config_data_p2(0) = '1' THEN
-                        -- Stay in current state (do not update current_state)
-                        NULL;
-                    -- Priority 3: Normal state transition
+                    -- --------------------------------------------------------
+                    -- IMPROVEMENT 2: ROM miss detection
+                    -- All-zero data on a real event means the ROM has no entry
+                    -- for this (state, event) pair. Force IDLE and signal error.
+                    -- --------------------------------------------------------
+                    IF config_data_p2 = (config_data_p2'RANGE => '0') THEN
+                        current_state     <= (OTHERS => '0');  -- safe fallback: IDLE
+                        output_action_reg <= (OTHERS => '0');
+                        fsm_error_i       <= '1';
+
+                    -- --------------------------------------------------------
+                    -- IMPROVEMENT 3: Reserved-bits check
+                    -- Bits [31:29] or [7:4] non-zero indicate a malformed entry.
+                    -- --------------------------------------------------------
+                    ELSIF config_data_p2(31 DOWNTO 29) /= "000"
+                       OR config_data_p2(7 DOWNTO 4)   /= "0000" THEN
+                        current_state     <= (OTHERS => '0');
+                        output_action_reg <= (OTHERS => '0');
+                        fsm_error_i       <= '1';
+
                     ELSE
-                        current_state <= config_data_p2(28 DOWNTO 24);
-                    END IF;
-                END IF;
-            END IF;
-        END IF;
+                        -- ROM data looks structurally valid
+                        output_valid      <= '1';
+                        output_action_reg <= config_data_p2(23 DOWNTO 8);
+                        timer_start_out   <= config_data_p2(2);
+                        timer_reset_out   <= config_data_p2(3);
+
+                        next_state_v := config_data_p2(28 DOWNTO 24);
+
+                        -- --------------------------------------------------------
+                        -- IMPROVEMENT 4: Invalid next-state guard
+                        -- Reject any next_state > MAX_STATE_INDEX to prevent
+                        -- the FSM from jumping to an undefined state on a bad
+                        -- ROM entry.  Error is flagged and machine returns to IDLE.
+                        -- --------------------------------------------------------
+                        IF to_integer(unsigned(next_state_v)) > MAX_STATE_INDEX THEN
+                            current_state <= (OTHERS => '0');
+                            fsm_error_i   <= '1';
+
+                        -- Normal control priority: Interrupt > Hold > Normal
+                        ELSIF config_data_p2(1) = '1'
+                              AND event_code_reg_p2 = interrupt_event_p2 THEN
+                            current_state <= (OTHERS => '0');  -- interrupt: force IDLE
+
+                        ELSIF config_data_p2(0) = '1' THEN
+                            NULL;  -- hold_state: stay in current state
+
+                        ELSE
+                            current_state <= next_state_v;  -- normal transition
+                        END IF;
+
+                    END IF; -- ROM data checks
+                END IF; -- fsm_busy_p2
+            END IF; -- reset
+        END IF; -- rising_edge
     END PROCESS state_update;
 
     -- Output assignments
     state_code    <= current_state;
     output_action <= output_action_reg;
     fsm_busy      <= fsm_busy_i;
+    fsm_error     <= fsm_error_i;
 
 END ARCHITECTURE behavioral;

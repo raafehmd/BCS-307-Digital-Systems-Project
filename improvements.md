@@ -1,0 +1,329 @@
+# Error Handling Improvements — Configurable FSM Project
+
+**BCS-307 Digital Systems Project**
+Document covers all error handling, safety interlocks, and defensive logic added across the five improved VHDL source files.
+
+---
+
+## Table of Contents
+
+1. [generic\_fsm\_improved.vhd](#1-generic_fsm_improvedvhd)
+2. [elevator\_wrapper\_improved.vhd](#2-elevator_wrapper_improvedvhd)
+3. [vending\_wrapper\_improved.vhd](#3-vending_wrapper_improvedvhd)
+4. [traffic\_light\_wrapper\_improved.vhd](#4-traffic_light_wrapper_improvedvhd)
+5. [serial\_wrapper\_improved.vhd](#5-serial_wrapper_improvedvhd)
+6. [Summary Table](#6-summary-table)
+
+---
+
+## 1. `generic_fsm_improved.vhd`
+
+The FSM core gained a new `fsm_error : OUT STD_LOGIC` port that pulses HIGH for exactly one clock cycle whenever any of the three guards below fires. Previously all of these conditions caused silent, undetectable misbehaviour.
+
+### 1.1 ROM Miss Detection
+
+**Problem:** When a `(state, event)` pair has no entry in the ROM, `config_data` returns all-zeros. The original core treated this as a valid word, silently transitioning to state `00000` (IDLE) and zeroing all outputs — indistinguishable from a legitimate reset.
+
+**Fix:** If `config_data_p2 = x"00000000"` while `fsm_busy_p2 = '1'`, the state is forced to IDLE, outputs are cleared, and `fsm_error` is pulsed.
+
+```vhdl
+IF config_data_p2 = (config_data_p2'RANGE => '0') THEN
+    current_state     <= (OTHERS => '0');
+    output_action_reg <= (OTHERS => '0');
+    fsm_error_i       <= '1';
+```
+
+### 1.2 Reserved Bits Check
+
+**Problem:** ROM data bits `[31:29]` and `[7:4]` are defined as unused/reserved (`000` and `0000` respectively). A partially-written or corrupted ROM entry with non-zero reserved bits would previously be accepted and acted on without any warning.
+
+**Fix:** If either reserved field is non-zero the entry is rejected, state returns to IDLE, and `fsm_error` pulses.
+
+```vhdl
+ELSIF config_data_p2(31 DOWNTO 29) /= "000"
+   OR config_data_p2(7  DOWNTO 4)  /= "0000" THEN
+    current_state     <= (OTHERS => '0');
+    output_action_reg <= (OTHERS => '0');
+    fsm_error_i       <= '1';
+```
+
+### 1.3 Invalid Next-State Guard
+
+**Problem:** The ROM `next_state` field is 5 bits wide and can encode values 0–31, but only states 0–15 (`MAX_STATE_INDEX`) are defined in any application. A ROM bug writing a value of 16–31 would corrupt `current_state` and send the machine into an undefined region with no output.
+
+**Fix:** If `next_state > MAX_STATE_INDEX` the FSM is forced to IDLE and `fsm_error` pulses instead of loading the out-of-range value.
+
+```vhdl
+IF to_integer(unsigned(next_state_v)) > MAX_STATE_INDEX THEN
+    current_state <= (OTHERS => '0');
+    fsm_error_i   <= '1';
+```
+
+**Constant:** `MAX_STATE_INDEX : INTEGER := 15` — raise this if more states are added to any application.
+
+---
+
+## 2. `elevator_wrapper_improved.vhd`
+
+### 2.1 Motor Mutual-Exclusion Interlock
+
+**Problem:** `motor_up` and `motor_down` were driven directly from `output_action(0)` and `output_action(1)`. A single corrupt ROM entry setting both bits simultaneously would command the motor driver in both directions at once — a hardware-destructive condition.
+
+**Fix:** Hardware-level combinatorial interlock. Each motor output is AND'd with the complement of the other:
+
+```vhdl
+motor_up   <= motor_up_raw   AND NOT motor_down_raw AND NOT weight_sensor;
+motor_down <= motor_down_raw AND NOT motor_up_raw   AND NOT weight_sensor;
+```
+
+This is enforced in silicon regardless of ROM content. The FSM or ROM cannot override it.
+
+### 2.2 Weight Sensor Motor Cut
+
+**Problem:** The original design relied on the FSM transitioning to IDLE (via the weight event ROM entry) before the alarm asserted and the motors stopped. In the same pipeline cycle that the FSM transitions, `output_action` still reflects the previous MOVE state for one cycle — the motors could still be asserted briefly.
+
+**Fix:** `weight_sensor='1'` combinatorially cuts both motor outputs directly, in the same expression as the interlock above. No pipeline delay.
+
+### 2.3 Door-Open Timeout Counter
+
+**Problem:** If `door_sensor` becomes stuck at `'1'` (faulty sensor, obstruction), the elevator stays in `DOOR_OPEN` indefinitely. The FSM has no way to escape without a `door_clear` event, which can never fire while the sensor is high.
+
+**Fix:** A saturating counter runs while `state_code = "00011"` (DOOR_OPEN). When it reaches `DOOR_TIMEOUT_CYCLES` it asserts `door_timeout_event`, which the `input_decoder` maps to a synthetic `door_clear` event — forcing the close sequence even with the sensor stuck.
+
+```vhdl
+-- At 100 MHz: DOOR_TIMEOUT_CYCLES = 500_000 → 5 ms timeout
+CONSTANT DOOR_TIMEOUT_CYCLES : INTEGER := 500_000;
+```
+
+The counter resets whenever the FSM leaves DOOR_OPEN.
+
+### 2.4 Emergency Light Minimum Hold
+
+**Problem:** The `emergency_light` signal was a single 1-clock-cycle pulse (~10 ns at 100 MHz) generated by `abort_detect`. This is invisible to any external controller or LED driver operating on a human timescale.
+
+**Fix:** A decrement counter stretches the pulse to `EMERG_LIGHT_HOLD_CYCLES`. The light asserts on abort detection and stays high until the counter reaches zero.
+
+```vhdl
+-- At 100 MHz: EMERG_LIGHT_HOLD_CYCLES = 1_000_000 → 10 ms hold
+CONSTANT EMERG_LIGHT_HOLD_CYCLES : INTEGER := 1_000_000;
+```
+
+### 2.5 Floor Latch Guard
+
+**Problem:** If a new `floor_request` arrived while the elevator was mid-journey, `target_floor` would update immediately. The floor counter would then stop at the new target rather than the original, potentially leaving the elevator between floors or reversing direction unexpectedly.
+
+**Fix:** `floor_latch` only accepts a new `floor_request` when `state_code = EL_IDLE_STATE`. Requests during movement are ignored.
+
+```vhdl
+ELSIF state_code = EL_IDLE_STATE
+      AND UNSIGNED(floor_request) >= 1
+      AND UNSIGNED(floor_request) <= 11 THEN
+    target_floor <= TO_INTEGER(UNSIGNED(floor_request));
+```
+
+---
+
+## 3. `vending_wrapper_improved.vhd`
+
+### 3.1 Rising-Edge Detection on `coin_insert`
+
+**Problem:** `coin_insert` was sampled level-sensitive. When the FSM pipeline clears `fsm_busy` for one cycle between stage 1 and stage 2, the input decoder would see `coin_insert` still high and capture a second coin event — incorrectly crediting the customer with two coins from one insertion.
+
+**Fix:** A registered `coin_prev` signal detects the rising edge. Only `coin_rising = coin_insert AND NOT coin_prev` is forwarded to the event encoder.
+
+```vhdl
+coin_rising <= coin_insert AND NOT coin_prev;
+```
+
+### 3.2 Collect-State Idle Timeout
+
+**Problem:** If a customer inserts a coin but never makes a selection (walks away, machine abandoned), the FSM stays in `COLLECT` indefinitely. The machine is blocked, and any money inserted cannot be returned automatically.
+
+**Fix:** A saturating counter runs while `state_code = VM_STATE_COLLECT`. On saturation it asserts `collect_timeout`, which the `input_decoder` maps to the cancel interrupt — triggering the refund path automatically.
+
+```vhdl
+-- At 100 MHz: COLLECT_TIMEOUT_CYCLES = 500_000_000 → 5 seconds
+CONSTANT COLLECT_TIMEOUT_CYCLES : INTEGER := 500_000_000;
+```
+
+### 3.3 Out-of-Stock Display Override
+
+**Problem:** When `item_empty` fired, the FSM returned to IDLE with `display_msg = 0x00` (blank). The customer received no feedback about why no item was dispensed.
+
+**Fix:** A hold counter overrides `display_msg` with `0xFF` (all segments active — a visually distinct "out of stock" code) for `STOCK_MSG_HOLD_CYCLES` whenever `item_empty` fires.
+
+```vhdl
+display_msg <= OUT_OF_STOCK_CODE WHEN show_stock_msg = '1'
+               ELSE normal_display;
+-- OUT_OF_STOCK_CODE : STD_LOGIC_VECTOR := x"FF"
+-- STOCK_MSG_HOLD_CYCLES = 100_000_000 → 1 second at 100 MHz
+```
+
+### 3.4 Wider Interrupt Change-Return Coverage
+
+**Problem:** `int_change_pulse` (the signal that asserts `change_return` on a cancel interrupt) only fired when the FSM transitioned from `COLLECT → IDLE`. Cancelling from `SELECT` or `DISPENSE` would return the FSM to IDLE via the interrupt path but never assert `change_return` — the customer's money would be lost.
+
+**Fix:** The transition detection now covers all active states:
+
+```vhdl
+IF (prev_state = VM_STATE_COLLECT
+    OR prev_state = VM_STATE_SELECT
+    OR prev_state = VM_STATE_DISPENSE)
+   AND state_code_i = VM_STATE_IDLE THEN
+    int_change_pulse <= '1';
+END IF;
+```
+
+---
+
+## 4. `traffic_light_wrapper_improved.vhd`
+
+### 4.1 Interrupt Event Enabled
+
+**Problem:** The original wrapper set `interrupt_event => (OTHERS => '0')`, completely disabling the FSM interrupt mechanism. A pedestrian request during a timed phase had to wait for the current timer to expire — it could not abort the phase immediately.
+
+**Fix:** `EV_PEDESTRIAN_BTN` (`"0000000001"`) is wired as `interrupt_event`. When a pedestrian button fires in any state with `interrupt_en='1'` in its ROM entry, the FSM immediately returns to IDLE and proceeds to `PED_WAIT`.
+
+```vhdl
+fsm_core: ENTITY work.generic_fsm
+    PORT MAP (
+        interrupt_event => EV_PEDESTRIAN_BTN,   -- was (OTHERS => '0')
+        ...
+    );
+```
+
+### 4.2 Extended Timer Reset Pulse
+
+**Problem:** `reset_timer_clear` held for exactly 1 clock cycle after system reset. Many timer modules require a multi-cycle reset pulse to initialise correctly; a 1-cycle pulse may be missed or ignored.
+
+**Fix:** A down-counter holds `reset_timer_clear` HIGH for `TIMER_RESET_HOLD` cycles after reset deasserts.
+
+```vhdl
+CONSTANT TIMER_RESET_HOLD : INTEGER := 3;  -- 3 cycles minimum
+```
+
+### 4.3 Input Conflict Detection
+
+**Problem:** No visibility into simultaneous input conditions (e.g. `pedestrian_btn` and `car_sensor` both asserted at the same time). This can indicate wiring faults, bouncing buttons, or test-bench errors, but was previously silent.
+
+**Fix:** Combinatorial `input_conflict` output asserts whenever more than one input is simultaneously active.
+
+```vhdl
+input_conflict_i <=
+    '1' WHEN (pedestrian_btn = '1' AND car_sensor  = '1')
+          OR (pedestrian_btn = '1' AND timer_done  = '1')
+          OR (car_sensor     = '1' AND timer_done  = '1')
+    ELSE '0';
+```
+
+### 4.4 Fault Detection on Unexpected Timer
+
+**Problem:** If `timer_done` arrives while the FSM is in IDLE (timer not stopped on reset, or hardware fault), the FSM silently holds in IDLE via ROM entry 4. There is no indication to the system controller that a fault occurred.
+
+**Fix:** `fault_err` asserts for `FAULT_HOLD_CYCLES` whenever `timer_done = '1'` and `state_code = STATE_IDLE`.
+
+```vhdl
+ELSIF timer_done = '1' AND state_code = STATE_IDLE THEN
+    fault_hold_cnt <= FAULT_HOLD_CYCLES;
+    fault_err_i    <= '1';
+-- FAULT_HOLD_CYCLES = 1_000_000 → 10 ms at 100 MHz
+```
+
+---
+
+## 5. `serial_wrapper_improved.vhd`
+
+### 5.1 Reset Gate on `parity_err`
+
+**Problem:** The `parity_detect` process fired `parity_err` whenever `prev_state /= IDLE AND state_code = IDLE`. A system `reset` applied mid-transfer forces `state_code` to IDLE immediately — satisfying this condition and falsely asserting `parity_err` on every hard reset during a transfer.
+
+**Fix:** Added `reset = '0'` guard to the condition. The error is only flagged when the return to IDLE is not caused by a reset.
+
+```vhdl
+IF reset = '0'
+        AND prev_state /= SP_IDLE
+        AND prev_state /= SP_COMPLETE
+        AND state_code = SP_IDLE THEN
+    parity_err_i <= '1';
+```
+
+### 5.2 `UNSIGNED()` for State Range Comparison
+
+**Problem:** State range comparisons in `rx_latch_proc` used direct `STD_LOGIC_VECTOR` relational operators. These are legal in VHDL-2008 but silently incorrect in VHDL-93 tools, which perform lexicographic rather than numeric ordering.
+
+**Fix:** Wrapped with explicit `UNSIGNED()` casts, which are correct in all standard versions.
+
+```vhdl
+-- Before:
+AND state_code >= "00010"
+AND state_code <= "01001"
+
+-- After:
+AND UNSIGNED(state_code) >= UNSIGNED(SP_RX_BIT0_IDX)
+AND UNSIGNED(state_code) <= UNSIGNED(SP_RX_BIT7_IDX)
+```
+
+### 5.3 Frame Error Detection
+
+**Problem:** No detection of framing violations. If `tx_ready` rises before a full byte has been received (FSM not at `SP_COMPLETE` or `SP_IDLE`), the transmitter is out of sync with the receiver but there was no observable fault signal.
+
+**Fix:** New `frame_err : OUT STD_LOGIC` output. Fires for one clock cycle when `tx_ready` rises while the FSM is in any state other than `SP_IDLE` or `SP_COMPLETE`.
+
+```vhdl
+ELSIF tx_ready = '1' AND tx_ready_prev = '0'
+      AND state_code /= SP_IDLE
+      AND state_code /= SP_COMPLETE THEN
+    frame_err_i <= '1';
+```
+
+### 5.4 `0xFF` Idle Bus Pattern
+
+**Problem:** `tx_data` was driven to `0x00` (all zeros) when outside `SP_COMPLETE`. A transmitted null byte (`0x00`) and an idle bus are indistinguishable by any downstream observer or logic analyser.
+
+**Fix:** `tx_data` drives `0xFF` (all ones) when outside `SP_COMPLETE`, making idle bus immediately identifiable.
+
+```vhdl
+tx_data <= rx_latch WHEN state_code = SP_COMPLETE ELSE x"FF";
+```
+
+### 5.5 `tx_data_valid` Qualifier Output
+
+**Problem:** Downstream consumers of `tx_data` had to compare `state_out` against the `SP_COMPLETE` constant to know when the data was valid. This created an unnecessary coupling between the consumer and the FSM's internal state encoding.
+
+**Fix:** Explicit `tx_data_valid : OUT STD_LOGIC` output asserts only when `tx_data` holds valid received data.
+
+```vhdl
+tx_data_valid <= '1' WHEN state_code = SP_COMPLETE ELSE '0';
+```
+
+---
+
+## 6. Summary Table
+
+| File | Improvement | Type | New Port |
+|---|---|---|---|
+| `generic_fsm` | ROM miss detection | Error detection | `fsm_error` |
+| `generic_fsm` | Reserved bits check | Error detection | — |
+| `generic_fsm` | Invalid next-state guard | Error detection | — |
+| `elevator_wrapper` | Motor mutual-exclusion interlock | Safety interlock | — |
+| `elevator_wrapper` | Weight sensor motor cut | Safety interlock | — |
+| `elevator_wrapper` | Door-open timeout counter | Fault recovery | — |
+| `elevator_wrapper` | Emergency light hold | Output reliability | — |
+| `elevator_wrapper` | Floor latch guard | Race condition fix | — |
+| `elevator_wrapper` | FSM error surface | Observability | `fsm_error_out` |
+| `vending_wrapper` | Rising-edge detect on coin | Race condition fix | — |
+| `vending_wrapper` | Collect-state idle timeout | Fault recovery | — |
+| `vending_wrapper` | Out-of-stock display | User feedback | — |
+| `vending_wrapper` | Wider interrupt change coverage | Logic correctness | — |
+| `vending_wrapper` | FSM error surface | Observability | `fsm_error_out` |
+| `traffic_light_wrapper` | Interrupt event enabled | Logic correctness | — |
+| `traffic_light_wrapper` | Extended timer reset pulse | Reliability | — |
+| `traffic_light_wrapper` | Input conflict detection | Error detection | `input_conflict` |
+| `traffic_light_wrapper` | Fault on unexpected timer | Error detection | `fault_err` |
+| `traffic_light_wrapper` | FSM error surface | Observability | `fsm_error_out` |
+| `serial_wrapper` | Reset gate on `parity_err` | False-positive fix | — |
+| `serial_wrapper` | `UNSIGNED()` state range | Portability fix | — |
+| `serial_wrapper` | Frame error detection | Error detection | `frame_err` |
+| `serial_wrapper` | `0xFF` idle bus pattern | Observability | — |
+| `serial_wrapper` | `tx_data_valid` qualifier | Interface improvement | `tx_data_valid` |
+| `serial_wrapper` | FSM error surface | Observability | `fsm_error_out` |

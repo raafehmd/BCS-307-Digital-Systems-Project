@@ -19,8 +19,8 @@ STD = "--std=08"
 
 # Source files — order matters for analysis (dependencies first)
 SRC_FILES = [
-    "generic_fsm.vhd",
-    "config_rom.vhd",
+    "config_rom.vhd",       
+    "generic_fsm.vhd",      
     "traffic_light_wrapper.vhd",
     "vending_wrapper.vhd",
     "elevator_wrapper.vhd",
