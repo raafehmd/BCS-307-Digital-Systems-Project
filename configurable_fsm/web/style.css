@@ -1821,3 +1821,249 @@ footer { border-top: 1px solid var(--border); background: var(--bg-1); padding: 
   font-weight: 700;
   font-size: .8rem;
 }
+
+/* ================================================================
+   WAVEFORM LEGEND (auto-injected by renderWaveformInContainer)
+   + Active state glow + Signal transition marks
+   ================================================================ */
+
+/* Auto legend appended to every waveform panel */
+.wf-auto-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem 1.1rem;
+  align-items: center;
+  padding: .5rem .75rem;
+  margin-top: .35rem;
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 var(--r-sm) var(--r-sm);
+  font-size: .68rem;
+  font-family: var(--mono);
+}
+
+.wf-leg-cursor { color: var(--cyan); }
+.wf-leg-change  { color: var(--yellow); }
+
+/* Legend dot for the cursor */
+.wf-dot.cursor {
+  display: inline-block;
+  width: 2px; height: 12px;
+  background: var(--cyan);
+  box-shadow: 0 0 6px var(--cyan);
+  border-radius: 1px;
+  vertical-align: middle;
+  margin-right: 3px;
+}
+
+/* Legend dot for signal transitions */
+.wf-dot.change {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-left: 2px solid var(--yellow);
+  background: transparent;
+  vertical-align: middle;
+  margin-right: 3px;
+}
+
+/* Active state glow animation for SVG state circles */
+@keyframes state-pulse {
+  0%   { filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 20px currentColor); }
+  50%  { filter: drop-shadow(0 0 18px currentColor) drop-shadow(0 0 36px currentColor); }
+  100% { filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 20px currentColor); }
+}
+
+.state-circle.active-state {
+  animation: state-pulse 1.2s ease-in-out infinite;
+}
+
+/* Waveform title styling */
+.wf-title {
+  font-size: .72rem;
+  font-family: var(--mono);
+  color: var(--txt-3);
+  padding: .3rem .5rem .4rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+/* Signal change border already applied inline; ensure it doesn't overflow */
+.wf-segment { overflow: hidden; }
+
+/* Elevator: IDLE→DOOR_OPEN arrow label styling (green dashed) */
+.trans-label-green { fill: #39ff8f; font-weight: 700; }
+/* ================================================================
+   ERROR HANDLING TAB  +  UI DEVELOPMENT TAB
+   ================================================================ */
+
+/* ── Error Handling intro ── */
+.eh-intro-block {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--cyan);
+  border-radius: var(--r-md);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.eh-intro-text { color: var(--txt-2); line-height: 1.75; font-size: .9rem; }
+.eh-intro-facts {
+  display: flex; flex-wrap: wrap; gap: 1rem;
+  margin-top: 1rem;
+}
+.eh-fact {
+  display: flex; align-items: center; gap: .5rem;
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--r-md); padding: .5rem 1rem;
+  font-size: .78rem; color: var(--txt-2);
+}
+.eh-fact-icon { font-size: 1.5rem; font-weight: 700; font-family: var(--mono); }
+
+/* ── Four-layer flow diagram ── */
+.eh-flow {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: .5rem; justify-content: center;
+  background: var(--bg-1); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 1.5rem; margin-bottom: 1rem;
+}
+.eh-flow-box {
+  background: var(--bg-2); border: 2px solid; border-radius: var(--r-md);
+  padding: .75rem 1rem; text-align: center; min-width: 100px;
+}
+.eh-flow-icon { font-size: 1.5rem; margin-bottom: .3rem; }
+.eh-flow-label { font-size: .78rem; font-weight: 700; color: var(--txt); font-family: var(--mono); }
+.eh-flow-sub   { font-size: .65rem; color: var(--txt-3); margin-top: .2rem; line-height: 1.4; }
+.eh-flow-arrow { font-size: 1.4rem; color: var(--txt-3); padding: 0 .25rem; }
+
+/* ── Problem/Cause/Fix cards ── */
+.eh-cards { display: flex; flex-direction: column; gap: .9rem; margin-bottom: 1.5rem; }
+
+.eh-card { border-radius: var(--r-md); overflow: hidden; border: 1px solid; }
+.eh-red    { border-color: rgba(220,38,38,0.35);  background: rgba(220,38,38,0.04); }
+.eh-yellow { border-color: rgba(255,232,77,0.35);  background: rgba(255,232,77,0.03); }
+.eh-green  { border-color: rgba(57,255,143,0.35); background: rgba(57,255,143,0.04); }
+
+.eh-card-head {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .65rem 1rem; font-size: .82rem; font-weight: 700;
+  color: var(--txt); background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+}
+.eh-icon { font-size: 1rem; }
+.eh-card-body { padding: .75rem 1rem; display: flex; flex-direction: column; gap: .45rem; }
+.eh-row { display: flex; gap: .6rem; align-items: flex-start; font-size: .8rem; color: var(--txt-2); line-height: 1.55; }
+
+.eh-tag { display: inline-flex; padding: .15rem .55rem; border-radius: var(--r-sm);
+  font-size: .65rem; font-weight: 700; font-family: var(--mono);
+  white-space: nowrap; flex-shrink: 0; }
+.eh-tag-prob  { background: rgba(220,38,38,0.18); color: var(--red); }
+.eh-tag-cause { background: rgba(255,232,77,0.15); color: var(--yellow); }
+.eh-tag-fix   { background: rgba(57,255,143,0.15); color: var(--green); }
+
+/* ── VHDL improvement cards ── */
+.eh-vhdl-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
+  gap: 1rem; margin-bottom: 1.5rem;
+}
+.eh-vhdl-card {
+  background: var(--bg-1); border: 1px solid var(--border);
+  border-radius: var(--r-lg); overflow: hidden;
+}
+.eh-vhdl-header {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .5rem;
+  padding: .65rem 1rem; background: var(--bg-2);
+  border-bottom: 1px solid var(--border); border-left: 3px solid;
+}
+.eh-vhdl-file { font-family: var(--mono); font-size: .72rem; font-weight: 700; color: var(--txt); }
+.eh-vhdl-port { font-family: var(--mono); font-size: .7rem; color: var(--txt-3); }
+.eh-vhdl-items { display: flex; flex-direction: column; gap: .5rem; padding: .75rem 1rem; }
+.eh-vhdl-item {
+  display: flex; gap: .6rem; align-items: flex-start;
+  font-size: .78rem; color: var(--txt-2); line-height: 1.55;
+}
+.eh-vhdl-tag {
+  display: inline-flex; padding: .15rem .55rem; border-radius: var(--r-sm);
+  font-size: .65rem; font-weight: 700; font-family: var(--mono);
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* ── Summary table type badges ── */
+.eh-type {
+  display: inline-block; padding: .15rem .5rem; border-radius: var(--r-sm);
+  font-size: .65rem; font-family: var(--mono); font-weight: 700;
+}
+.eh-type-err  { background: rgba(220,38,38,0.15); color: var(--red); }
+.eh-type-safe { background: rgba(57,255,143,0.15); color: var(--green); }
+.eh-type-rec  { background: rgba(79,195,247,0.15); color: var(--blue); }
+.eh-type-rel  { background: rgba(181,123,255,0.15); color: var(--purple); }
+.eh-type-race { background: rgba(255,232,77,0.15); color: var(--yellow); }
+.eh-type-log  { background: rgba(255,157,61,0.15); color: var(--orange); }
+.eh-type-ux   { background: rgba(0,245,255,0.12); color: var(--cyan); }
+
+/* ─────────────────────────────────────── */
+/* ── UI Development tab ──────────────── */
+/* ─────────────────────────────────────── */
+
+.uid-intro {
+  background: var(--bg-1); border: 1px solid var(--border);
+  border-left: 4px solid var(--cyan); border-radius: var(--r-md);
+  padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;
+}
+.uid-intro-text { color: var(--txt-2); line-height: 1.75; font-size: .9rem; }
+
+/* Three-tech flow */
+.uid-tech-flow {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: .75rem; justify-content: center;
+  background: var(--bg-1); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 1.5rem; margin-bottom: 1.5rem;
+}
+.uid-tech-box {
+  background: var(--bg-2); border: 2px solid;
+  border-radius: var(--r-md); padding: 1rem 1.25rem;
+  text-align: center; min-width: 110px;
+}
+.uid-tech-icon { font-size: 1.8rem; margin-bottom: .35rem; }
+.uid-tech-name { font-size: .88rem; font-weight: 700; color: var(--txt); font-family: var(--mono); }
+.uid-tech-role { font-size: .7rem; color: var(--txt-3); margin-top: .2rem; }
+.uid-tech-arrow { font-size: 1.6rem; color: var(--txt-3); padding: 0 .25rem; }
+
+/* Detail blocks */
+.uid-detail-block {
+  background: var(--bg-1); border: 1px solid var(--border);
+  border-radius: var(--r-lg); overflow: hidden; margin-bottom: 1.5rem;
+}
+.uid-html { border-top: 3px solid var(--orange); }
+.uid-css  { border-top: 3px solid var(--cyan); }
+.uid-js   { border-top: 3px solid var(--yellow); }
+
+.uid-detail-label {
+  padding: .65rem 1rem; background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  font-size: .72rem; font-family: var(--mono); color: var(--txt-3);
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.uid-detail-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+  gap: 0;
+}
+.uid-detail-card {
+  padding: 1rem 1.25rem; border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.uid-detail-card:last-child { border-right: none; }
+.uid-dc-title {
+  font-size: .8rem; font-weight: 700; color: var(--txt);
+  margin-bottom: .5rem; font-family: var(--mono);
+}
+.uid-detail-card p { font-size: .78rem; color: var(--txt-2); line-height: 1.65; }
+
+/* Colour swatches */
+.uid-var-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .4rem;
+  margin-top: .6rem; font-size: .72rem; color: var(--txt-2); font-family: var(--mono);
+}
+.uid-swatch {
+  display: inline-block; width: 14px; height: 14px;
+  border-radius: 3px; flex-shrink: 0;
+}
