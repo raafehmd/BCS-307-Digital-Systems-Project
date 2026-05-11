@@ -29,6 +29,8 @@
       <button class="nav-btn" data-tab="serial">📡 Serial Comm</button>
       <button class="nav-btn" data-tab="simulation">Simulation</button>
       <button class="nav-btn" data-tab="waveform">Waveform Viewer</button>
+      <button class="nav-btn" data-tab="error-handling">&#9888;&#65039; Error Handling</button>
+      <button class="nav-btn" data-tab="ui-development">&#128421;&#65039; UI Development</button>
     </nav>
     <button class="hamburger" id="hamburger">☰</button>
   </div>
@@ -65,8 +67,8 @@
         <line x1="100" y1="150" x2="118" y2="150" stroke="#2a3560" stroke-width="1.5" marker-end="url(#ah)"/>
         <rect x="120" y="90" width="80" height="120" rx="8" fill="rgba(20,40,80,0.8)" stroke="#4fc3f7" stroke-width="1.5"/>
         <text x="160" y="114" fill="#eef2ff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">WRAPPER</text>
-        <text x="160" y="132" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">Input Decoder</text>
-        <text x="160" y="148" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">Output Encoder</text>
+        <text x="160" y="132" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">Input Encoder</text>
+        <text x="160" y="148" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">Output Decoder</text>
         <text x="160" y="164" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">config_id</text>
         <line x1="200" y1="150" x2="218" y2="150" stroke="#2a3560" stroke-width="1.5" marker-end="url(#ah)"/>
         <rect x="226" y="58"  width="82" height="58" rx="8" fill="rgba(50,20,80,0.8)"  stroke="#b57bff" stroke-width="1.5"/>
@@ -435,7 +437,7 @@
         <div class="em-row"><span class="em-port">output_action[1]</span><span class="em-arrow">→</span><span class="em-signal">yellow_led</span></div>
         <div class="em-row"><span class="em-port">output_action[2]</span><span class="em-arrow">→</span><span class="em-signal">green_led</span></div>
         <div class="em-row"><span class="em-port">output_action[3]</span><span class="em-arrow">→</span><span class="em-signal">ped_signal (pedestrian walk light)</span></div>
-        <div class="em-row"><span class="em-port">fsm_busy</span><span class="em-arrow">→</span><span class="em-signal">gates input decoder (prevents double-firing during pipeline)</span></div>
+        <div class="em-row"><span class="em-port">fsm_busy</span><span class="em-arrow">→</span><span class="em-signal">gates input encoder (prevents double-firing during pipeline)</span></div>
       </div>
     </div>
   </div>
@@ -445,7 +447,7 @@
     <tbody>
       <tr><td><code>clk</code></td><td class="dir-in">IN</td><td>1</td><td>System clock — all registers update on rising edge</td></tr>
       <tr><td><code>reset</code></td><td class="dir-in">IN</td><td>1</td><td>Synchronous reset — forces FSM back to state 0 (IDLE)</td></tr>
-      <tr><td><code>event_code</code></td><td class="dir-in">IN</td><td>10</td><td>Current input event from wrapper's input decoder (bitmask)</td></tr>
+      <tr><td><code>event_code</code></td><td class="dir-in">IN</td><td>10</td><td>Current input event from wrapper's input encoder (bitmask)</td></tr>
       <tr><td><code>config_data</code></td><td class="dir-in">IN</td><td>32</td><td>ROM word: next_state[28:24] + output_action[23:8] + flags[7:0]</td></tr>
       <tr><td><code>config_id</code></td><td class="dir-in">IN</td><td>2</td><td>ROM section selector: 00=TL, 01=VM, 10=EL, 11=SP</td></tr>
       <tr><td><code>interrupt_event</code></td><td class="dir-in">IN</td><td>10</td><td>Special event that forces FSM → IDLE immediately</td></tr>
@@ -557,7 +559,7 @@
       <line x1="155" y1="54" x2="305" y2="54" stroke="#1a2240" stroke-width="1"/>
       <!-- Input decoder -->
       <rect x="162" y="62" width="136" height="46" rx="6" fill="#071828" stroke="#4fc3f7" stroke-width="1"/>
-      <text x="230" y="80" fill="#4fc3f7" font-family="Space Mono" font-size="7.5" font-weight="700" text-anchor="middle">Input Decoder</text>
+      <text x="230" y="80" fill="#4fc3f7" font-family="Space Mono" font-size="7.5" font-weight="700" text-anchor="middle">Input Encoder</text>
       <text x="230" y="92" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">physical signals → 10-bit event_code</text>
       <text x="230" y="102" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">priority encoder + edge detector</text>
       <!-- config_id -->
@@ -617,8 +619,8 @@
     <div class="wtj-card wtj-input">
       <div class="wtj-num">①</div>
       <div class="wtj-body">
-        <div class="wtj-title">Input Decoder — Physical Signals → event_code</div>
-        <p class="wtj-desc">The wrapper's input decoder watches all physical input pins every clock cycle. When it detects an active signal (and the FSM core is not busy), it encodes that signal into a 10-bit one-hot event code and sends it to the generic FSM core. Only one event fires per cycle — the priority encoder decides which if multiple signals arrive simultaneously.</p>
+        <div class="wtj-title">Input Encoder — Physical Signals → event_code</div>
+        <p class="wtj-desc">The wrapper's input encoder watches all physical input pins every clock cycle. When it detects an active signal (and the FSM core is not busy), it <em>encodes</em> that signal into a 10-bit one-hot event code and sends it to the generic FSM core. Only one event fires per cycle — the priority encoder decides which if multiple signals arrive simultaneously.</p>
         <div class="wtj-rules">
           <div class="wtj-rule"><span class="wtj-rule-badge" style="border-color:#4fc3f7">Rule 1</span> Only fires when <code>fsm_busy = '0'</code> — the pipeline gate</div>
           <div class="wtj-rule"><span class="wtj-rule-badge" style="border-color:#ffe84d">Rule 2</span> Priority encoder: one event per cycle (highest priority wins)</div>
@@ -745,7 +747,7 @@
   </div>
 
   <!-- Priority encoder visual -->
-  <div class="section-title">Inside the Input Decoder — Priority Encoder</div>
+  <div class="section-title">Inside the Input Encoder — Priority Encoder</div>
   <div class="wrapper-priority-block">
     <div class="wpb-diagram">
       <svg viewBox="0 0 420 190" xmlns="http://www.w3.org/2000/svg" class="wpb-svg">
@@ -868,7 +870,7 @@
 
     <div class="wcg-item">
       <div class="code-block" style="margin:0">
-        <div class="code-header">Traffic Light — Input Decoder (with fsm_busy gate)</div>
+        <div class="code-header">Traffic Light — Input Encoder (with fsm_busy gate)</div>
 <pre>input_encode : <span class="kw">PROCESS</span>(clk)
 <span class="kw">BEGIN</span>
   <span class="kw">IF</span> rising_edge(clk) <span class="kw">THEN</span>
@@ -1072,14 +1074,14 @@ change_return &lt;= output_action(<span class="num">1</span>) <span class="kw">O
           <div class="fee-item"><span class="fee-badge" style="background:#ff4f6e">S1 RED</span> Red light ON. All vehicles stopped. Either a car_sensor or pedestrian_btn triggered entry. Timer started.</div>
           <div class="fee-item"><span class="fee-badge" style="background:#39ff8f;color:#000">S2 GREEN</span> Green light ON. Vehicles may proceed. Entered after RED timer expires. Timer started.</div>
           <div class="fee-item"><span class="fee-badge" style="background:#ffe84d;color:#000">S3 YELLOW</span> Yellow light ON. Warning: prepare to stop. Entered after GREEN timer expires. Short timer.</div>
-          <div class="fee-item"><span class="fee-badge" style="background:#4fc3f7;color:#000">S4 PED_WAIT</span> Red ON, pedestrian request queued. Entered from RED or GREEN when pedestrian_btn fires.</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#4fc3f7;color:#000">S4 PED_WAIT</span> Red ON, pedestrian request queued. Entered from RED when pedestrian_btn fires. (From GREEN, ped_btn causes GREEN→RED directly.)</div>
           <div class="fee-item"><span class="fee-badge" style="background:#b57bff">S5 PED_CROSS</span> Red ON + walk signal ON. Pedestrian actively crossing. Entered from PED_WAIT after timer.</div>
         </div>
       </div>
       <div class="fee-section">
         <div class="fee-label">Events (what triggers transitions)</div>
         <div class="fee-items">
-          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#4fc3f7">pedestrian_btn (bit[0]=1)</span> Pedestrian pressed the crossing button. Valid from IDLE, RED, GREEN.</div>
+          <div class="fee-item"><span class="fee-badge" style="border-color:#4fc3f7">pedestrian_btn (bit[0]=1)</span> Pedestrian pressed the crossing button. Valid from IDLE and RED → goes to PED_WAIT. From GREEN → goes directly to RED (immediate stop, no intermediate wait state).</div>
           <div class="fee-item"><span class="fee-ev-badge" style="border-color:#ffe84d">car_sensor (bit[1]=2)</span> Vehicle detected by loop sensor. Valid from IDLE only — triggers entry to RED.</div>
           <div class="fee-item"><span class="fee-ev-badge" style="border-color:#39ff8f">timer_done (bit[2]=4)</span> External timer expired. Drives all phase transitions: RED→GREEN, GREEN→YELLOW, YELLOW→RED, PED_WAIT→PED_CROSS, PED_CROSS→RED.</div>
           <div class="fee-item"><span class="fee-ev-badge" style="border-color:#ff4f6e">INTERRUPT (emergency)</span> Emergency vehicle override. ROM interrupt_en entry forces FSM → IDLE in 1 cycle.</div>
@@ -1099,7 +1101,7 @@ change_return &lt;= output_action(<span class="num">1</span>) <span class="kw">O
   <div class="section-title">Guided Walkthroughs — from Testbench Cases</div>
   <div class="walkthrough-tabs">
     <button class="wt-tab active" onclick="showWT('traffic','normal')">TB Tests 2–5: Normal Car Cycle</button>
-    <button class="wt-tab" onclick="showWT('traffic','ped-green')">TB Tests 12–15: Ped from GREEN</button>
+    <button class="wt-tab" onclick="showWT('traffic','ped-green')">TB: Ped from GREEN → RED</button>
     <button class="wt-tab" onclick="showWT('traffic','ped-red')">TB Tests 16–19: Ped from RED</button>
   </div>
   <div class="walkthrough-content" id="wt-traffic-normal">
@@ -1113,12 +1115,13 @@ change_return &lt;= output_action(<span class="num">1</span>) <span class="kw">O
     </div>
   </div>
   <div class="walkthrough-content hidden" id="wt-traffic-ped-green">
-    <div class="wt-title">Pedestrian from GREEN: GREEN → PED_WAIT → PED_CROSS → RED (TB Tests 12–15)</div>
+    <div class="wt-title">Pedestrian from GREEN: GREEN → RED → PED_WAIT → PED_CROSS → RED</div>
     <div class="wt-steps">
-      <div class="wt-step"><div class="wt-step-num">1</div><div class="wt-step-body"><strong>Setup:</strong> reset → car_sensor → timer_done → FSM now in GREEN. <code>green_led='1'</code>. T12 passes.</div></div>
-      <div class="wt-step"><div class="wt-step-num">2</div><div class="wt-step-body"><strong>pulse_sig(pedestrian_btn)</strong>: event_code="01" from GREEN → ROM[00_00010_0000000001]: next_state=PED_WAIT(00100). <code>red_led='1', green_led='0'</code>. T13 passes.</div></div>
-      <div class="wt-step"><div class="wt-step-num">3</div><div class="wt-step-body"><strong>pulse_sig(timer_done)</strong> from PED_WAIT → PED_CROSS(00101). <code>red_led='1', ped_signal='1'</code>. Walk signal on! T14 passes.</div></div>
-      <div class="wt-step"><div class="wt-step-num">4</div><div class="wt-step-body"><strong>pulse_sig(timer_done)</strong> from PED_CROSS → RED(00001). <code>ped_signal='0', red_led='1'</code>. Crossing complete. T15 passes.</div></div>
+      <div class="wt-step"><div class="wt-step-num">1</div><div class="wt-step-body"><strong>Setup:</strong> reset → car_sensor → timer_done → FSM now in GREEN. <code>green_led='1'</code>.</div></div>
+      <div class="wt-step"><div class="wt-step-num">2</div><div class="wt-step-body"><strong>pulse_sig(pedestrian_btn)</strong> while GREEN: ROM[00_00010_0000000001]: next_state=<strong>RED</strong>(00001). <code>red_led='1', green_led='0'</code>. Vehicles stop immediately — GREEN → RED direct transition.</div></div>
+      <div class="wt-step"><div class="wt-step-num">3</div><div class="wt-step-body"><strong>pulse_sig(pedestrian_btn)</strong> from RED → PED_WAIT(00100). Pedestrian crossing queued. Red held.</div></div>
+      <div class="wt-step"><div class="wt-step-num">4</div><div class="wt-step-body"><strong>pulse_sig(timer_done)</strong> from PED_WAIT → PED_CROSS(00101). <code>ped_signal='1'</code>. Walk signal ON!</div></div>
+      <div class="wt-step"><div class="wt-step-num">5</div><div class="wt-step-body"><strong>pulse_sig(timer_done)</strong> from PED_CROSS → RED(00001). <code>ped_signal='0'</code>. Crossing complete. Normal cycle resumes.</div></div>
     </div>
   </div>
   <div class="walkthrough-content hidden" id="wt-traffic-ped-red">
@@ -1236,10 +1239,9 @@ change_return &lt;= output_action(<span class="num">1</span>) <span class="kw">O
         <line x1="110" y1="155" x2="270" y2="155" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah2)"/>
         <text x="190" y="148" class="trans-label">timer_done=1</text>
 
-        <!-- GREEN self-loop: timer_done=0 AND ped_btn=0 (stay green) -->
+        <!-- GREEN self-loop: timer_done=0 (stay green while timer running) -->
         <path d="M326,138 Q358,110 358,155 Q358,180 326,172" stroke="#39ff8f" stroke-width="1.2" stroke-dasharray="4,3" fill="none" marker-end="url(#ah2)"/>
         <text x="362" y="152" class="trans-label" style="fill:#39ff8f;font-size:5.5px">tmr=0</text>
-        <text x="362" y="161" class="trans-label" style="fill:#39ff8f;font-size:5.5px">ped=0</text>
 
         <!-- GREEN → YELLOW: timer_done=1 (normal) -->
         <line x1="300" y1="185" x2="300" y2="255" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah2)"/>
@@ -1271,9 +1273,10 @@ change_return &lt;= output_action(<span class="num">1</span>) <span class="kw">O
         <text x="26" y="308" class="trans-label" style="fill:#b57bff;font-weight:700">timer_done=1</text>
         <text x="26" y="318" class="trans-label" style="fill:#b57bff;font-size:5.5px">PED_CROSS→RED</text>
 
-        <!-- GREEN → PED_WAIT: pedestrian_btn=1 (dashed cyan) -->
-        <path d="M283,172 Q220,210 110,272" stroke="#4fc3f7" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#ah2)"/>
-        <text x="202" y="218" class="trans-label" style="fill:#4fc3f7">ped_btn=1</text>
+        <!-- GREEN → RED: pedestrian_btn=1 (orange dashed, direct to RED) -->
+        <path d="M272,162 Q200,155 112,158" stroke="#ff9d3d" stroke-width="2" stroke-dasharray="6,3" fill="none" marker-end="url(#ah2)"/>
+        <text x="185" y="150" class="trans-label" style="fill:#ff9d3d;font-weight:700">ped_btn=1</text>
+        <text x="185" y="159" class="trans-label" style="fill:#ff9d3d;font-size:5.5px">GREEN→RED</text>
 
         <!-- RED → PED_WAIT: pedestrian_btn=1 (dashed cyan, down the left) -->
         <line x1="80" y1="185" x2="80" y2="255" stroke="#4fc3f7" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#ah2)"/>
@@ -1353,7 +1356,7 @@ change_return &lt;= output_action(<span class="num">1</span>) <span class="kw">O
   <div class="embedded-waveform">
     <div class="embedded-waveform-header">📊 Traffic Light FSM — GHDL Simulation Waveform</div>
     <div class="waveform-display" id="wf-embed-traffic" style="min-height:260px;padding:1.1rem;overflow-x:auto"></div>
-    <div class="waveform-explanation"><strong>Reading:</strong> Cycle 2 → <code>event_code=car</code> fires, <code>fsm_busy</code> pulses. Cycle 3 → <code>state_code</code> becomes RED, <code>red_led</code> HIGH. Cycle 7 → <code>timer_done=1</code> → GREEN. Cycle 11 → <code>timer_done=1</code> → YELLOW. Cycle 22 → <code>timer_done=1</code> → <strong>RED</strong> (YELLOW→RED confirmed). Cycle 15 → <code>ped_btn=1</code> while RED → PED_WAIT. Cycle 19 → <code>timer_done=1</code> → PED_CROSS, <code>ped_signal</code> HIGH. Cycle 22 → <code>timer_done=1</code> → <strong>RED</strong> (PED_CROSS→RED confirmed). The <strong>cyan cursor</strong> follows the current simulation step.</div>
+    <div class="waveform-explanation"><strong>Reading:</strong> Cycle 2 → <code>event_code=car</code> fires, <code>fsm_busy</code> HIGH. Cycle 3 → <code>state_code</code>=RED, <code>red_led</code> HIGH. Cycle 7 → <code>timer_done</code> → GREEN. Cycle 11 → <code>timer_done</code> → YELLOW. Cycle 22 → <code>timer_done</code> → <strong>RED</strong> (YELLOW→RED). Cycle 14 → <code>ped_btn</code> while GREEN → <strong>RED directly</strong> (GREEN→RED on pedestrian_btn=1). Cycle 15 → <code>ped_btn</code> from RED → PED_WAIT. Cycle 19 → <code>timer_done</code> → PED_CROSS, <code>ped_signal</code> HIGH. Cycle 22 → <code>timer_done</code> → <strong>RED</strong> (PED_CROSS→RED). Cyan cursor = current simulation step.</div>
     <div class="waveform-legend">
       <span class="wf-leg-item"><span class="wf-dot high"></span>HIGH</span>
       <span class="wf-leg-item"><span class="wf-dot low"></span>LOW</span>
@@ -1793,6 +1796,11 @@ change_return &lt;= output_action(<span class="num">1</span>) <span class="kw">O
         <!-- DOOR_CLOSE → IDLE: closing complete -->
         <path d="M228,375 Q330,375 330,205 Q330,36 228,36" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah4)"/>
         <text x="334" y="200" class="trans-label">auto</text>
+
+        <!-- IDLE → DOOR_OPEN: direct open request (e.g. already at requested floor) -->
+        <path d="M200,64 Q200,140 200,252" stroke="#39ff8f" stroke-width="1.8" stroke-dasharray="6,3" fill="none" marker-end="url(#ah4)"/>
+        <text x="205" y="165" class="trans-label" style="fill:#39ff8f;font-weight:700">open_req</text>
+        <text x="205" y="174" class="trans-label" style="fill:#39ff8f;font-size:5px">(at floor)</text>
 
         <!-- Emergency path: from any motion/door state → EL_emergency -->
         <!-- MOVE_UP → EMERGENCY -->
@@ -2403,6 +2411,481 @@ ghdl -r --std=08 tb_serial        --vcd=serial.vcd</pre></div></div></div>
     <div class="prof-title">🎓 One-Sentence Project Summary</div>
     <p>"We designed a single reusable FSM core in VHDL whose behavior is entirely determined by a ROM lookup table — enabling traffic light, vending machine, elevator, and serial communication controllers to share the same hardware logic, differing only in their ROM configuration data."</p>
   </div>
+</section>
+
+
+<!-- ERROR HANDLING TAB -->
+<section class="tab" id="tab-error-handling">
+  <div class="page-header">
+    <h2>&#9888;&#65039; Error Handling</h2>
+    <p>What can go wrong, why it happens, and exactly how to fix it &mdash; layer by layer</p>
+  </div>
+
+  <div class="eh-intro-block">
+    <p class="eh-intro-text">Error handling means <strong>detecting problems early, reporting them clearly, and recovering safely</strong>. In this project there are four layers that must all work together: the browser front-end, the Flask Python server, the GHDL VHDL simulator, and the VHDL source itself. If any layer fails without a clear message, the whole system looks like it has &ldquo;crashed&rdquo; with no obvious fix.</p>
+    <div class="eh-intro-facts">
+      <div class="eh-fact"><span class="eh-fact-icon" style="color:var(--cyan)">4</span><span>System layers</span></div>
+      <div class="eh-fact"><span class="eh-fact-icon" style="color:var(--yellow)">24</span><span>VHDL improvements</span></div>
+      <div class="eh-fact"><span class="eh-fact-icon" style="color:var(--green)">5</span><span>Files improved</span></div>
+      <div class="eh-fact"><span class="eh-fact-icon" style="color:var(--red)">0</span><span>Silent failures</span></div>
+    </div>
+  </div>
+
+  <div class="section-title">The Four-Layer System</div>
+  <div class="eh-flow">
+    <div class="eh-flow-box" style="border-color:var(--cyan)">
+      <div class="eh-flow-icon">&#127760;</div>
+      <div class="eh-flow-label">Browser</div>
+      <div class="eh-flow-sub">HTML/CSS/JS<br>index.html</div>
+    </div>
+    <div class="eh-flow-arrow">&rarr;</div>
+    <div class="eh-flow-box" style="border-color:var(--purple)">
+      <div class="eh-flow-icon">&#128013;</div>
+      <div class="eh-flow-label">Flask Server</div>
+      <div class="eh-flow-sub">sim_server.py<br>localhost:5000</div>
+    </div>
+    <div class="eh-flow-arrow">&rarr;</div>
+    <div class="eh-flow-box" style="border-color:var(--yellow)">
+      <div class="eh-flow-icon">&#9881;&#65039;</div>
+      <div class="eh-flow-label">GHDL</div>
+      <div class="eh-flow-sub">Compiles &amp;<br>runs VHDL</div>
+    </div>
+    <div class="eh-flow-arrow">&rarr;</div>
+    <div class="eh-flow-box" style="border-color:var(--green)">
+      <div class="eh-flow-icon">&#128200;</div>
+      <div class="eh-flow-label">VCD Parser</div>
+      <div class="eh-flow-sub">Extracts signals<br>&amp; cycles</div>
+    </div>
+    <div class="eh-flow-arrow">&rarr;</div>
+    <div class="eh-flow-box" style="border-color:var(--cyan)">
+      <div class="eh-flow-icon">&#128444;&#65039;</div>
+      <div class="eh-flow-label">Waveform UI</div>
+      <div class="eh-flow-sub">Displays real<br>FSM execution</div>
+    </div>
+  </div>
+  <p style="font-size:.8rem;color:var(--txt-2);text-align:center;margin-top:.5rem">Each arrow is a possible failure point. Every layer has its own checks so nothing fails silently.</p>
+
+  <div class="section-title">Layer 1 &mdash; Setup &amp; Environment Errors</div>
+  <div class="eh-cards">
+
+    <div class="eh-card eh-red">
+      <div class="eh-card-head"><span class="eh-icon">&#10060;</span>GHDL not found on PATH</div>
+      <div class="eh-card-body">
+        <div class="eh-row"><span class="eh-tag eh-tag-prob">Problem</span><span>Running <code>ghdl --version</code> fails or returns &ldquo;command not found&rdquo;.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-cause">Cause</span><span>GHDL is not installed, or installed but not on the system PATH.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-fix">Fix</span><span>Install: <code>sudo apt install ghdl</code> or <code>brew install ghdl</code>. Verify: <code>ghdl --version</code>.</span></div>
+      </div>
+    </div>
+
+    <div class="eh-card eh-red">
+      <div class="eh-card-head"><span class="eh-icon">&#10060;</span>Python / Flask not installed</div>
+      <div class="eh-card-body">
+        <div class="eh-row"><span class="eh-tag eh-tag-prob">Problem</span><span>Running <code>python sim_server.py</code> fails immediately.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-cause">Cause</span><span>Python 3 not installed, or <code>flask</code> / <code>flask-cors</code> packages missing.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-fix">Fix</span><span><code>pip install flask flask-cors</code> then re-run the server.</span></div>
+      </div>
+    </div>
+
+    <div class="eh-card eh-yellow">
+      <div class="eh-card-head"><span class="eh-icon">&#9888;&#65039;</span>Backend server not running</div>
+      <div class="eh-card-body">
+        <div class="eh-row"><span class="eh-tag eh-tag-prob">Problem</span><span>RUN VHDL shows &#128308; Offline badge or network error in console.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-cause">Cause</span><span><code>sim_server.py</code> was never started or was closed.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-fix">Fix</span><span>In a terminal inside <code>configurable_fsm/</code> run: <code>python sim_server.py</code>. Keep that terminal open.</span></div>
+      </div>
+    </div>
+
+    <div class="eh-card eh-yellow">
+      <div class="eh-card-head"><span class="eh-icon">&#9888;&#65039;</span>Opened via file:// instead of localhost</div>
+      <div class="eh-card-body">
+        <div class="eh-row"><span class="eh-tag eh-tag-prob">Problem</span><span>RUN VHDL causes a page reload or the browser blocks the request entirely.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-cause">Cause</span><span>Some browsers block <code>fetch()</code> to localhost when the page is loaded as <code>file://</code> due to CORS policy.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-fix">Fix</span><span>Serve locally: <code>python -m http.server 8080</code> then open <code>http://localhost:8080</code>.</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-title">Layer 2 &mdash; VHDL Compilation &amp; Simulation Errors</div>
+  <div class="eh-cards">
+
+    <div class="eh-card eh-red">
+      <div class="eh-card-head"><span class="eh-icon">&#10060;</span>Missing VHDL source files</div>
+      <div class="eh-card-body">
+        <div class="eh-row"><span class="eh-tag eh-tag-prob">Problem</span><span>GHDL analyze step fails: &ldquo;cannot open&rdquo; or &ldquo;file not found&rdquo;.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-cause">Cause</span><span>One or more <code>.vhd</code> source files are missing from <code>src/</code>.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-fix">Fix</span><span>Check all six files exist: <code>generic_fsm.vhd</code>, <code>config_rom.vhd</code>, and all four wrappers in <code>configurable_fsm/src/</code>.</span></div>
+      </div>
+    </div>
+
+    <div class="eh-card eh-red">
+      <div class="eh-card-head"><span class="eh-icon">&#10060;</span>VHDL compilation errors</div>
+      <div class="eh-card-body">
+        <div class="eh-row"><span class="eh-tag eh-tag-prob">Problem</span><span>GHDL <code>-a</code> step fails with syntax or type errors in the console.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-cause">Cause</span><span>VHDL syntax mistake, wrong standard version, or signal type mismatch.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-fix">Fix</span><span>The error includes file name and line number. Fix the VHDL. Always use <code>ghdl -a --std=08 file.vhd</code>.</span></div>
+      </div>
+    </div>
+
+    <div class="eh-card eh-yellow">
+      <div class="eh-card-head"><span class="eh-icon">&#9888;&#65039;</span>Missing testbench file</div>
+      <div class="eh-card-body">
+        <div class="eh-row"><span class="eh-tag eh-tag-prob">Problem</span><span>Server reports &ldquo;Testbench not found&rdquo; for the selected FSM.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-cause">Cause</span><span>The <code>tb/</code> directory is missing the required testbench, e.g. <code>tb_traffic_light.vhd</code>.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-fix">Fix</span><span>Ensure all five testbenches are in <code>configurable_fsm/tb/</code>. Check filename matches exactly.</span></div>
+      </div>
+    </div>
+
+    <div class="eh-card eh-yellow">
+      <div class="eh-card-head"><span class="eh-icon">&#9888;&#65039;</span>VCD file not generated</div>
+      <div class="eh-card-body">
+        <div class="eh-row"><span class="eh-tag eh-tag-prob">Problem</span><span>Console shows &ldquo;Simulation ran but no VCD was produced&rdquo;.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-cause">Cause</span><span>GHDL simulation ended with a fatal assertion, or <code>vcd_out/</code> has permission issues.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-fix">Fix</span><span>Check GHDL output for assertion messages. Verify write permission on <code>configurable_fsm/vcd_out/</code>.</span></div>
+      </div>
+    </div>
+
+    <div class="eh-card eh-green">
+      <div class="eh-card-head"><span class="eh-icon">&#10003;</span>Simulation finishes but shows FAIL lines</div>
+      <div class="eh-card-body">
+        <div class="eh-row"><span class="eh-tag eh-tag-prob">Problem</span><span>Console shows <code>FAIL:</code> lines but VCD is still produced.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-cause">Cause</span><span>Testbench <code>ASSERT</code> statements detected unexpected FSM output. Normal during development.</span></div>
+        <div class="eh-row"><span class="eh-tag eh-tag-fix">Fix</span><span>The FAIL message tells you which test failed and what was expected vs received. Debug the ROM entry for that transition.</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-title">Layer 3 &mdash; VHDL Hardware Error Guards</div>
+  <p style="color:var(--txt-2);font-size:.85rem;margin-bottom:1.25rem;line-height:1.7">The improved VHDL files add hardware-level guards that detect bad conditions and assert observable error signals visible in the VCD waveform.</p>
+
+  <div class="eh-vhdl-grid">
+
+    <div class="eh-vhdl-card">
+      <div class="eh-vhdl-header" style="border-color:var(--cyan)">
+        <span class="eh-vhdl-file">generic_fsm_improved.vhd</span>
+        <span class="eh-vhdl-port">&#8594; <code>fsm_error</code> OUT port</span>
+      </div>
+      <div class="eh-vhdl-items">
+        <div class="eh-vhdl-item">
+          <span class="eh-vhdl-tag" style="background:rgba(220,38,38,0.15);color:var(--red)">ROM Miss</span>
+          <span>If (state, event) returns all-zero ROM word, state forced to IDLE and <code>fsm_error</code> pulses HIGH. Was previously a silent reset.</span>
+        </div>
+        <div class="eh-vhdl-item">
+          <span class="eh-vhdl-tag" style="background:rgba(220,38,38,0.15);color:var(--red)">Reserved Bits</span>
+          <span>ROM bits [31:29] and [7:4] must be zero. Non-zero rejects the entry, forces IDLE, pulses <code>fsm_error</code>. Catches corrupted ROM.</span>
+        </div>
+        <div class="eh-vhdl-item">
+          <span class="eh-vhdl-tag" style="background:rgba(220,38,38,0.15);color:var(--red)">Invalid State</span>
+          <span>Next-state field must be &le; 15. Values 16&ndash;31 force IDLE instead of entering undefined territory.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="eh-vhdl-card">
+      <div class="eh-vhdl-header" style="border-color:var(--green)">
+        <span class="eh-vhdl-file">elevator_wrapper_improved.vhd</span>
+        <span class="eh-vhdl-port">&#8594; Safety interlocks</span>
+      </div>
+      <div class="eh-vhdl-items">
+        <div class="eh-vhdl-item">
+          <span class="eh-vhdl-tag" style="background:rgba(5,150,105,0.15);color:var(--green)">Motor Interlock</span>
+          <span><code>motor_up</code> and <code>motor_down</code> can never both be HIGH simultaneously. Combinatorial AND-NOT gate enforced in silicon regardless of ROM.</span>
+        </div>
+        <div class="eh-vhdl-item">
+          <span class="eh-vhdl-tag" style="background:rgba(5,150,105,0.15);color:var(--green)">Door Timeout</span>
+          <span>Saturating counter. Stuck <code>door_sensor</code> HIGH for 500,000 cycles (5 ms at 100 MHz) forces a synthetic close event.</span>
+        </div>
+        <div class="eh-vhdl-item">
+          <span class="eh-vhdl-tag" style="background:rgba(5,150,105,0.15);color:var(--green)">Floor Latch</span>
+          <span>New floor request only accepted in IDLE. Mid-journey re-targeting blocked to prevent stopping between floors.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="eh-vhdl-card">
+      <div class="eh-vhdl-header" style="border-color:var(--yellow)">
+        <span class="eh-vhdl-file">vending_wrapper_improved.vhd</span>
+        <span class="eh-vhdl-port">&#8594; Race &amp; timeout fixes</span>
+      </div>
+      <div class="eh-vhdl-items">
+        <div class="eh-vhdl-item">
+          <span class="eh-vhdl-tag" style="background:rgba(217,119,6,0.15);color:var(--yellow)">Edge Detect</span>
+          <span>Rising-edge detection on <code>coin_insert</code> prevents double-counting when coin stays HIGH across the pipeline busy cycle.</span>
+        </div>
+        <div class="eh-vhdl-item">
+          <span class="eh-vhdl-tag" style="background:rgba(217,119,6,0.15);color:var(--yellow)">Idle Timeout</span>
+          <span>5-second inactivity counter in COLLECT. On expiry the cancel interrupt fires &mdash; coins refunded, machine unblocked automatically.</span>
+        </div>
+        <div class="eh-vhdl-item">
+          <span class="eh-vhdl-tag" style="background:rgba(217,119,6,0.15);color:var(--yellow)">Wider Refund</span>
+          <span>Interrupt change-return now covers COLLECT, SELECT, and DISPENSE &mdash; not COLLECT only. Cancel from any active state always refunds.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="eh-vhdl-card">
+      <div class="eh-vhdl-header" style="border-color:var(--purple)">
+        <span class="eh-vhdl-file">traffic_light_wrapper_improved.vhd</span>
+        <span class="eh-vhdl-port">&#8594; <code>input_conflict</code>, <code>fault_err</code></span>
+      </div>
+      <div class="eh-vhdl-items">
+        <div class="eh-vhdl-item">
+          <span class="eh-vhdl-tag" style="background:rgba(181,123,255,0.15);color:var(--purple)">Input Conflict</span>
+          <span>Simultaneous <code>pedestrian_btn</code> + <code>car_sensor</code> + <code>timer_done</code> asserts <code>input_conflict</code> &mdash; indicates wiring fault or bounce.</span>
+        </div>
+        <div class="eh-vhdl-item">
+          <span class="eh-vhdl-tag" style="background:rgba(181,123,255,0.15);color:var(--purple)">Fault Detect</span>
+          <span><code>timer_done</code> arriving while FSM is in IDLE means timer was never stopped. <code>fault_err</code> asserts for 10 ms to flag the hardware fault.</span>
+        </div>
+        <div class="eh-vhdl-item">
+          <span class="eh-vhdl-tag" style="background:rgba(181,123,255,0.15);color:var(--purple)">Interrupt Live</span>
+          <span>Pedestrian button now wired as <code>interrupt_event</code>. Was previously <code>(OTHERS =&gt; '0')</code> &mdash; interrupt mechanism was completely disabled.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="eh-vhdl-card">
+      <div class="eh-vhdl-header" style="border-color:var(--blue)">
+        <span class="eh-vhdl-file">serial_wrapper_improved.vhd</span>
+        <span class="eh-vhdl-port">&#8594; <code>frame_err</code>, <code>tx_data_valid</code></span>
+      </div>
+      <div class="eh-vhdl-items">
+        <div class="eh-vhdl-item">
+          <span class="eh-vhdl-tag" style="background:rgba(79,195,247,0.15);color:var(--blue)">Reset Guard</span>
+          <span>System reset during transfer no longer triggers false <code>parity_err</code>. Reset is now checked in the detection condition.</span>
+        </div>
+        <div class="eh-vhdl-item">
+          <span class="eh-vhdl-tag" style="background:rgba(79,195,247,0.15);color:var(--blue)">Frame Error</span>
+          <span><code>tx_ready</code> rising while FSM is not at IDLE or COMPLETE means transmitter out of sync &mdash; <code>frame_err</code> flags it.</span>
+        </div>
+        <div class="eh-vhdl-item">
+          <span class="eh-vhdl-tag" style="background:rgba(79,195,247,0.15);color:var(--blue)">Idle Pattern</span>
+          <span><code>tx_data</code> drives <code>0xFF</code> when idle. An idle bus is now clearly distinguishable from a valid null byte.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-title">Complete Improvements Summary</div>
+  <div class="port-table-wrap">
+    <table class="port-table">
+      <thead><tr><th>File</th><th>Improvement</th><th>Type</th><th>New Port</th></tr></thead>
+      <tbody>
+        <tr><td><code>generic_fsm</code></td><td>ROM miss detection</td><td><span class="eh-type eh-type-err">Error detect</span></td><td><code>fsm_error</code></td></tr>
+        <tr><td><code>generic_fsm</code></td><td>Reserved bits check</td><td><span class="eh-type eh-type-err">Error detect</span></td><td>&mdash;</td></tr>
+        <tr><td><code>generic_fsm</code></td><td>Invalid next-state guard</td><td><span class="eh-type eh-type-err">Error detect</span></td><td>&mdash;</td></tr>
+        <tr><td><code>elevator_wrapper</code></td><td>Motor mutual-exclusion interlock</td><td><span class="eh-type eh-type-safe">Safety</span></td><td>&mdash;</td></tr>
+        <tr><td><code>elevator_wrapper</code></td><td>Weight sensor motor cut</td><td><span class="eh-type eh-type-safe">Safety</span></td><td>&mdash;</td></tr>
+        <tr><td><code>elevator_wrapper</code></td><td>Door-open timeout counter</td><td><span class="eh-type eh-type-rec">Recovery</span></td><td>&mdash;</td></tr>
+        <tr><td><code>elevator_wrapper</code></td><td>Emergency light hold</td><td><span class="eh-type eh-type-rel">Reliability</span></td><td>&mdash;</td></tr>
+        <tr><td><code>elevator_wrapper</code></td><td>Floor latch guard</td><td><span class="eh-type eh-type-race">Race fix</span></td><td>&mdash;</td></tr>
+        <tr><td><code>vending_wrapper</code></td><td>Rising-edge detect on coin</td><td><span class="eh-type eh-type-race">Race fix</span></td><td>&mdash;</td></tr>
+        <tr><td><code>vending_wrapper</code></td><td>Collect-state idle timeout</td><td><span class="eh-type eh-type-rec">Recovery</span></td><td>&mdash;</td></tr>
+        <tr><td><code>vending_wrapper</code></td><td>Out-of-stock display override</td><td><span class="eh-type eh-type-ux">UX</span></td><td>&mdash;</td></tr>
+        <tr><td><code>vending_wrapper</code></td><td>Wider interrupt change coverage</td><td><span class="eh-type eh-type-log">Logic</span></td><td>&mdash;</td></tr>
+        <tr><td><code>traffic_wrapper</code></td><td>Interrupt event enabled</td><td><span class="eh-type eh-type-log">Logic</span></td><td>&mdash;</td></tr>
+        <tr><td><code>traffic_wrapper</code></td><td>Input conflict detection</td><td><span class="eh-type eh-type-err">Error detect</span></td><td><code>input_conflict</code></td></tr>
+        <tr><td><code>traffic_wrapper</code></td><td>Fault on unexpected timer</td><td><span class="eh-type eh-type-err">Error detect</span></td><td><code>fault_err</code></td></tr>
+        <tr><td><code>serial_wrapper</code></td><td>Reset gate on parity_err</td><td><span class="eh-type eh-type-log">Logic</span></td><td>&mdash;</td></tr>
+        <tr><td><code>serial_wrapper</code></td><td>Frame error detection</td><td><span class="eh-type eh-type-err">Error detect</span></td><td><code>frame_err</code></td></tr>
+        <tr><td><code>serial_wrapper</code></td><td>0xFF idle bus pattern</td><td><span class="eh-type eh-type-ux">UX</span></td><td>&mdash;</td></tr>
+        <tr><td><code>serial_wrapper</code></td><td>tx_data_valid qualifier</td><td><span class="eh-type eh-type-log">Logic</span></td><td><code>tx_data_valid</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prof-box" style="margin-top:1.5rem">
+    <div class="prof-title">&#127979; Viva Summary &mdash; Error Handling</div>
+    <p>&ldquo;Error handling works at three levels: the frontend shows clear messages when the backend is unreachable; the Flask server validates each step of the GHDL pipeline and returns structured JSON errors; and the improved VHDL files add hardware guards &mdash; ROM miss detection, motor interlocks, timeout counters, and frame error signals &mdash; so that no fault is silent.&rdquo;</p>
+  </div>
+
+</section>
+
+<!-- UI DEVELOPMENT TAB -->
+<section class="tab" id="tab-ui-development">
+  <div class="page-header">
+    <h2>&#128421;&#65039; UI Development</h2>
+    <p>How the website was built &mdash; HTML structure, CSS styling, and JavaScript interactivity</p>
+  </div>
+
+  <div class="uid-intro">
+    <p class="uid-intro-text">This website is not a static set of slides. It is a <strong>fully interactive educational FSM simulator</strong> built from scratch using plain HTML, CSS, and JavaScript &mdash; no frameworks, no build tools. Every tab, animation, waveform, and state diagram was written by hand to match the real VHDL hardware behaviour.</p>
+  </div>
+
+  <div class="section-title">The Three Building Blocks</div>
+  <div class="uid-tech-flow">
+    <div class="uid-tech-box" style="border-color:var(--orange)">
+      <div class="uid-tech-icon">&#128196;</div>
+      <div class="uid-tech-name">HTML</div>
+      <div class="uid-tech-role">Structure</div>
+    </div>
+    <div class="uid-tech-arrow">+</div>
+    <div class="uid-tech-box" style="border-color:var(--cyan)">
+      <div class="uid-tech-icon">&#127912;</div>
+      <div class="uid-tech-name">CSS</div>
+      <div class="uid-tech-role">Appearance</div>
+    </div>
+    <div class="uid-tech-arrow">+</div>
+    <div class="uid-tech-box" style="border-color:var(--yellow)">
+      <div class="uid-tech-icon">&#9889;</div>
+      <div class="uid-tech-name">JavaScript</div>
+      <div class="uid-tech-role">Behaviour</div>
+    </div>
+    <div class="uid-tech-arrow">=</div>
+    <div class="uid-tech-box" style="border-color:var(--green);background:rgba(57,255,143,0.06)">
+      <div class="uid-tech-icon">&#127891;</div>
+      <div class="uid-tech-name">Interactive</div>
+      <div class="uid-tech-role">FSM Simulator</div>
+    </div>
+  </div>
+
+  <div class="section-title">HTML &mdash; Page Structure</div>
+  <div class="uid-detail-block uid-html">
+    <div class="uid-detail-label">&#128196; index.html &mdash; ~2,400 lines</div>
+    <div class="uid-detail-grid">
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">Tab System</div>
+        <p>Each tab is a <code>&lt;section class="tab"&gt;</code> element. Only the section with <code>class="tab active"</code> is visible. Clicking a nav button adds/removes the <code>active</code> class via JavaScript.</p>
+      </div>
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">SVG State Diagrams</div>
+        <p>Every FSM state diagram is a hand-coded inline SVG with <code>&lt;circle&gt;</code>, <code>&lt;path&gt;</code>, and <code>&lt;text&gt;</code> elements. <code>data-state</code> attributes let JavaScript highlight the active state circle.</p>
+      </div>
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">Live Demo Panels</div>
+        <p>The intersection, vending machine, elevator, and serial panels are HTML <code>&lt;div&gt;</code> elements. JavaScript updates their classes and inline styles at each animation step.</p>
+      </div>
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">Educational Content</div>
+        <p>Every tab contains state descriptions, event tables, ROM lookup examples, VHDL snippets, guided walkthroughs, and Q&amp;A sections &mdash; all in plain HTML.</p>
+      </div>
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">Waveform Containers</div>
+        <p>Waveform panels are empty <code>&lt;div id="wf-embed-*"&gt;</code> elements. JavaScript builds waveform content dynamically each time the animation step changes the cycle cursor.</p>
+      </div>
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">Simulation Panel</div>
+        <p>The RUN VHDL panel, console, cycle inspector, and live waveform are all in HTML. JavaScript wires the buttons to the Flask backend using <code>fetch()</code> and SSE event streams.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">CSS &mdash; Visual Design</div>
+  <div class="uid-detail-block uid-css">
+    <div class="uid-detail-label">&#127912; style.css &mdash; ~1,900 lines</div>
+    <div class="uid-detail-grid">
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">Design System</div>
+        <p>All colours, spacing, and fonts are stored as <strong>CSS custom properties</strong> in <code>:root</code>. Changing <code>--cyan</code> once updates every button, border, and glow across the whole site.</p>
+        <div class="uid-var-row">
+          <span class="uid-swatch" style="background:#060810;border:1px solid #2a3560"></span><code>--bg</code>
+          <span class="uid-swatch" style="background:#00f5ff"></span><code>--cyan</code>
+          <span class="uid-swatch" style="background:#39ff8f"></span><code>--green</code>
+          <span class="uid-swatch" style="background:#ffe84d"></span><code>--yellow</code>
+          <span class="uid-swatch" style="background:#ff4f6e"></span><code>--red</code>
+          <span class="uid-swatch" style="background:#b57bff"></span><code>--purple</code>
+        </div>
+      </div>
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">Dark Neon Theme</div>
+        <p>Background is near-black (<code>#060810</code>). Text is <code>#eef2ff</code>. Accent colours are vivid. <code>drop-shadow</code> and <code>box-shadow</code> create the neon glow effect on state circles and buttons.</p>
+      </div>
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">Responsive Layout</div>
+        <p>CSS Grid and Flexbox are used throughout. All card grids automatically reflow on narrower screens using <code>@media</code> queries and <code>grid-template-columns: repeat(auto-fit, minmax(...))</code>.</p>
+      </div>
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">Waveform Rendering</div>
+        <p>Waveform signals are rows of absolutely-positioned <code>&lt;div&gt;</code> elements. HIGH uses green top-border, LOW uses grey, BUS uses cyan borders, clock uses purple. The cursor is a thin div with cyan glow.</p>
+      </div>
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">Animations</div>
+        <p><code>@keyframes</code> power the state-circle pulse glow, traffic light car movement, elevator shaft travel, serial dot blink, and emergency flash. CSS <code>transition</code> smooths hover states.</p>
+      </div>
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">No External Library</div>
+        <p>Every visual element was written from scratch. No Bootstrap, Tailwind, or component library. Keeps the file small (~90 KB unminified) and fully controllable.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">JavaScript &mdash; Interactivity &amp; Backend</div>
+  <div class="uid-detail-block uid-js">
+    <div class="uid-detail-label">&#9889; script.js &mdash; ~1,360 lines</div>
+    <div class="uid-detail-grid">
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">Tab Navigation</div>
+        <p><code>switchTab(tabId)</code> removes <code>active</code> from every <code>.tab</code> and <code>.nav-btn</code>, then adds it to the target. Wired to all nav buttons at page load. No page reload &mdash; single-page app.</p>
+      </div>
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">FSM Animation Engine</div>
+        <p><code>FSM_SEQUENCES</code> holds every FSM step: state index, event label, description, outputs, scene data. <code>_renderStep(fsm)</code> reads the current step and updates the SVG, state bar, demo panel, and waveform cursor simultaneously.</p>
+      </div>
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">State Diagram Highlight</div>
+        <p><code>_svgHighlight(fsm, idx)</code> applies a coloured stroke and drop-shadow glow to the active state circle, plus a CSS <code>state-pulse</code> keyframe animation that makes it breathe.</p>
+      </div>
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">Waveform Renderer</div>
+        <p><code>renderWaveformInContainer()</code> reads <code>WAVEFORM_DATA</code> and builds the waveform DOM: one row per signal, one segment per cycle. Signal-change marks appear where bit values differ. The legend is appended automatically.</p>
+      </div>
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">Backend Communication</div>
+        <p>RUN VHDL uses plain <code>fetch().then().catch()</code> &mdash; no <code>async/await</code>, no <code>AbortController</code>. SSE (<code>EventSource</code>) streams GHDL logs live. Results load with a second fetch and populate the cycle inspector and waveform.</p>
+      </div>
+      <div class="uid-detail-card">
+        <div class="uid-dc-title">Static vs Live Data</div>
+        <p>Every FSM tab has static demo data (<code>WAVEFORM_DATA</code>, <code>FSM_SEQUENCES</code>) working without any backend. Real GHDL data populates <code>_sim.cycles</code> when the backend runs, replacing the demo with actual hardware execution.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Key Design Decisions</div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">&#127775;</div>
+      <h3>Educational First</h3>
+      <p>Every design choice prioritised clarity. State names, ROM addresses, and pipeline stages are shown explicitly so a student watching the animation understands <em>why</em> the FSM is in that state, not just <em>that</em> it is.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128274;</div>
+      <h3>No Page Reloads</h3>
+      <p>RUN VHDL is <code>type="button"</code> with a pure-JS click listener. All network calls use plain <code>fetch().then().catch()</code>. No <code>async/await</code> in the click path, no <code>AbortController</code>, no form submissions.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128260;</div>
+      <h3>Always Works Offline</h3>
+      <p>The frontend is fully functional without the Flask backend. All FSM animations, waveforms, and educational content work from static data. The backend only adds the real GHDL execution layer on top.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128230;</div>
+      <h3>No Build Step</h3>
+      <p>Three files: <code>index.html</code>, <code>style.css</code>, <code>script.js</code>. Open in a browser and it works. No npm, no webpack, no transpilation. Easy to submit and demonstrate on any machine.</p>
+    </div>
+  </div>
+
+  <div class="section-title">Project File Overview</div>
+  <div class="port-table-wrap">
+    <table class="port-table">
+      <thead><tr><th>File</th><th>Size</th><th>Purpose</th><th>Key Contents</th></tr></thead>
+      <tbody>
+        <tr><td><code>index.html</code></td><td>~2,400 lines</td><td>All page content</td><td>12 tabs, 4 FSM diagrams (SVG), 4 live demo panels, all educational text</td></tr>
+        <tr><td><code>style.css</code></td><td>~1,900 lines</td><td>All visual styling</td><td>CSS variables, dark theme, card layouts, waveform styles, animations, responsive breakpoints</td></tr>
+        <tr><td><code>script.js</code></td><td>~1,360 lines</td><td>All behaviour</td><td>Tab switching, FSM animations, waveform rendering, SVG highlight, backend API calls, cycle inspector</td></tr>
+        <tr><td><code>sim_server.py</code></td><td>~400 lines</td><td>Backend bridge</td><td>Flask REST API, GHDL subprocess runner, VCD parser, SSE log streaming</td></tr>
+        <tr><td><code>src/*.vhd</code></td><td>6 files</td><td>VHDL design</td><td>generic_fsm, config_rom, 4 application wrappers (improved versions add error guards)</td></tr>
+        <tr><td><code>tb/*.vhd</code></td><td>5 files</td><td>VHDL testbenches</td><td>tb_fsm, tb_traffic_light, tb_vending, tb_elevator, tb_serial</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prof-box" style="margin-top:1.5rem">
+    <div class="prof-title">&#127979; Viva Summary &mdash; UI Development</div>
+    <p>&ldquo;The website is a single-page application built with HTML, CSS, and plain JavaScript &mdash; no frameworks. HTML defines the tab sections and inline SVG diagrams. CSS uses custom properties for the dark neon theme and CSS Grid for responsive layouts. JavaScript handles tab switching, FSM step animations, waveform rendering, and communication with the Flask backend via fetch and SSE. The system works fully offline with static data and adds real GHDL execution when the backend is running.&rdquo;</p>
+  </div>
+
 </section>
 
 </main>
