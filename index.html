@@ -1,0 +1,2425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Configurable FSM-Based Digital Controller · BCS-307</title>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header>
+  <div class="header-inner">
+    <div class="logo-block">
+      <div class="logo-chip">FSM</div>
+      <div>
+        <div class="logo-title">Configurable FSM Controller</div>
+        <div class="logo-sub">BCS-307 · Digital Systems Project</div>
+      </div>
+    </div>
+    <nav id="main-nav">
+      <button class="nav-btn active"  data-tab="home">Home</button>
+      <button class="nav-btn" data-tab="generic-fsm">Generic FSM</button>
+      <button class="nav-btn" data-tab="wrapper">🔌 Wrapper</button>
+      <button class="nav-btn" data-tab="config-rom">Config ROM</button>
+      <button class="nav-btn" data-tab="traffic">🚦 Traffic Light</button>
+      <button class="nav-btn" data-tab="vending">🥤 Vending Machine</button>
+      <button class="nav-btn" data-tab="elevator">🛗 Elevator</button>
+      <button class="nav-btn" data-tab="serial">📡 Serial Comm</button>
+      <button class="nav-btn" data-tab="simulation">Simulation</button>
+      <button class="nav-btn" data-tab="waveform">Waveform Viewer</button>
+    </nav>
+    <button class="hamburger" id="hamburger">☰</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ═══════════ HOME ═══════════ -->
+<section class="tab active" id="tab-home">
+  <div class="hero">
+    <div class="hero-text">
+      <span class="badge">Digital Systems · VHDL · GHDL · BCS-307</span>
+      <h1>One Core.<br>Every Controller.</h1>
+      <p class="hero-lead">A table-driven, generic FSM engine written in VHDL that becomes a traffic light, vending machine, elevator, or serial protocol controller — just by swapping a ROM configuration table. No rewriting. No copy-pasting. Pure modularity.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="switchTab('generic-fsm')">Explore the FSM Core →</button>
+        <button class="btn-ghost"   onclick="switchTab('simulation')">Run Simulations</button>
+      </div>
+    </div>
+    <div class="hero-arch">
+      <svg viewBox="0 0 460 300" xmlns="http://www.w3.org/2000/svg" class="arch-svg">
+        <defs>
+          <marker id="ah" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto">
+            <polygon points="0 0,8 3,0 6" fill="#2a3560"/>
+          </marker>
+        </defs>
+        <rect x="8"  y="78"  width="92" height="144" rx="8" fill="rgba(25,35,70,0.8)"  stroke="#2e3d65" stroke-width="1.5"/>
+        <text x="54" y="102" fill="#eef2ff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">INPUTS</text>
+        <text x="54" y="120" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">pedestrian_btn</text>
+        <text x="54" y="134" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">car_sensor</text>
+        <text x="54" y="148" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">coin_insert</text>
+        <text x="54" y="162" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">floor_request</text>
+        <text x="54" y="176" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">rx_valid</text>
+        <line x1="100" y1="150" x2="118" y2="150" stroke="#2a3560" stroke-width="1.5" marker-end="url(#ah)"/>
+        <rect x="120" y="90" width="80" height="120" rx="8" fill="rgba(20,40,80,0.8)" stroke="#4fc3f7" stroke-width="1.5"/>
+        <text x="160" y="114" fill="#eef2ff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">WRAPPER</text>
+        <text x="160" y="132" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">Input Encoder</text>
+        <text x="160" y="148" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">Output Decoder</text>
+        <text x="160" y="164" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">config_id</text>
+        <line x1="200" y1="150" x2="218" y2="150" stroke="#2a3560" stroke-width="1.5" marker-end="url(#ah)"/>
+        <rect x="226" y="58"  width="82" height="58" rx="8" fill="rgba(50,20,80,0.8)"  stroke="#b57bff" stroke-width="1.5"/>
+        <text x="267" y="82"  fill="#eef2ff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">CONFIG</text>
+        <text x="267" y="98"  fill="#eef2ff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">ROM</text>
+        <line x1="267" y1="116" x2="267" y2="148" stroke="#2a3560" stroke-width="1.5" marker-end="url(#ah)"/>
+        <rect x="226" y="150" width="82" height="82" rx="8" fill="rgba(0,40,50,0.8)"   stroke="#00f5ff" stroke-width="2"/>
+        <text x="267" y="177" fill="#eef2ff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">GENERIC</text>
+        <text x="267" y="193" fill="#eef2ff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">FSM CORE</text>
+        <line x1="308" y1="191" x2="326" y2="191" stroke="#2a3560" stroke-width="1.5" marker-end="url(#ah)"/>
+        <rect x="328" y="88"  width="118" height="216" rx="8" fill="rgba(10,50,30,0.8)" stroke="#39ff8f" stroke-width="1.5"/>
+        <text x="387" y="112" fill="#eef2ff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">OUTPUTS</text>
+        <text x="387" y="130" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">red/green/yellow_led</text>
+        <text x="387" y="146" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">dispense_motor</text>
+        <text x="387" y="162" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">motor_up/down</text>
+        <text x="387" y="178" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">tx_enable</text>
+        <text x="387" y="194" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">alarm_buzzer</text>
+        <text x="387" y="210" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">output_action[15:0]</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ── Understanding the Architecture (with visuals) ── -->
+  <div class="section-title">Understanding the Architecture</div>
+
+  <!-- Animated pipeline visual -->
+  <div class="arch-explain-block">
+    <div class="arch-explain-text">
+      <p class="arch-lead">The project replaces four separate, hard-coded VHDL state machines with <strong>one reusable FSM engine</strong> — the <code>generic_fsm.vhd</code>. Behavior is stored not in logic gates but in a look-up table (ROM). Swap the ROM data and the same chip becomes a different controller.</p>
+      <p style="margin-top:.75rem;color:var(--txt-2);font-size:.875rem;">Think of it like a CPU: the processor core stays the same; only the program (data in memory) changes what it does. Here, the FSM core stays the same; only the ROM table changes what it controls.</p>
+    </div>
+    <!-- Mini animated ROM pipeline diagram -->
+    <div class="arch-pipeline-visual">
+      <svg viewBox="0 0 520 130" xmlns="http://www.w3.org/2000/svg" class="pipeline-svg" id="arch-pipeline-svg">
+        <defs>
+          <marker id="pah" markerWidth="7" markerHeight="5" refX="5" refY="2.5" orient="auto">
+            <polygon points="0 0,7 2.5,0 5" fill="#00f5ff"/>
+          </marker>
+        </defs>
+        <!-- Blocks -->
+        <rect x="4"   y="35" width="88" height="60" rx="8" fill="#0b1428" stroke="#2a3560" stroke-width="1.5"/>
+        <text x="48"  y="58" fill="#6b7aaa" font-family="Space Mono" font-size="7.5" text-anchor="middle">WRAPPER</text>
+        <text x="48"  y="74" fill="#4fc3f7" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">event_code</text>
+        <text x="48"  y="88" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">10-bit bitmask</text>
+        <!-- arrow 1 -->
+        <line x1="92" y1="65" x2="116" y2="65" stroke="#00f5ff" stroke-width="2" marker-end="url(#pah)"/>
+        <!-- S1 box -->
+        <rect x="118" y="35" width="88" height="60" rx="8" fill="#0a1830" stroke="#2a3560" stroke-width="1.5"/>
+        <text x="162" y="52" fill="#6b7aaa" font-family="Space Mono" font-size="7" text-anchor="middle">Stage 1</text>
+        <text x="162" y="66" fill="#eef2ff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">Event</text>
+        <text x="162" y="80" fill="#eef2ff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">Capture</text>
+        <text x="162" y="92" fill="#3d4d70" font-family="Space Mono" font-size="6" text-anchor="middle">fsm_busy→1</text>
+        <!-- arrow 2 -->
+        <line x1="206" y1="65" x2="230" y2="65" stroke="#00f5ff" stroke-width="2" marker-end="url(#pah)"/>
+        <!-- S2 box -->
+        <rect x="232" y="35" width="88" height="60" rx="8" fill="#0a1830" stroke="#2a3560" stroke-width="1.5"/>
+        <text x="276" y="52" fill="#6b7aaa" font-family="Space Mono" font-size="7" text-anchor="middle">Stage 2</text>
+        <text x="276" y="66" fill="#eef2ff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">ROM</text>
+        <text x="276" y="80" fill="#eef2ff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">Lookup</text>
+        <text x="276" y="92" fill="#b57bff" font-family="Space Mono" font-size="6" text-anchor="middle">config_data_p2</text>
+        <!-- ROM feed arrow down from top -->
+        <line x1="276" y1="0" x2="276" y2="33" stroke="#b57bff" stroke-width="1.5" marker-end="url(#pah)" stroke-dasharray="4,3"/>
+        <text x="276" y="12" fill="#b57bff" font-family="Space Mono" font-size="7" text-anchor="middle">CONFIG ROM</text>
+        <!-- arrow 3 -->
+        <line x1="320" y1="65" x2="344" y2="65" stroke="#00f5ff" stroke-width="2" marker-end="url(#pah)"/>
+        <!-- S3 box -->
+        <rect x="346" y="35" width="88" height="60" rx="8" fill="#0a1830" stroke="#2a3560" stroke-width="1.5"/>
+        <text x="390" y="52" fill="#6b7aaa" font-family="Space Mono" font-size="7" text-anchor="middle">Stage 3</text>
+        <text x="390" y="66" fill="#eef2ff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">State</text>
+        <text x="390" y="80" fill="#eef2ff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">Update</text>
+        <text x="390" y="92" fill="#39ff8f" font-family="Space Mono" font-size="6" text-anchor="middle">next_state[28:24]</text>
+        <!-- arrow 4 -->
+        <line x1="434" y1="65" x2="458" y2="65" stroke="#00f5ff" stroke-width="2" marker-end="url(#pah)"/>
+        <!-- Output box -->
+        <rect x="460" y="35" width="56" height="60" rx="8" fill="#041810" stroke="#39ff8f" stroke-width="1.5"/>
+        <text x="488" y="60" fill="#39ff8f" font-family="Space Mono" font-size="7.5" font-weight="700" text-anchor="middle">OUTPUTS</text>
+        <text x="488" y="76" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">LEDs</text>
+        <text x="488" y="88" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">motors</text>
+        <!-- Latency labels -->
+        <text x="105" y="120" fill="#3d4d70" font-family="Space Mono" font-size="6.5" text-anchor="middle">cycle 1</text>
+        <text x="219" y="120" fill="#3d4d70" font-family="Space Mono" font-size="6.5" text-anchor="middle">cycle 2</text>
+        <text x="333" y="120" fill="#3d4d70" font-family="Space Mono" font-size="6.5" text-anchor="middle">cycle 3</text>
+      </svg>
+      <div class="pipeline-caption">3-stage pipeline: event captured → ROM fetched → state updated. Outputs are valid 2 clock cycles after an event fires.</div>
+    </div>
+  </div>
+
+  <!-- ROM Lookup mini example -->
+  <div class="rom-mini-example">
+    <div class="rom-mini-title">📖 How a ROM Lookup Works — Concrete Example</div>
+    <div class="rom-mini-body">
+      <div class="rom-mini-step">
+        <div class="rom-mini-step-num">1</div>
+        <div><strong>State:</strong> RED (binary <code>00001</code>) + <strong>Event:</strong> timer_expire (<code>0000000100</code>)<br>
+        <span style="color:var(--txt-2);font-size:.8rem">Wrapper encodes physical timer signal into 10-bit event code, sends to FSM core.</span></div>
+      </div>
+      <div class="rom-mini-arrow">→</div>
+      <div class="rom-mini-step">
+        <div class="rom-mini-step-num">2</div>
+        <div><strong>Address:</strong> <code>00_00001_0000000100</code> = <code>0x0404</code><br>
+        <span style="color:var(--txt-2);font-size:.8rem">config_id[1:0] + state[4:0] + event[9:0] concatenated to form 17-bit ROM address.</span></div>
+      </div>
+      <div class="rom-mini-arrow">→</div>
+      <div class="rom-mini-step">
+        <div class="rom-mini-step-num">3</div>
+        <div><strong>ROM word:</strong> <code>x"0_02_0004_04"</code><br>
+        <span style="color:var(--txt-2);font-size:.8rem">Bits[28:24]=GREEN(00010), bits[23:8]=green_led, bit[2]=timer_start. Next state = GREEN!</span></div>
+      </div>
+      <div class="rom-mini-arrow">→</div>
+      <div class="rom-mini-step rom-mini-result">
+        <div class="rom-mini-step-num" style="background:var(--green);color:#000">✓</div>
+        <div><strong style="color:var(--green)">Result:</strong> FSM enters GREEN, green_led turns ON, timer restarts.<br>
+        <span style="color:var(--txt-2);font-size:.8rem">All from 32 bits in a table — zero traffic-light logic in the FSM core.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card"><div class="card-icon">⚙️</div><h3>What is an FSM?</h3><p>A <strong>Finite State Machine</strong> moves between a fixed set of <em>states</em> based on inputs. At any moment it occupies exactly one state, and an <em>event</em> causes a transition while producing outputs. Every traffic light, vending machine, and protocol handler is an FSM at its core.</p></div>
+    <div class="card"><div class="card-icon">🔥</div><h3>The Hard-Coded Problem</h3><p>Traditional FSM design means writing a <em>unique</em> VHDL entity for every controller — traffic lights hard-wired inside the traffic light module, elevator states inside another — duplicating the same clock/reset boilerplate everywhere. Changing behavior means rewriting logic, which introduces bugs.</p></div>
+    <div class="card"><div class="card-icon">✅</div><h3>Our Solution: Write Once</h3><p>One <code>generic_fsm.vhd</code> core handles <em>any</em> application. It simply looks up (state + event) in a ROM table, extracts the next state and output, and updates registers on the clock edge. <strong>Behavior lives in the table, not the logic.</strong></p></div>
+    <div class="card"><div class="card-icon">🧩</div><h3>Configure Many Times</h3><p><code>config_rom.vhd</code> stores four independent lookup tables — one per application — selectable by a 2-bit <code>config_id</code>. The same FSM core simultaneously supports all four controllers. Adding a 5th means adding a ROM section, not rewriting logic.</p></div>
+  </div>
+
+  <!-- ── Compare & Contrast ── -->
+  <div class="section-title" id="compare-section">Compare &amp; Contrast: Hard-Coded vs ROM-Driven FSM</div>
+  <div class="compare-intro">
+    <p>This section contrasts the traditional approach (writing a separate VHDL state machine per controller) with the configurable ROM-driven approach used in this project. Understanding these tradeoffs is key to understanding <em>why</em> the architecture is designed the way it is.</p>
+  </div>
+
+  <div class="compare-table-wrap">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Dimension</th>
+          <th class="col-hc">Hard-Coded FSM</th>
+          <th class="col-rm">ROM-Driven (This Project)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Consistency</strong></td>
+          <td class="col-hc">Each FSM is a separate VHDL entity written independently. Different developers write slightly different reset logic, output encoding, or pipeline structures — leading to subtle inconsistencies and difficult cross-controller debugging.</td>
+          <td class="col-rm">One generic core, tested once. All four controllers share identical pipeline timing, reset behavior, and interrupt mechanism. If a bug is found and fixed in <code>generic_fsm.vhd</code>, all four controllers benefit instantly.</td>
+        </tr>
+        <tr>
+          <td><strong>Feasibility</strong></td>
+          <td class="col-hc">Simple and familiar — VHDL <code>CASE</code> statements map cleanly to state diagrams. No indirection. Small FSMs (≤8 states) synthesize efficiently. The approach breaks down for large or frequently-changing state spaces.</td>
+          <td class="col-rm">Requires ROM infrastructure up front (config_rom.vhd, address encoding, pipeline stages). Slightly higher initial complexity. Becomes <em>vastly more</em> feasible for 3+ controllers since new controllers only require ROM data — no new logic.</td>
+        </tr>
+        <tr>
+          <td><strong>Efficiency</strong></td>
+          <td class="col-hc">Single-cycle transitions (no pipeline overhead). Optimal for FPGA area when only one controller is needed. Logic is directly synthesized from <code>CASE</code> — no ROM inference needed.</td>
+          <td class="col-rm">2-cycle pipeline latency per transition (ROM read + state update). ROM occupies BRAM or LUT-RAM. However: one core instead of four means <em>lower total area</em> when multiple controllers are instantiated on the same chip.</td>
+        </tr>
+        <tr>
+          <td><strong>Modifiability</strong></td>
+          <td class="col-hc">Changing behavior = editing VHDL, re-synthesizing, re-placing-and-routing. Risk of introducing bugs. Must regression-test the entire entity.</td>
+          <td class="col-rm">Changing behavior = updating ROM data (one constant). Logic path unchanged. Regression tests for the FSM core remain valid. Only ROM entries need re-verification.</td>
+        </tr>
+        <tr>
+          <td><strong>Scalability</strong></td>
+          <td class="col-hc">Adding a 5th controller means copy-pasting an existing FSM entity, renaming it, and rewriting the state logic — O(N) work per controller.</td>
+          <td class="col-rm">Adding a 5th controller means: new ROM section (data) + thin wrapper adapter (30–50 lines) + increment config_id range. Core logic untouched. O(1) growth for the FSM engine.</td>
+        </tr>
+        <tr>
+          <td><strong>Testability</strong></td>
+          <td class="col-hc">Each FSM needs its own testbench. Errors in one don't inform others. Timing peculiarities vary per entity.</td>
+          <td class="col-rm">Test <code>generic_fsm.vhd</code> once with <code>tb_fsm.vhd</code> — pipeline, interrupts, hold-state, reset all covered. Application-specific tests (<code>tb_traffic_light</code> etc.) only need to verify ROM data correctness, not FSM logic.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="compare-verdict">
+    <div class="verdict-item verdict-hc">
+      <div class="verdict-title">Choose Hard-Coded when…</div>
+      <ul>
+        <li>Building exactly one, small, permanent controller (≤6 states)</li>
+        <li>Timing is ultra-critical and every cycle matters</li>
+        <li>Team has no time to learn the ROM-driven abstraction</li>
+      </ul>
+    </div>
+    <div class="verdict-item verdict-rm">
+      <div class="verdict-title">Choose ROM-Driven when…</div>
+      <ul>
+        <li>Building 2+ controllers sharing the same FPGA</li>
+        <li>Behavior may change after initial deployment</li>
+        <li>Consistency and reusability matter more than single-cycle latency</li>
+        <li>Long-term maintainability is a priority</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section-title">Four Applications, One Core</div>
+  <div class="app-cards">
+    <div class="app-card" onclick="switchTab('traffic')">
+      <div class="app-icon" style="background:linear-gradient(135deg,#ff4f6e,#7f1d1d)">🚦</div>
+      <div class="app-name">Traffic Light</div>
+      <div class="app-desc">config_id="00" · 6 states · RED/GREEN/YELLOW/PED_WAIT/PED_CROSS</div>
+    </div>
+    <div class="app-card" onclick="switchTab('vending')">
+      <div class="app-icon" style="background:linear-gradient(135deg,#ffe84d,#78350f)">🥤</div>
+      <div class="app-name">Vending Machine</div>
+      <div class="app-desc">config_id="01" · 5 states · IDLE/COLLECT/SELECT/DISPENSE/CHANGE</div>
+    </div>
+    <div class="app-card" onclick="switchTab('elevator')">
+      <div class="app-icon" style="background:linear-gradient(135deg,#39ff8f,#064e3b)">🛗</div>
+      <div class="app-name">Elevator</div>
+      <div class="app-desc">config_id="10" · 5 states · IDLE/MOVE_UP/MOVE_DOWN/DOOR_OPEN/CLOSE</div>
+    </div>
+    <div class="app-card" onclick="switchTab('serial')">
+      <div class="app-icon" style="background:linear-gradient(135deg,#b57bff,#3730a3)">📡</div>
+      <div class="app-name">Serial Comm</div>
+      <div class="app-desc">config_id="11" · 12 states · IDLE→START→BIT0..7→STOP→COMPLETE</div>
+    </div>
+  </div>
+
+  <div class="info-box" style="margin-top:1.5rem">
+    <div class="info-box-title">💡 Why this architecture is superior</div>
+    <div class="info-grid">
+      <div><span class="tag cyan">Reusability</span> One FSM core, unlimited applications.</div>
+      <div><span class="tag green">Modularity</span> Wrappers are thin adapters — no logic duplication.</div>
+      <div><span class="tag purple">Testability</span> Test generic_fsm once; ROM entries are just data.</div>
+      <div><span class="tag yellow">Scalability</span> New controller = new ROM section + new wrapper only.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ GENERIC FSM ═══════════ -->
+<section class="tab" id="tab-generic-fsm">
+  <div class="page-header"><h2>Generic FSM Core</h2><p>The heart of the entire project — <code>generic_fsm.vhd</code></p></div>
+
+  <!-- Definition paragraph -->
+  <div class="generic-fsm-intro">
+    <p>The <strong>Generic FSM</strong> is a <em>table-driven, ROM-configured, reusable state machine engine</em>. Rather than encoding state transitions as logic gates (VHDL <code>CASE</code> statements), this core reads its next-state and output values from a ROM every clock cycle. The same hardware block — the same entity, the same port map — becomes a traffic light controller, a vending machine, an elevator, or a serial receiver just by pointing it at a different section of the configuration ROM. This makes <code>generic_fsm.vhd</code> the single most important file in the project: it is instantiated <em>once</em> but handles all four applications simultaneously.</p>
+    <div class="generic-fsm-key-facts">
+      <span class="kf-item"><code>5-bit</code> state register → up to 32 states</span>
+      <span class="kf-sep">·</span>
+      <span class="kf-item"><code>10-bit</code> event code → up to 1024 events</span>
+      <span class="kf-sep">·</span>
+      <span class="kf-item"><code>2-bit</code> config_id → 4 ROM sections</span>
+      <span class="kf-sep">·</span>
+      <span class="kf-item"><code>3-cycle</code> pipelined transition</span>
+    </div>
+  </div>
+
+  <div class="section-title">Entity Interface — Block Diagram</div>
+
+  <!-- Visual block diagram of the entity -->
+  <div class="entity-block-diagram">
+    <svg viewBox="0 0 640 320" xmlns="http://www.w3.org/2000/svg" class="entity-svg">
+      <defs>
+        <marker id="eah" markerWidth="7" markerHeight="5" refX="5" refY="2.5" orient="auto">
+          <polygon points="0 0,7 2.5,0 5" fill="#4a5580"/>
+        </marker>
+        <marker id="eah-in" markerWidth="7" markerHeight="5" refX="5" refY="2.5" orient="auto">
+          <polygon points="0 0,7 2.5,0 5" fill="#4fc3f7"/>
+        </marker>
+        <marker id="eah-out" markerWidth="7" markerHeight="5" refX="5" refY="2.5" orient="auto">
+          <polygon points="0 0,7 2.5,0 5" fill="#39ff8f"/>
+        </marker>
+      </defs>
+
+      <!-- Core box -->
+      <rect x="220" y="40" width="200" height="240" rx="12" fill="#050c1e" stroke="#00f5ff" stroke-width="2"/>
+      <text x="320" y="70" fill="#00f5ff" font-family="Space Mono" font-size="10" font-weight="700" text-anchor="middle">generic_fsm</text>
+      <text x="320" y="86" fill="#3d4d70" font-family="Space Mono" font-size="7.5" text-anchor="middle">generic_fsm.vhd</text>
+      <line x1="225" y1="94" x2="415" y2="94" stroke="#1a2240" stroke-width="1"/>
+
+      <!-- Internal labels -->
+      <text x="320" y="118" fill="#2a3560" font-family="Space Mono" font-size="7" text-anchor="middle">3-stage pipeline</text>
+      <text x="320" y="132" fill="#2a3560" font-family="Space Mono" font-size="7" text-anchor="middle">ROM addr generator</text>
+      <text x="320" y="146" fill="#2a3560" font-family="Space Mono" font-size="7" text-anchor="middle">State register</text>
+      <text x="320" y="160" fill="#2a3560" font-family="Space Mono" font-size="7" text-anchor="middle">Priority decoder</text>
+      <text x="320" y="174" fill="#2a3560" font-family="Space Mono" font-size="7" text-anchor="middle">Interrupt logic</text>
+
+      <!-- INPUTS (left side) -->
+      <!-- clk -->
+      <line x1="60" y1="110" x2="218" y2="110" stroke="#4fc3f7" stroke-width="1.5" marker-end="url(#eah-in)"/>
+      <rect x="4" y="98" width="56" height="24" rx="4" fill="#071828" stroke="#4fc3f7" stroke-width="1"/>
+      <text x="32" y="114" fill="#4fc3f7" font-family="Space Mono" font-size="7.5" text-anchor="middle">clk</text>
+      <text x="140" y="107" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">1-bit · rising edge</text>
+
+      <!-- reset -->
+      <line x1="60" y1="140" x2="218" y2="140" stroke="#4fc3f7" stroke-width="1.5" marker-end="url(#eah-in)"/>
+      <rect x="4" y="128" width="56" height="24" rx="4" fill="#071828" stroke="#4fc3f7" stroke-width="1"/>
+      <text x="32" y="144" fill="#4fc3f7" font-family="Space Mono" font-size="7.5" text-anchor="middle">reset</text>
+      <text x="140" y="137" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">1-bit · sync</text>
+
+      <!-- event_code -->
+      <line x1="60" y1="170" x2="218" y2="170" stroke="#ffe84d" stroke-width="1.5" marker-end="url(#eah-in)"/>
+      <rect x="4" y="158" width="56" height="24" rx="4" fill="#1a1200" stroke="#ffe84d" stroke-width="1"/>
+      <text x="32" y="174" fill="#ffe84d" font-family="Space Mono" font-size="6.5" text-anchor="middle">event_code</text>
+      <text x="140" y="167" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">10-bit · from wrapper</text>
+
+      <!-- config_data -->
+      <line x1="60" y1="200" x2="218" y2="200" stroke="#b57bff" stroke-width="1.5" marker-end="url(#eah-in)"/>
+      <rect x="4" y="188" width="56" height="24" rx="4" fill="#150830" stroke="#b57bff" stroke-width="1"/>
+      <text x="32" y="204" fill="#b57bff" font-family="Space Mono" font-size="6" text-anchor="middle">config_data</text>
+      <text x="140" y="197" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">32-bit · from ROM</text>
+
+      <!-- config_id -->
+      <line x1="60" y1="230" x2="218" y2="230" stroke="#b57bff" stroke-width="1.5" marker-end="url(#eah-in)"/>
+      <rect x="4" y="218" width="56" height="24" rx="4" fill="#150830" stroke="#b57bff" stroke-width="1"/>
+      <text x="32" y="234" fill="#b57bff" font-family="Space Mono" font-size="6.5" text-anchor="middle">config_id</text>
+      <text x="140" y="227" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">2-bit · 00-11 selector</text>
+
+      <!-- interrupt_event -->
+      <line x1="60" y1="260" x2="218" y2="260" stroke="#ff4f6e" stroke-width="1.5" marker-end="url(#eah-in)"/>
+      <rect x="4" y="248" width="56" height="24" rx="4" fill="#200008" stroke="#ff4f6e" stroke-width="1"/>
+      <text x="32" y="264" fill="#ff4f6e" font-family="Space Mono" font-size="5.5" text-anchor="middle">interrupt_evt</text>
+      <text x="140" y="257" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">10-bit · forces IDLE</text>
+
+      <!-- OUTPUTS (right side) -->
+      <!-- state_code -->
+      <line x1="420" y1="120" x2="576" y2="120" stroke="#39ff8f" stroke-width="1.5" marker-end="url(#eah-out)"/>
+      <rect x="578" y="108" width="58" height="24" rx="4" fill="#001806" stroke="#39ff8f" stroke-width="1"/>
+      <text x="607" y="122" fill="#39ff8f" font-family="Space Mono" font-size="6" text-anchor="middle">state_code</text>
+      <text x="498" y="117" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">5-bit · current state</text>
+
+      <!-- output_action -->
+      <line x1="420" y1="152" x2="576" y2="152" stroke="#39ff8f" stroke-width="1.5" marker-end="url(#eah-out)"/>
+      <rect x="578" y="140" width="58" height="24" rx="4" fill="#001806" stroke="#39ff8f" stroke-width="1"/>
+      <text x="607" y="154" fill="#39ff8f" font-family="Space Mono" font-size="5.5" text-anchor="middle">output_action</text>
+      <text x="498" y="149" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">16-bit · bitmask</text>
+
+      <!-- config_addr -->
+      <line x1="420" y1="184" x2="576" y2="184" stroke="#4fc3f7" stroke-width="1.5" marker-end="url(#eah-out)"/>
+      <rect x="578" y="172" width="58" height="24" rx="4" fill="#071828" stroke="#4fc3f7" stroke-width="1"/>
+      <text x="607" y="186" fill="#4fc3f7" font-family="Space Mono" font-size="6" text-anchor="middle">config_addr</text>
+      <text x="498" y="181" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">17-bit → to ROM</text>
+
+      <!-- output_valid -->
+      <line x1="420" y1="216" x2="576" y2="216" stroke="#39ff8f" stroke-width="1.5" marker-end="url(#eah-out)"/>
+      <rect x="578" y="204" width="58" height="24" rx="4" fill="#001806" stroke="#39ff8f" stroke-width="1"/>
+      <text x="607" y="218" fill="#39ff8f" font-family="Space Mono" font-size="5.5" text-anchor="middle">output_valid</text>
+      <text x="498" y="213" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">1-bit · pulse</text>
+
+      <!-- fsm_busy -->
+      <line x1="420" y1="248" x2="576" y2="248" stroke="#ffe84d" stroke-width="1.5" marker-end="url(#eah-out)"/>
+      <rect x="578" y="236" width="58" height="24" rx="4" fill="#1a1200" stroke="#ffe84d" stroke-width="1"/>
+      <text x="607" y="250" fill="#ffe84d" font-family="Space Mono" font-size="6.5" text-anchor="middle">fsm_busy</text>
+      <text x="498" y="245" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">1-bit · pipeline gate</text>
+
+      <!-- timer_start_out -->
+      <line x1="420" y1="280" x2="576" y2="280" stroke="#39ff8f" stroke-width="1.5" marker-end="url(#eah-out)"/>
+      <rect x="578" y="268" width="58" height="24" rx="4" fill="#001806" stroke="#39ff8f" stroke-width="1"/>
+      <text x="607" y="282" fill="#39ff8f" font-family="Space Mono" font-size="5.5" text-anchor="middle">timer_start</text>
+      <text x="498" y="277" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">1-bit · ROM bit[2]</text>
+
+      <!-- IN/OUT labels -->
+      <text x="32" y="90" fill="#4fc3f7" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">INPUTS</text>
+      <text x="607" y="100" fill="#39ff8f" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">OUTPUTS</text>
+    </svg>
+
+    <!-- Concrete mapping example -->
+    <div class="entity-example-box">
+      <div class="entity-example-title">📌 Concrete Port Mapping — Traffic Light Wrapper</div>
+      <div class="entity-example-body">
+        <div class="em-row"><span class="em-port">event_code</span><span class="em-arrow">←</span><span class="em-signal">pedestrian_btn="01", car_sensor="10", timer_done="100" (10-bit one-hot)</span></div>
+        <div class="em-row"><span class="em-port">config_id</span><span class="em-arrow">←</span><span class="em-signal">"00" (constant — selects traffic light ROM section)</span></div>
+        <div class="em-row"><span class="em-port">interrupt_event</span><span class="em-arrow">←</span><span class="em-signal">TL_INTERRUPT_EVENT = "0000001000" (emergency vehicle, bit 3)</span></div>
+        <div class="em-row"><span class="em-port">state_code</span><span class="em-arrow">→</span><span class="em-signal">wrapper uses it to track state for display and output decoding</span></div>
+        <div class="em-row"><span class="em-port">output_action[0]</span><span class="em-arrow">→</span><span class="em-signal">red_led (physical signal to hardware)</span></div>
+        <div class="em-row"><span class="em-port">output_action[1]</span><span class="em-arrow">→</span><span class="em-signal">yellow_led</span></div>
+        <div class="em-row"><span class="em-port">output_action[2]</span><span class="em-arrow">→</span><span class="em-signal">green_led</span></div>
+        <div class="em-row"><span class="em-port">output_action[3]</span><span class="em-arrow">→</span><span class="em-signal">ped_signal (pedestrian walk light)</span></div>
+        <div class="em-row"><span class="em-port">fsm_busy</span><span class="em-arrow">→</span><span class="em-signal">gates input encoder (prevents double-firing during pipeline)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="port-table-wrap"><table class="port-table">
+    <thead><tr><th>Port</th><th>Dir</th><th>Width</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>clk</code></td><td class="dir-in">IN</td><td>1</td><td>System clock — all registers update on rising edge</td></tr>
+      <tr><td><code>reset</code></td><td class="dir-in">IN</td><td>1</td><td>Synchronous reset — forces FSM back to state 0 (IDLE)</td></tr>
+      <tr><td><code>event_code</code></td><td class="dir-in">IN</td><td>10</td><td>Current input event from wrapper's input encoder (bitmask)</td></tr>
+      <tr><td><code>config_data</code></td><td class="dir-in">IN</td><td>32</td><td>ROM word: next_state[28:24] + output_action[23:8] + flags[7:0]</td></tr>
+      <tr><td><code>config_id</code></td><td class="dir-in">IN</td><td>2</td><td>ROM section selector: 00=TL, 01=VM, 10=EL, 11=SP</td></tr>
+      <tr><td><code>interrupt_event</code></td><td class="dir-in">IN</td><td>10</td><td>Special event that forces FSM → IDLE immediately</td></tr>
+      <tr><td><code>state_code</code></td><td class="dir-out">OUT</td><td>5</td><td>Current state (5 bits → up to 32 states)</td></tr>
+      <tr><td><code>output_action</code></td><td class="dir-out">OUT</td><td>16</td><td>16-bit output bitmask decoded by wrapper into physical signals</td></tr>
+      <tr><td><code>config_addr</code></td><td class="dir-out">OUT</td><td>17</td><td>ROM address: {config_id[1:0], state[4:0], event_code[9:0]}</td></tr>
+      <tr><td><code>output_valid</code></td><td class="dir-out">OUT</td><td>1</td><td>Pulses HIGH when output_action is valid (post state-update)</td></tr>
+      <tr><td><code>fsm_busy</code></td><td class="dir-out">OUT</td><td>1</td><td>HIGH during pipeline processing — wrapper must not send new events</td></tr>
+      <tr><td><code>timer_start_out</code></td><td class="dir-out">OUT</td><td>1</td><td>Decoded from ROM bit[2] — tells external timer to start</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="section-title">The 3-Stage Pipeline</div>
+  <div class="pipeline-diagram">
+    <div class="pipe-stage">
+      <div class="pipe-label">Stage 1 <span>Event Capture</span></div>
+      <div class="pipe-body"><p>On rising clock edge, if <code>fsm_busy=0</code> and non-zero <code>event_code</code> arrives, capture into <code>event_code_reg</code> and assert <code>fsm_busy_i='1'</code>.</p><div class="pipe-output">→ event_code_reg, fsm_busy_i</div></div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-stage">
+      <div class="pipe-label">Stage 2 <span>ROM Capture</span></div>
+      <div class="pipe-body"><p>Address <code>{config_id, state, event_code_reg}</code> is already at the ROM. This stage registers the ROM output into <code>config_data_p2</code>.</p><div class="pipe-output">→ config_data_p2, fsm_busy_p2</div></div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-stage">
+      <div class="pipe-label">Stage 3 <span>State Update</span></div>
+      <div class="pipe-body"><p>Decode ROM word: extract <code>next_state[28:24]</code>, <code>output_action[23:8]</code>, control flags. Apply priority: <strong>Interrupt &gt; Hold &gt; Normal</strong>.</p><div class="pipe-output">→ current_state, output_action_reg</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">ROM Word Format — 32-bit Encoding</div>
+  <div class="bitfield-diagram">
+    <div class="bit-group unused"><div class="bit-label">31:29</div><div class="bit-name">UNUSED</div></div>
+    <div class="bit-group next-state"><div class="bit-label">28:24</div><div class="bit-name">next_state (5 bits)</div></div>
+    <div class="bit-group output-action"><div class="bit-label">23:8</div><div class="bit-name">output_action (16 bits)</div></div>
+    <div class="bit-group flag"><div class="bit-label">7:4</div><div class="bit-name">timer_reset timer_start</div></div>
+    <div class="bit-group flag-red"><div class="bit-label">1</div><div class="bit-name" style="color:var(--red)">interrupt_en</div></div>
+    <div class="bit-group flag"><div class="bit-label">0</div><div class="bit-name" style="color:var(--yellow)">hold_state</div></div>
+  </div>
+
+  <div class="section-title">State Transition Priority</div>
+  <div class="priority-cards">
+    <div class="priority-card p-interrupt"><h4>1 · Interrupt (Highest)</h4><p>When <code>event_code = interrupt_event</code> AND ROM has <code>interrupt_en='1'</code>, FSM forces to state 0 (IDLE) immediately regardless of any other condition.</p></div>
+    <div class="priority-card p-hold"><h4>2 · Hold State</h4><p>When ROM bit[0] = <code>hold_state='1'</code>, FSM stays in current state. Event acknowledged (output_valid pulses) but <code>current_state</code> does not change.</p></div>
+    <div class="priority-card p-normal"><h4>3 · Normal Transition</h4><p>Default path: <code>current_state ← ROM[28:24]</code>. Next state is whatever is programmed in the ROM lookup table for this (state, event) pair.</p></div>
+  </div>
+
+  <div class="section-title">Common Questions</div>
+  <div class="qa-list">
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)">Why use a 2-stage pipeline instead of single-cycle?<span class="qa-arrow">▼</span></div><div class="qa-a">ROM lookup takes a full clock cycle. Without the pipeline, config_data would not be stable when the state register samples it. The 2-stage design gives the ROM a full period to produce valid output before Stage 3 consumes it — satisfying setup time without increasing clock period constraints.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)">Why does hold_state matter?<span class="qa-arrow">▼</span></div><div class="qa-a">Without a hold_state entry, unhandled events hit the <code>others=&gt;0</code> ROM default — meaning next_state=0 (IDLE). The FSM would silently reset on any unmapped event. hold_state lets the designer say "this event is acknowledged and intentionally ignored in this state."</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)">How does the ROM address calculation work exactly?<span class="qa-arrow">▼</span></div><div class="qa-a"><code>config_addr = config_id[16:15] &amp; state[14:10] &amp; event_code[9:0]</code>. For traffic light: config_id="00", state=RED("00001"), event=TIMER("0000000100"): addr = 00_00001_0000000100 = 0x0404. ROM entry at 0x0404 maps to GREEN state.</div></div>
+  </div>
+</section>
+
+<!-- ═══════════ WRAPPER ═══════════ -->
+<section class="tab" id="tab-wrapper">
+  <div class="page-header"><h2>FSM Wrappers</h2><p>The thin adapters that connect the real world to the generic FSM core</p></div>
+
+  <!-- Intro -->
+  <div class="wrapper-intro">
+    <p>A <strong>wrapper</strong> is a small VHDL entity that sits between the physical hardware signals (buttons, sensors, LEDs, motors) and the generic FSM core. It has exactly two jobs: translate <em>physical inputs → a 10-bit event code</em> the FSM understands, and translate <em>the FSM's 16-bit output_action → physical output signals</em>. Nothing more. All the state-machine intelligence lives in the core and the ROM — the wrapper is just a translator.</p>
+    <div class="wrapper-key-facts">
+      <span class="kf-item">4 wrappers in this project</span>
+      <span class="kf-sep">·</span>
+      <span class="kf-item">~50–80 lines each</span>
+      <span class="kf-sep">·</span>
+      <span class="kf-item">Zero state logic inside</span>
+      <span class="kf-sep">·</span>
+      <span class="kf-item">One per application</span>
+    </div>
+  </div>
+
+  <!-- Big picture diagram -->
+  <div class="section-title">Where the Wrapper Lives</div>
+  <div class="wrapper-big-picture">
+    <svg viewBox="0 0 660 200" xmlns="http://www.w3.org/2000/svg" class="wrapper-overview-svg">
+      <defs>
+        <marker id="wah" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto">
+          <polygon points="0 0,8 3,0 6" fill="#4a5580"/>
+        </marker>
+        <marker id="wah-c" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto">
+          <polygon points="0 0,8 3,0 6" fill="#00f5ff"/>
+        </marker>
+        <marker id="wah-g" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto">
+          <polygon points="0 0,8 3,0 6" fill="#39ff8f"/>
+        </marker>
+      </defs>
+
+      <!-- Physical world box -->
+      <rect x="4" y="30" width="108" height="140" rx="8" fill="#0a0e1c" stroke="#2e3d65" stroke-width="1.5"/>
+      <text x="58" y="52" fill="#6b7aaa" font-family="Space Mono" font-size="7.5" font-weight="700" text-anchor="middle">PHYSICAL</text>
+      <text x="58" y="64" fill="#6b7aaa" font-family="Space Mono" font-size="7.5" font-weight="700" text-anchor="middle">WORLD</text>
+      <text x="58" y="84" fill="#3d4d70" font-family="Space Mono" font-size="6.5" text-anchor="middle">🔘 buttons</text>
+      <text x="58" y="98" fill="#3d4d70" font-family="Space Mono" font-size="6.5" text-anchor="middle">📡 sensors</text>
+      <text x="58" y="112" fill="#3d4d70" font-family="Space Mono" font-size="6.5" text-anchor="middle">💡 LEDs</text>
+      <text x="58" y="126" fill="#3d4d70" font-family="Space Mono" font-size="6.5" text-anchor="middle">⚙️ motors</text>
+      <text x="58" y="140" fill="#3d4d70" font-family="Space Mono" font-size="6.5" text-anchor="middle">🔔 buzzers</text>
+
+      <!-- Arrow: world → wrapper (inputs) -->
+      <line x1="112" y1="90" x2="148" y2="90" stroke="#4fc3f7" stroke-width="2" marker-end="url(#wah-c)"/>
+      <text x="130" y="84" fill="#4fc3f7" font-family="Space Mono" font-size="6" text-anchor="middle">raw</text>
+      <text x="130" y="93" fill="#4fc3f7" font-family="Space Mono" font-size="6" text-anchor="middle">inputs</text>
+
+      <!-- Wrapper box (highlighted) -->
+      <rect x="150" y="10" width="160" height="180" rx="10" fill="#050e22" stroke="#00f5ff" stroke-width="2.5"/>
+      <text x="230" y="32" fill="#00f5ff" font-family="Space Mono" font-size="9" font-weight="700" text-anchor="middle">WRAPPER</text>
+      <text x="230" y="46" fill="#3d4d70" font-family="Space Mono" font-size="7" text-anchor="middle">e.g. traffic_light_wrapper.vhd</text>
+      <line x1="155" y1="54" x2="305" y2="54" stroke="#1a2240" stroke-width="1"/>
+      <!-- Input decoder -->
+      <rect x="162" y="62" width="136" height="46" rx="6" fill="#071828" stroke="#4fc3f7" stroke-width="1"/>
+      <text x="230" y="80" fill="#4fc3f7" font-family="Space Mono" font-size="7.5" font-weight="700" text-anchor="middle">Input Encoder</text>
+      <text x="230" y="92" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">physical signals → 10-bit event_code</text>
+      <text x="230" y="102" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">priority encoder + edge detector</text>
+      <!-- config_id -->
+      <rect x="162" y="118" width="136" height="24" rx="6" fill="#150830" stroke="#b57bff" stroke-width="1"/>
+      <text x="230" y="134" fill="#b57bff" font-family="Space Mono" font-size="7.5" font-weight="700" text-anchor="middle">config_id = constant</text>
+      <!-- Output decoder -->
+      <rect x="162" y="152" width="136" height="30" rx="6" fill="#001806" stroke="#39ff8f" stroke-width="1"/>
+      <text x="230" y="168" fill="#39ff8f" font-family="Space Mono" font-size="7.5" font-weight="700" text-anchor="middle">Output Decoder</text>
+      <text x="230" y="178" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">output_action[15:0] → physical signals</text>
+
+      <!-- Arrow: wrapper → core (event_code) -->
+      <line x1="310" y1="80" x2="346" y2="80" stroke="#00f5ff" stroke-width="2" marker-end="url(#wah-c)"/>
+      <text x="328" y="72" fill="#00f5ff" font-family="Space Mono" font-size="6" text-anchor="middle">event</text>
+      <text x="328" y="81" fill="#00f5ff" font-family="Space Mono" font-size="6" text-anchor="middle">_code</text>
+      <!-- Arrow: core → wrapper (output_action) -->
+      <line x1="346" y1="130" x2="310" y2="130" stroke="#39ff8f" stroke-width="2" marker-end="url(#wah-g)"/>
+      <text x="328" y="122" fill="#39ff8f" font-family="Space Mono" font-size="6" text-anchor="middle">output</text>
+      <text x="328" y="131" fill="#39ff8f" font-family="Space Mono" font-size="6" text-anchor="middle">_action</text>
+      <!-- Arrow: core → wrapper (fsm_busy) -->
+      <line x1="346" y1="155" x2="310" y2="155" stroke="#ffe84d" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#wah-g)"/>
+      <text x="328" y="148" fill="#ffe84d" font-family="Space Mono" font-size="5.5" text-anchor="middle">fsm_busy</text>
+
+      <!-- Generic FSM core box -->
+      <rect x="348" y="40" width="130" height="130" rx="8" fill="#020c1a" stroke="#00f5ff" stroke-width="2"/>
+      <text x="413" y="66" fill="#00f5ff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">GENERIC</text>
+      <text x="413" y="80" fill="#00f5ff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">FSM CORE</text>
+      <text x="413" y="96" fill="#3d4d70" font-family="Space Mono" font-size="6.5" text-anchor="middle">generic_fsm.vhd</text>
+      <text x="413" y="112" fill="#3d4d70" font-family="Space Mono" font-size="6" text-anchor="middle">state register</text>
+      <text x="413" y="124" fill="#3d4d70" font-family="Space Mono" font-size="6" text-anchor="middle">pipeline stages</text>
+      <text x="413" y="136" fill="#3d4d70" font-family="Space Mono" font-size="6" text-anchor="middle">interrupt logic</text>
+      <text x="413" y="148" fill="#3d4d70" font-family="Space Mono" font-size="6" text-anchor="middle">ROM addr gen</text>
+
+      <!-- Arrow: core → ROM -->
+      <line x1="478" y1="90" x2="512" y2="90" stroke="#b57bff" stroke-width="1.5" marker-end="url(#wah)"/>
+      <text x="495" y="82" fill="#b57bff" font-family="Space Mono" font-size="5.5" text-anchor="middle">config_addr</text>
+
+      <!-- Config ROM -->
+      <rect x="514" y="58" width="100" height="64" rx="8" fill="#0d0520" stroke="#b57bff" stroke-width="1.5"/>
+      <text x="564" y="80" fill="#b57bff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">CONFIG</text>
+      <text x="564" y="94" fill="#b57bff" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">ROM</text>
+      <text x="564" y="108" fill="#3d4d70" font-family="Space Mono" font-size="6" text-anchor="middle">config_rom.vhd</text>
+      <!-- Arrow: ROM → core (config_data) -->
+      <line x1="514" y1="110" x2="480" y2="120" stroke="#b57bff" stroke-width="1.5" marker-end="url(#wah)"/>
+      <text x="497" y="123" fill="#b57bff" font-family="Space Mono" font-size="5.5" text-anchor="middle">config_data</text>
+
+      <!-- Arrow: wrapper → world (outputs) -->
+      <line x1="150" y1="168" x2="112" y2="148" stroke="#39ff8f" stroke-width="2" marker-end="url(#wah-g)"/>
+      <text x="127" y="166" fill="#39ff8f" font-family="Space Mono" font-size="6" text-anchor="middle">decoded</text>
+      <text x="127" y="175" fill="#39ff8f" font-family="Space Mono" font-size="6" text-anchor="middle">outputs</text>
+    </svg>
+    <p class="wrapper-overview-caption">The wrapper (highlighted in cyan) is the only component that knows about the specific application. The FSM core and ROM are completely reusable.</p>
+  </div>
+
+  <!-- Two jobs explained -->
+  <div class="section-title">The Wrapper's Two Jobs</div>
+  <div class="wrapper-two-jobs">
+    <div class="wtj-card wtj-input">
+      <div class="wtj-num">①</div>
+      <div class="wtj-body">
+        <div class="wtj-title">Input Encoder — Physical Signals → event_code</div>
+        <p class="wtj-desc">The wrapper's input encoder watches all physical input pins every clock cycle. When it detects an active signal (and the FSM core is not busy), it <em>encodes</em> that signal into a 10-bit one-hot event code and sends it to the generic FSM core. Only one event fires per cycle — the priority encoder decides which if multiple signals arrive simultaneously.</p>
+        <div class="wtj-rules">
+          <div class="wtj-rule"><span class="wtj-rule-badge" style="border-color:#4fc3f7">Rule 1</span> Only fires when <code>fsm_busy = '0'</code> — the pipeline gate</div>
+          <div class="wtj-rule"><span class="wtj-rule-badge" style="border-color:#ffe84d">Rule 2</span> Priority encoder: one event per cycle (highest priority wins)</div>
+          <div class="wtj-rule"><span class="wtj-rule-badge" style="border-color:#39ff8f">Rule 3</span> Edge detection on level signals (prevents double-firing)</div>
+          <div class="wtj-rule"><span class="wtj-rule-badge" style="border-color:#ff4f6e">Rule 4</span> Interrupt events bypass the normal priority and go directly to the FSM interrupt port</div>
+        </div>
+      </div>
+    </div>
+    <div class="wtj-card wtj-output">
+      <div class="wtj-num">②</div>
+      <div class="wtj-body">
+        <div class="wtj-title">Output Decoder — output_action → Physical Signals</div>
+        <p class="wtj-desc">When the FSM core completes a state transition, it asserts <code>output_valid</code> and puts a 16-bit bitmask on <code>output_action</code>. The wrapper's output decoder reads each bit and drives the corresponding physical output signal. This is a purely combinational decode — no logic, no conditions, just bit assignment.</p>
+        <div class="wtj-rules">
+          <div class="wtj-rule"><span class="wtj-rule-badge" style="border-color:#39ff8f">Rule 1</span> Each bit position maps to exactly one physical output signal</div>
+          <div class="wtj-rule"><span class="wtj-rule-badge" style="border-color:#4fc3f7">Rule 2</span> Purely combinational — no registers in the output path</div>
+          <div class="wtj-rule"><span class="wtj-rule-badge" style="border-color:#b57bff">Rule 3</span> The mapping is defined per-wrapper — different for each application</div>
+          <div class="wtj-rule"><span class="wtj-rule-badge" style="border-color:#ffe84d">Rule 4</span> Special outputs (interrupt return, timer, alarm) may use extra logic</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Four wrappers side by side -->
+  <div class="section-title">The Four Wrappers — At a Glance</div>
+  <div class="wrapper-four-grid">
+
+    <!-- Traffic Light -->
+    <div class="wfg-card">
+      <div class="wfg-header" style="border-color:#ff4f6e;background:rgba(255,79,110,0.08)">
+        <span class="wfg-icon">🚦</span>
+        <div>
+          <div class="wfg-title">traffic_light_wrapper.vhd</div>
+          <div class="wfg-subtitle">config_id = "00"</div>
+        </div>
+      </div>
+      <div class="wfg-body">
+        <div class="wfg-section-label">Inputs → event_code</div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#4fc3f7">pedestrian_btn</span><span class="wfg-arrow">→</span><span class="wfg-code">"0000000001" (bit 0)</span></div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#4fc3f7">car_sensor</span><span class="wfg-arrow">→</span><span class="wfg-code">"0000000010" (bit 1)</span></div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#4fc3f7">timer_done</span><span class="wfg-arrow">→</span><span class="wfg-code">"0000000100" (bit 2)</span></div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#ff4f6e">emergency</span><span class="wfg-arrow">→</span><span class="wfg-code">interrupt_event</span></div>
+        <div class="wfg-section-label" style="margin-top:.6rem">output_action → Outputs</div>
+        <div class="wfg-io-row"><span class="wfg-code">bit [0]</span><span class="wfg-arrow">→</span><span class="wfg-sig" style="color:#39ff8f">red_led</span></div>
+        <div class="wfg-io-row"><span class="wfg-code">bit [1]</span><span class="wfg-arrow">→</span><span class="wfg-sig" style="color:#39ff8f">yellow_led</span></div>
+        <div class="wfg-io-row"><span class="wfg-code">bit [2]</span><span class="wfg-arrow">→</span><span class="wfg-sig" style="color:#39ff8f">green_led</span></div>
+        <div class="wfg-io-row"><span class="wfg-code">bit [3]</span><span class="wfg-arrow">→</span><span class="wfg-sig" style="color:#39ff8f">ped_signal</span></div>
+        <div class="wfg-io-row"><span class="wfg-code">ROM bit[2]</span><span class="wfg-arrow">→</span><span class="wfg-sig" style="color:#39ff8f">timer_start</span></div>
+      </div>
+    </div>
+
+    <!-- Vending Machine -->
+    <div class="wfg-card">
+      <div class="wfg-header" style="border-color:#ffe84d;background:rgba(255,232,77,0.08)">
+        <span class="wfg-icon">🥤</span>
+        <div>
+          <div class="wfg-title">vending_wrapper.vhd</div>
+          <div class="wfg-subtitle">config_id = "01"</div>
+        </div>
+      </div>
+      <div class="wfg-body">
+        <div class="wfg-section-label">Inputs → event_code</div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#4fc3f7">coin_insert</span><span class="wfg-arrow">→</span><span class="wfg-code">"0000000001" (bit 0)</span></div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#4fc3f7">selection_btn</span><span class="wfg-arrow">→</span><span class="wfg-code">bits [2:1] (01/10/11)</span></div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#4fc3f7">item_empty</span><span class="wfg-arrow">→</span><span class="wfg-code">"0000001000" (bit 3)</span></div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#4fc3f7">dispense_done</span><span class="wfg-arrow">→</span><span class="wfg-code">"0000010000" (bit 4)</span></div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#4fc3f7">change_done</span><span class="wfg-arrow">→</span><span class="wfg-code">"0001000000" (bit 6)</span></div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#ff4f6e">cancel_btn</span><span class="wfg-arrow">→</span><span class="wfg-code">interrupt_event</span></div>
+        <div class="wfg-section-label" style="margin-top:.6rem">output_action → Outputs</div>
+        <div class="wfg-io-row"><span class="wfg-code">bit [0]</span><span class="wfg-arrow">→</span><span class="wfg-sig" style="color:#39ff8f">dispense_motor</span></div>
+        <div class="wfg-io-row"><span class="wfg-code">bit [1]</span><span class="wfg-arrow">→</span><span class="wfg-sig" style="color:#39ff8f">change_return</span></div>
+        <div class="wfg-io-row"><span class="wfg-code">bits [3:0]</span><span class="wfg-arrow">→</span><span class="wfg-sig" style="color:#39ff8f">display_msg</span></div>
+        <div class="wfg-io-row"><span class="wfg-code">interrupt return</span><span class="wfg-arrow">→</span><span class="wfg-sig" style="color:#ff4f6e">int_change_pulse</span></div>
+      </div>
+    </div>
+
+    <!-- Elevator -->
+    <div class="wfg-card">
+      <div class="wfg-header" style="border-color:#39ff8f;background:rgba(57,255,143,0.06)">
+        <span class="wfg-icon">🛗</span>
+        <div>
+          <div class="wfg-title">elevator_wrapper.vhd</div>
+          <div class="wfg-subtitle">config_id = "10"</div>
+        </div>
+      </div>
+      <div class="wfg-body">
+        <div class="wfg-section-label">Inputs → event_code</div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#4fc3f7">go_up</span><span class="wfg-arrow">→</span><span class="wfg-code">"0000000001" (bit 0)</span></div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#4fc3f7">go_down</span><span class="wfg-arrow">→</span><span class="wfg-code">"0000000010" (bit 1)</span></div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#4fc3f7">arrived</span><span class="wfg-arrow">→</span><span class="wfg-code">"0000000100" (bit 2)</span></div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#4fc3f7">door_clear</span><span class="wfg-arrow">→</span><span class="wfg-code">"0000001000" (bit 3)</span></div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#4fc3f7">door_sensor</span><span class="wfg-arrow">→</span><span class="wfg-code">"0000010000" (bit 4)</span></div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#ff4f6e">emergency_btn</span><span class="wfg-arrow">→</span><span class="wfg-code">interrupt_event</span></div>
+        <div class="wfg-section-label" style="margin-top:.6rem">output_action → Outputs</div>
+        <div class="wfg-io-row"><span class="wfg-code">bit [0]</span><span class="wfg-arrow">→</span><span class="wfg-sig" style="color:#39ff8f">motor_up</span></div>
+        <div class="wfg-io-row"><span class="wfg-code">bit [1]</span><span class="wfg-arrow">→</span><span class="wfg-sig" style="color:#39ff8f">motor_down</span></div>
+        <div class="wfg-io-row"><span class="wfg-code">bit [2]</span><span class="wfg-arrow">→</span><span class="wfg-sig" style="color:#39ff8f">door_open</span></div>
+        <div class="wfg-io-row"><span class="wfg-code">bit [3]</span><span class="wfg-arrow">→</span><span class="wfg-sig" style="color:#39ff8f">alarm_buzzer</span></div>
+        <div class="wfg-io-row"><span class="wfg-code">floor counter</span><span class="wfg-arrow">→</span><span class="wfg-sig" style="color:#39ff8f">floor_display</span></div>
+      </div>
+    </div>
+
+    <!-- Serial -->
+    <div class="wfg-card">
+      <div class="wfg-header" style="border-color:#b57bff;background:rgba(181,123,255,0.08)">
+        <span class="wfg-icon">📡</span>
+        <div>
+          <div class="wfg-title">serial_wrapper.vhd</div>
+          <div class="wfg-subtitle">config_id = "11"</div>
+        </div>
+      </div>
+      <div class="wfg-body">
+        <div class="wfg-section-label">Inputs → event_code</div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#4fc3f7">rx_valid ↑ + parity OK</span><span class="wfg-arrow">→</span><span class="wfg-code">bit [8] (256)</span></div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#4fc3f7">tx_ready ↑</span><span class="wfg-arrow">→</span><span class="wfg-code">bit [9] (512)</span></div>
+        <div class="wfg-io-row"><span class="wfg-sig" style="color:#ff4f6e">rx_valid ↑ + BAD parity</span><span class="wfg-arrow">→</span><span class="wfg-code">interrupt_event</span></div>
+        <div class="wfg-note">⚡ Edge detection: only rising edges of rx_valid fire an event. This prevents re-triggering while the signal stays high.</div>
+        <div class="wfg-section-label" style="margin-top:.6rem">output_action → Outputs</div>
+        <div class="wfg-io-row"><span class="wfg-code">bit [8]</span><span class="wfg-arrow">→</span><span class="wfg-sig" style="color:#39ff8f">tx_enable</span></div>
+        <div class="wfg-io-row"><span class="wfg-code">interrupt return</span><span class="wfg-arrow">→</span><span class="wfg-sig" style="color:#ff4f6e">parity_err</span></div>
+        <div class="wfg-io-row"><span class="wfg-code">shift register</span><span class="wfg-arrow">→</span><span class="wfg-sig" style="color:#39ff8f">rx_data[7:0]</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Priority encoder visual -->
+  <div class="section-title">Inside the Input Encoder — Priority Encoder</div>
+  <div class="wrapper-priority-block">
+    <div class="wpb-diagram">
+      <svg viewBox="0 0 420 190" xmlns="http://www.w3.org/2000/svg" class="wpb-svg">
+        <defs>
+          <marker id="wpah" markerWidth="7" markerHeight="5" refX="5" refY="2.5" orient="auto">
+            <polygon points="0 0,7 2.5,0 5" fill="#4a5580"/>
+          </marker>
+        </defs>
+        <!-- Signals coming in -->
+        <text x="8" y="36" fill="#6b7aaa" font-family="Space Mono" font-size="7.5">pedestrian_btn</text>
+        <line x1="100" y1="32" x2="145" y2="32" stroke="#4fc3f7" stroke-width="1.5" marker-end="url(#wpah)"/>
+        <text x="8" y="68" fill="#6b7aaa" font-family="Space Mono" font-size="7.5">car_sensor</text>
+        <line x1="100" y1="64" x2="145" y2="64" stroke="#4fc3f7" stroke-width="1.5" marker-end="url(#wpah)"/>
+        <text x="8" y="100" fill="#6b7aaa" font-family="Space Mono" font-size="7.5">timer_done</text>
+        <line x1="100" y1="96" x2="145" y2="96" stroke="#4fc3f7" stroke-width="1.5" marker-end="url(#wpah)"/>
+        <text x="8" y="132" fill="#ff4f6e" font-family="Space Mono" font-size="7.5">emergency</text>
+        <line x1="100" y1="128" x2="145" y2="128" stroke="#ff4f6e" stroke-width="1.5" marker-end="url(#wpah)"/>
+
+        <!-- fsm_busy gate -->
+        <text x="104" y="172" fill="#ffe84d" font-family="Space Mono" font-size="7">fsm_busy=0 gate</text>
+        <line x1="130" y1="162" x2="130" y2="148" stroke="#ffe84d" stroke-width="1.5" stroke-dasharray="3,2"/>
+
+        <!-- Priority encoder box -->
+        <rect x="147" y="14" width="110" height="130" rx="8" fill="#0a1828" stroke="#4fc3f7" stroke-width="1.5"/>
+        <text x="202" y="38" fill="#4fc3f7" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">PRIORITY</text>
+        <text x="202" y="52" fill="#4fc3f7" font-family="Space Mono" font-size="8" font-weight="700" text-anchor="middle">ENCODER</text>
+        <line x1="152" y1="60" x2="252" y2="60" stroke="#1a2240" stroke-width="1"/>
+        <text x="202" y="76" fill="#3d4d70" font-family="Space Mono" font-size="6.5" text-anchor="middle">IF ped_btn THEN</text>
+        <text x="202" y="88" fill="#3d4d70" font-family="Space Mono" font-size="6.5" text-anchor="middle">  event ← "001"</text>
+        <text x="202" y="100" fill="#3d4d70" font-family="Space Mono" font-size="6.5" text-anchor="middle">ELSIF car THEN</text>
+        <text x="202" y="112" fill="#3d4d70" font-family="Space Mono" font-size="6.5" text-anchor="middle">  event ← "010"</text>
+        <text x="202" y="124" fill="#3d4d70" font-family="Space Mono" font-size="6.5" text-anchor="middle">ELSIF timer THEN</text>
+        <text x="202" y="136" fill="#3d4d70" font-family="Space Mono" font-size="6.5" text-anchor="middle">  event ← "100"</text>
+
+        <!-- Arrow: encoder → outputs -->
+        <line x1="257" y1="64" x2="295" y2="64" stroke="#00f5ff" stroke-width="2" marker-end="url(#wpah)"/>
+        <line x1="257" y1="128" x2="295" y2="128" stroke="#ff4f6e" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#wpah)"/>
+
+        <!-- Outputs -->
+        <rect x="297" y="40" width="118" height="40" rx="6" fill="#071828" stroke="#00f5ff" stroke-width="1"/>
+        <text x="356" y="58" fill="#00f5ff" font-family="Space Mono" font-size="7" font-weight="700" text-anchor="middle">event_code[9:0]</text>
+        <text x="356" y="72" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">→ generic_fsm</text>
+
+        <rect x="297" y="110" width="118" height="36" rx="6" fill="#200008" stroke="#ff4f6e" stroke-width="1"/>
+        <text x="356" y="128" fill="#ff4f6e" font-family="Space Mono" font-size="7" font-weight="700" text-anchor="middle">interrupt_event</text>
+        <text x="356" y="140" fill="#6b7aaa" font-family="Space Mono" font-size="6.5" text-anchor="middle">→ fsm interrupt port</text>
+      </svg>
+    </div>
+    <div class="wpb-text">
+      <p>The priority encoder uses an <code>IF / ELSIF / ELSIF</code> chain — the first matching condition wins. This ensures only one event fires per clock cycle even if multiple inputs arrive simultaneously.</p>
+      <p style="margin-top:.6rem">The <code>fsm_busy</code> gate wraps the entire encoder: when the FSM core is mid-pipeline, no new event is sent. This prevents the same physical event from being counted twice during the 2-cycle pipeline latency.</p>
+      <p style="margin-top:.6rem">Interrupt signals (emergency, cancel, bad parity) skip the priority encoder and go directly to the <code>interrupt_event</code> port — they are always serviced immediately.</p>
+    </div>
+  </div>
+
+  <!-- Output decoder visual -->
+  <div class="section-title">Inside the Output Decoder — Bit Mapping</div>
+  <div class="wrapper-output-block">
+    <svg viewBox="0 0 540 130" xmlns="http://www.w3.org/2000/svg" class="wob-svg">
+      <defs>
+        <marker id="woah" markerWidth="7" markerHeight="5" refX="5" refY="2.5" orient="auto">
+          <polygon points="0 0,7 2.5,0 5" fill="#39ff8f"/>
+        </marker>
+      </defs>
+      <!-- output_action bus label -->
+      <text x="4" y="30" fill="#39ff8f" font-family="Space Mono" font-size="8" font-weight="700">output_action[15:0]</text>
+      <text x="4" y="44" fill="#6b7aaa" font-family="Space Mono" font-size="7">from generic_fsm</text>
+
+      <!-- Bit boxes -->
+      <rect x="4" y="54" width="32" height="36" rx="4" fill="#001806" stroke="#39ff8f" stroke-width="1.2"/>
+      <text x="20" y="70" fill="#39ff8f" font-family="Space Mono" font-size="7" font-weight="700" text-anchor="middle">[0]</text>
+      <text x="20" y="82" fill="#6b7aaa" font-family="Space Mono" font-size="6" text-anchor="middle">red</text>
+
+      <rect x="42" y="54" width="32" height="36" rx="4" fill="#001806" stroke="#39ff8f" stroke-width="1.2"/>
+      <text x="58" y="70" fill="#39ff8f" font-family="Space Mono" font-size="7" font-weight="700" text-anchor="middle">[1]</text>
+      <text x="58" y="82" fill="#6b7aaa" font-family="Space Mono" font-size="6" text-anchor="middle">yellow</text>
+
+      <rect x="80" y="54" width="32" height="36" rx="4" fill="#001806" stroke="#39ff8f" stroke-width="1.2"/>
+      <text x="96" y="70" fill="#39ff8f" font-family="Space Mono" font-size="7" font-weight="700" text-anchor="middle">[2]</text>
+      <text x="96" y="82" fill="#6b7aaa" font-family="Space Mono" font-size="6" text-anchor="middle">green</text>
+
+      <rect x="118" y="54" width="32" height="36" rx="4" fill="#001806" stroke="#39ff8f" stroke-width="1.2"/>
+      <text x="134" y="70" fill="#39ff8f" font-family="Space Mono" font-size="7" font-weight="700" text-anchor="middle">[3]</text>
+      <text x="134" y="82" fill="#6b7aaa" font-family="Space Mono" font-size="6" text-anchor="middle">ped</text>
+
+      <rect x="156" y="54" width="44" height="36" rx="4" fill="#071020" stroke="#3d4d70" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="178" y="70" fill="#3d4d70" font-family="Space Mono" font-size="7" text-anchor="middle">[7:4]</text>
+      <text x="178" y="82" fill="#3d4d70" font-family="Space Mono" font-size="6" text-anchor="middle">unused</text>
+
+      <rect x="206" y="54" width="44" height="36" rx="4" fill="#150830" stroke="#b57bff" stroke-width="1.2"/>
+      <text x="228" y="70" fill="#b57bff" font-family="Space Mono" font-size="7" font-weight="700" text-anchor="middle">[9:8]</text>
+      <text x="228" y="82" fill="#6b7aaa" font-family="Space Mono" font-size="6" text-anchor="middle">timer ctrl</text>
+
+      <rect x="256" y="54" width="140" height="36" rx="4" fill="#071020" stroke="#3d4d70" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="326" y="70" fill="#3d4d70" font-family="Space Mono" font-size="7" text-anchor="middle">[15:10]</text>
+      <text x="326" y="82" fill="#3d4d70" font-family="Space Mono" font-size="6" text-anchor="middle">reserved / app-specific</text>
+
+      <!-- Arrows down to physical signals -->
+      <line x1="20"  y1="90" x2="20"  y2="110" stroke="#39ff8f" stroke-width="1.5" marker-end="url(#woah)"/>
+      <text x="20" y="125" fill="#39ff8f" font-family="Space Mono" font-size="6" text-anchor="middle">red_led</text>
+
+      <line x1="58"  y1="90" x2="58"  y2="110" stroke="#39ff8f" stroke-width="1.5" marker-end="url(#woah)"/>
+      <text x="58" y="125" fill="#39ff8f" font-family="Space Mono" font-size="6" text-anchor="middle">yellow_led</text>
+
+      <line x1="96"  y1="90" x2="96"  y2="110" stroke="#39ff8f" stroke-width="1.5" marker-end="url(#woah)"/>
+      <text x="96" y="125" fill="#39ff8f" font-family="Space Mono" font-size="6" text-anchor="middle">green_led</text>
+
+      <line x1="134" y1="90" x2="134" y2="110" stroke="#39ff8f" stroke-width="1.5" marker-end="url(#woah)"/>
+      <text x="134" y="125" fill="#39ff8f" font-family="Space Mono" font-size="6" text-anchor="middle">ped_signal</text>
+
+      <line x1="228" y1="90" x2="228" y2="110" stroke="#b57bff" stroke-width="1.5" marker-end="url(#woah)"/>
+      <text x="228" y="125" fill="#b57bff" font-family="Space Mono" font-size="6" text-anchor="middle">timer_start/reset</text>
+    </svg>
+    <p class="wob-caption">Example: Traffic Light wrapper output decoding. Each bit in <code>output_action</code> drives exactly one physical pin. The decode is purely combinational — <code>red_led &lt;= output_action(0)</code>.</p>
+  </div>
+
+  <!-- VHDL code examples -->
+  <div class="section-title">VHDL Code — Annotated Examples</div>
+  <div class="wrapper-code-grid">
+
+    <div class="wcg-item">
+      <div class="code-block" style="margin:0">
+        <div class="code-header">Traffic Light — Input Encoder (with fsm_busy gate)</div>
+<pre>input_encode : <span class="kw">PROCESS</span>(clk)
+<span class="kw">BEGIN</span>
+  <span class="kw">IF</span> rising_edge(clk) <span class="kw">THEN</span>
+    event_code &lt;= (<span class="kw">OTHERS</span> =&gt; '0');        <span class="cm">-- default: no event</span>
+    <span class="kw">IF</span> fsm_busy = '0' <span class="kw">THEN</span>               <span class="cm">-- pipeline gate</span>
+      <span class="kw">IF</span>    pedestrian_btn = '1' <span class="kw">THEN</span>
+        event_code &lt;= EV_PEDESTRIAN_BTN; <span class="cm">-- "0000000001"</span>
+      <span class="kw">ELSIF</span> car_sensor     = '1' <span class="kw">THEN</span>
+        event_code &lt;= EV_CAR_SENSOR;     <span class="cm">-- "0000000010"</span>
+      <span class="kw">ELSIF</span> timer_done     = '1' <span class="kw">THEN</span>
+        event_code &lt;= EV_TIMER_DONE;     <span class="cm">-- "0000000100"</span>
+      <span class="kw">END IF</span>;
+    <span class="kw">END IF</span>;
+  <span class="kw">END IF</span>;
+<span class="kw">END PROCESS</span>;</pre>
+      </div>
+      <div class="explain-box" style="margin-top:.5rem">The <code>IF fsm_busy = '0'</code> guard is the key safety mechanism — it ensures the 2-stage pipeline completes before a new event enters.</div>
+    </div>
+
+    <div class="wcg-item">
+      <div class="code-block" style="margin:0">
+        <div class="code-header">Traffic Light — Output Decoder (pure combinational)</div>
+<pre>output_decode : <span class="kw">PROCESS</span>(output_action, output_valid)
+<span class="kw">BEGIN</span>
+  red_led    &lt;= '0'; yellow_led &lt;= '0';
+  green_led  &lt;= '0'; ped_signal &lt;= '0';
+  timer_start &lt;= '0';
+  <span class="kw">IF</span> output_valid = '1' <span class="kw">THEN</span>
+    red_led    &lt;= output_action(<span class="num">0</span>); <span class="cm">-- bit 0 → red LED</span>
+    yellow_led &lt;= output_action(<span class="num">1</span>); <span class="cm">-- bit 1 → yellow LED</span>
+    green_led  &lt;= output_action(<span class="num">2</span>); <span class="cm">-- bit 2 → green LED</span>
+    ped_signal &lt;= output_action(<span class="num">3</span>); <span class="cm">-- bit 3 → walk signal</span>
+    timer_start&lt;= output_action(<span class="num">8</span>); <span class="cm">-- bit 8 → timer ctrl</span>
+  <span class="kw">END IF</span>;
+<span class="kw">END PROCESS</span>;</pre>
+      </div>
+      <div class="explain-box" style="margin-top:.5rem">Zero application logic — just bit assignments. Any change to FSM behavior is made in the ROM, not here.</div>
+    </div>
+
+    <div class="wcg-item">
+      <div class="code-block" style="margin:0">
+        <div class="code-header">Serial — Edge Detection (rx_valid rising edge only)</div>
+<pre>edge_detect : <span class="kw">PROCESS</span>(clk)
+<span class="kw">BEGIN</span>
+  <span class="kw">IF</span> rising_edge(clk) <span class="kw">THEN</span>
+    rx_valid_prev &lt;= rx_valid; <span class="cm">-- remember last cycle</span>
+    tx_ready_prev &lt;= tx_ready;
+  <span class="kw">END IF</span>;
+<span class="kw">END PROCESS</span>;
+
+<span class="cm">-- Rising edge = current HIGH, previous LOW</span>
+rx_valid_rise &lt;= rx_valid <span class="kw">AND NOT</span> rx_valid_prev;
+tx_ready_rise &lt;= tx_ready <span class="kw">AND NOT</span> tx_ready_prev;</pre>
+      </div>
+      <div class="explain-box" style="margin-top:.5rem">Without edge detection, a signal held HIGH for 3 cycles would fire 3 events through the pipeline — one per clock. Edge detection fires exactly once per physical signal assertion.</div>
+    </div>
+
+    <div class="wcg-item">
+      <div class="code-block" style="margin:0">
+        <div class="code-header">Vending — Interrupt Return Detection (cancel refund)</div>
+<pre>int_return : <span class="kw">PROCESS</span>(clk)
+<span class="kw">BEGIN</span>
+  <span class="kw">IF</span> rising_edge(clk) <span class="kw">THEN</span>
+    state_prev &lt;= state_code;  <span class="cm">-- track previous state</span>
+    <span class="cm">-- Detect COLLECT→IDLE transition (interrupt fired)</span>
+    <span class="kw">IF</span> state_prev = VM_COLLECT
+       <span class="kw">AND</span> state_code = VM_IDLE <span class="kw">THEN</span>
+      int_change_pulse &lt;= '1'; <span class="cm">-- assert refund for 1 cycle</span>
+    <span class="kw">ELSE</span>
+      int_change_pulse &lt;= '0';
+    <span class="kw">END IF</span>;
+  <span class="kw">END IF</span>;
+<span class="kw">END PROCESS</span>;
+
+change_return &lt;= output_action(<span class="num">1</span>) <span class="kw">OR</span> int_change_pulse;</pre>
+      </div>
+      <div class="explain-box" style="margin-top:.5rem">The interrupt jump bypasses normal output_action. This process catches the forced state change and generates the refund pulse that the ROM path would have produced — ensuring coins are always returned.</div>
+    </div>
+  </div>
+
+  <!-- Q&A -->
+  <div class="section-title">Common Questions about Wrappers</div>
+  <div class="qa-list">
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)">Why not put the input/output logic directly in the FSM core?<span class="qa-arrow">▼</span></div><div class="qa-a">The FSM core only speaks in abstract event codes and output bitmasks — it has no knowledge of traffic lights or vending machines. This separation is what makes the core reusable. If the core handled real signals, you'd need to rewrite or reconfigure it for every application, defeating the whole point.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)">Can a wrapper have state of its own?<span class="qa-arrow">▼</span></div><div class="qa-a">Yes — some wrappers contain small auxiliary processes with registers (like the elevator's floor counter or the serial wrapper's shift register and parity accumulator). These are not FSM states — they are support logic that helps translate physical signals into events or that accumulates data across multiple state transitions. The state machine logic itself always lives in the generic core.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)">What if two inputs arrive simultaneously?<span class="qa-arrow">▼</span></div><div class="qa-a">The priority encoder handles this. The IF/ELSIF chain means only the highest-priority condition fires. Lower-priority signals are effectively held for the next cycle (if the FSM is busy) or simply missed (if held for only one cycle). In real hardware design, the application spec defines which signal takes priority — e.g., emergency always beats everything else.</div></div>
+    <div class="qa-item"><div class="qa-q" onclick="toggleQA(this)">How does the wrapper know which ROM section to use?<span class="qa-arrow">▼</span></div><div class="qa-a">Each wrapper sets <code>config_id</code> to a fixed constant — traffic light always drives "00", vending always drives "01", etc. This constant is connected directly to the FSM core's <code>config_id</code> input port and never changes during operation. The ROM uses this to select the correct section for every address lookup.</div></div>
+  </div>
+
+  <div class="prof-box" style="margin-top:1.5rem">
+    <div class="prof-title">🎓 One-Sentence Wrapper Summary</div>
+    <p>"A wrapper is a thin VHDL adapter — 50–80 lines — that translates application-specific hardware signals into the generic 10-bit event language the FSM core understands, and translates the FSM's 16-bit output bitmask back into physical signals, containing zero state-machine logic of its own."</p>
+  </div>
+</section>
+
+<!-- ═══════════ CONFIG ROM ═══════════ -->
+<section class="tab" id="tab-config-rom">
+  <div class="page-header"><h2>Configuration ROM</h2><p>The lookup table that defines all FSM behavior — <code>config_rom.vhd</code></p></div>
+
+  <!-- Student-friendly intro -->
+  <div class="config-rom-intro">
+    <p>The <strong>Configuration ROM</strong> is the brain of the entire system. It is a large lookup table that answers one question every clock cycle: <em>"Given that I am in state X and event Y just happened, what should I do next?"</em> The answer — encoded in a 32-bit word — tells the FSM core: which state to go to, which output signals to assert, and whether to start a timer.</p>
+    <p style="margin-top:.75rem">Think of it like a spreadsheet with rows indexed by (controller, state, event) and columns for (next_state, outputs, flags). Changing behavior is as simple as editing a cell in the spreadsheet — no logic changes required.</p>
+  </div>
+
+  <!-- Why 2^15 — bit allocation math -->
+  <div class="section-title">Why is the Address Space 2¹⁷ = 131,072?</div>
+  <div class="rom-math-block">
+    <div class="rom-math-text">
+      <p>The ROM address is formed by <strong>concatenating three fields</strong>:</p>
+      <div class="rom-math-formula">
+        <div class="rmf-row">
+          <span class="rmf-field" style="background:rgba(181,123,255,0.15);border-color:#b57bff">config_id</span>
+          <span class="rmf-size">2 bits</span>
+          <span class="rmf-explain">= 4 possible controllers (00, 01, 10, 11)</span>
+        </div>
+        <div class="rmf-row">
+          <span class="rmf-field" style="background:rgba(0,245,255,0.1);border-color:#00f5ff">current_state</span>
+          <span class="rmf-size">5 bits</span>
+          <span class="rmf-explain">= up to 32 states per controller</span>
+        </div>
+        <div class="rmf-row">
+          <span class="rmf-field" style="background:rgba(255,232,77,0.1);border-color:#ffe84d">event_code</span>
+          <span class="rmf-size">10 bits</span>
+          <span class="rmf-explain">= up to 1,024 distinguishable events</span>
+        </div>
+        <div class="rmf-equals">
+          <div class="rmf-total">Total address width = 2 + 5 + 10 = <strong>17 bits</strong></div>
+          <div class="rmf-total-size">2¹⁷ = <strong style="color:var(--cyan)">131,072</strong> possible addresses</div>
+        </div>
+      </div>
+    </div>
+    <div class="rom-bitfield-visual">
+      <div class="rbf-title">Address Bitfield — 17 bits</div>
+      <div class="rbf-diagram">
+        <div class="rbf-field f-config" style="width:12%">
+          <div class="rbf-bits">[16:15]</div>
+          <div class="rbf-name">config_id</div>
+          <div class="rbf-val">2 bits</div>
+        </div>
+        <div class="rbf-field f-state" style="width:29%">
+          <div class="rbf-bits">[14:10]</div>
+          <div class="rbf-name">state</div>
+          <div class="rbf-val">5 bits</div>
+        </div>
+        <div class="rbf-field f-event" style="width:59%">
+          <div class="rbf-bits">[9:0]</div>
+          <div class="rbf-name">event_code</div>
+          <div class="rbf-val">10 bits</div>
+        </div>
+      </div>
+      <div class="rbf-example">
+        <strong>Worked Example:</strong> Traffic Light (config_id=<code>00</code>), state=RED (<code>00001</code>), event=timer_expire (<code>0000000100</code>)<br>
+        Address = <code>00</code> <code>00001</code> <code>0000000100</code> = <code>0b00_00001_0000000100</code> = <strong style="color:var(--cyan)">0x0404</strong><br>
+        ROM[0x0404] = <code>x"0_02_0004_04"</code> → next_state=GREEN, green_led=ON, timer_start=1
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box" style="margin-top:1rem">
+    <div class="info-box-title">📐 In Practice: Sparse ROM</div>
+    <p>Each controller section has 2<sup>15</sup> = 32,768 addresses (5-bit state × 10-bit event). With 32-bit words, that is 128 KB per section. However, only <strong>20–30 entries are non-zero</strong> per controller — all others default to <code>x"00000000"</code> (stay in state 0, no outputs). VHDL synthesis tools automatically infer efficient BRAM or LUT-RAM from this sparse structure. The <code>OTHERS =&gt; (OTHERS =&gt; '0')</code> default is intentional: an unmapped (state, event) pair safely does nothing.</p>
+  </div>
+
+  <div class="section-title">ROM Address Structure</div>
+  <div class="rom-select-diagram">
+    <div class="rom-addr-box">
+      <div class="addr-field config-id-field">config_id<br>[16:15]<br>2 bits</div>
+      <div class="addr-field state-field">current_state<br>[14:10]<br>5 bits</div>
+      <div class="addr-field event-field">event_code<br>[9:0]<br>10 bits</div>
+    </div>
+    <div class="rom-cases">
+      <div class="rom-case"><span class="config-badge">"00"</span> → traffic_light_rom — up to 1024 entries for traffic light FSM</div>
+      <div class="rom-case"><span class="config-badge">"01"</span> → vending_machine_rom — up to 1024 entries for vending machine FSM</div>
+      <div class="rom-case"><span class="config-badge">"10"</span> → elevator_rom — up to 1024 entries for elevator FSM</div>
+      <div class="rom-case"><span class="config-badge">"11"</span> → serial_protocol_rom — 12 entries for serial comm FSM</div>
+    </div>
+  </div>
+  <div class="section-title">ROM Entry Examples</div>
+  <div class="rom-examples">
+    <div class="rom-example-row"><div class="rom-addr">Traffic: RED + timer_expire<br><code>addr 0x0404</code></div><div class="rom-word">x"0_05_0004_00"</div><div class="rom-meaning">next_state=GREEN(00010), output=green_led(bit2), timer_start=1 → "Green phase begins"</div></div>
+    <div class="rom-example-row"><div class="rom-addr">Vending: COLLECT + cancel<br><code>interrupt entry</code></div><div class="rom-word">x"0_00_0000_02"</div><div class="rom-meaning">next_state=IDLE(00000), interrupt_en=1 → "Cancel forces immediate IDLE"</div></div>
+    <div class="rom-example-row"><div class="rom-addr">Elevator: MOVE_UP + go_up<br><code>spurious guard</code></div><div class="rom-word">x"0_01_0001_01"</div><div class="rom-meaning">next_state=MOVE_UP(hold), hold_state=1 → "Guard against pipeline spurious re-entry"</div></div>
+    <div class="rom-example-row"><div class="rom-addr">Serial: SP_STOP + rx_valid<br>(good parity)</div><div class="rom-word">x"0_0B_0100_00"</div><div class="rom-meaning">next_state=SP_COMPLETE(01011), output=tx_enable → "Frame received OK"</div></div>
+  </div>
+</section>
+
+<!-- ═══════════ TRAFFIC LIGHT ═══════════ -->
+<section class="tab" id="tab-traffic">
+  <div class="page-header"><h2>Traffic Light FSM</h2><p><code>traffic_light_wrapper.vhd</code> · config_id = "00" · 6 states · 13 scenario steps</p></div>
+  <div class="real-world-box"><h3>🚦 Problem Being Solved</h3><p>A road intersection needs a controller that cycles Red→Green→Yellow on a timer, handles pedestrian button presses to queue a PED_CROSS phase, and supports an emergency override that blanks all lights for emergency vehicles. The FSM enforces correct ordering — you can never reach GREEN without passing through RED first.</p></div>
+
+  <!-- State/Event Explanation -->
+  <div class="fsm-explain-block">
+    <div class="fsm-explain-title">Understanding States, Events &amp; Outputs</div>
+    <div class="fsm-explain-grid">
+      <div class="fee-section">
+        <div class="fee-label">States (what the FSM is doing)</div>
+        <div class="fee-items">
+          <div class="fee-item"><span class="fee-badge" style="background:#6b7280">S0 IDLE</span> All lights off. Intersection inactive — no car or pedestrian detected. System idle after reset.</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#ff4f6e">S1 RED</span> Red light ON. All vehicles stopped. Either a car_sensor or pedestrian_btn triggered entry. Timer started.</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#39ff8f;color:#000">S2 GREEN</span> Green light ON. Vehicles may proceed. Entered after RED timer expires. Timer started.</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#ffe84d;color:#000">S3 YELLOW</span> Yellow light ON. Warning: prepare to stop. Entered after GREEN timer expires. Short timer.</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#4fc3f7;color:#000">S4 PED_WAIT</span> Red ON, pedestrian request queued. Entered from RED when pedestrian_btn fires. (From GREEN, ped_btn causes GREEN→RED directly.)</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#b57bff">S5 PED_CROSS</span> Red ON + walk signal ON. Pedestrian actively crossing. Entered from PED_WAIT after timer.</div>
+        </div>
+      </div>
+      <div class="fee-section">
+        <div class="fee-label">Events (what triggers transitions)</div>
+        <div class="fee-items">
+          <div class="fee-item"><span class="fee-badge" style="border-color:#4fc3f7">pedestrian_btn (bit[0]=1)</span> Pedestrian pressed the crossing button. Valid from IDLE and RED → goes to PED_WAIT. From GREEN → goes directly to RED (immediate stop, no intermediate wait state).</div>
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#ffe84d">car_sensor (bit[1]=2)</span> Vehicle detected by loop sensor. Valid from IDLE only — triggers entry to RED.</div>
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#39ff8f">timer_done (bit[2]=4)</span> External timer expired. Drives all phase transitions: RED→GREEN, GREEN→YELLOW, YELLOW→RED, PED_WAIT→PED_CROSS, PED_CROSS→RED.</div>
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#ff4f6e">INTERRUPT (emergency)</span> Emergency vehicle override. ROM interrupt_en entry forces FSM → IDLE in 1 cycle.</div>
+        </div>
+        <div class="fee-label" style="margin-top:.75rem">Outputs (physical signals asserted)</div>
+        <div class="fee-items">
+          <div class="fee-item"><code>output_action[0]</code> → <strong>red_led</strong>: HIGH in RED, PED_WAIT, PED_CROSS</div>
+          <div class="fee-item"><code>output_action[1]</code> → <strong>yellow_led</strong>: HIGH in YELLOW only</div>
+          <div class="fee-item"><code>output_action[2]</code> → <strong>green_led</strong>: HIGH in GREEN only</div>
+          <div class="fee-item"><code>output_action[3]</code> → <strong>ped_signal</strong>: HIGH in PED_CROSS only</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guided Walkthroughs from testbench -->
+  <div class="section-title">Guided Walkthroughs — from Testbench Cases</div>
+  <div class="walkthrough-tabs">
+    <button class="wt-tab active" onclick="showWT('traffic','normal')">TB Tests 2–5: Normal Car Cycle</button>
+    <button class="wt-tab" onclick="showWT('traffic','ped-green')">TB: Ped from GREEN → RED</button>
+    <button class="wt-tab" onclick="showWT('traffic','ped-red')">TB Tests 16–19: Ped from RED</button>
+  </div>
+  <div class="walkthrough-content" id="wt-traffic-normal">
+    <div class="wt-title">Normal Car Cycle: IDLE → RED → GREEN → YELLOW → RED (TB Tests 2–5)</div>
+    <div class="wt-steps">
+      <div class="wt-step"><div class="wt-step-num">1</div><div class="wt-step-body"><strong>do_reset</strong>: FSM in IDLE. All LEDs off. <code>check_lights('0','0','0','0')</code> passes.</div></div>
+      <div class="wt-step"><div class="wt-step-num">2</div><div class="wt-step-body"><strong>pulse_sig(car_sensor)</strong>: event_code="10" fires → ROM[00_00000_0000000010]: next_state=RED(00001). 3 settle cycles later: <code>red_led='1'</code>. Test T2 passes.</div></div>
+      <div class="wt-step"><div class="wt-step-num">3</div><div class="wt-step-body"><strong>pulse_sig(timer_done)</strong>: event_code="100" fires from RED → ROM[00_00001_0000000100]: next_state=GREEN(00010). <code>green_led='1'</code>. Test T3 passes.</div></div>
+      <div class="wt-step"><div class="wt-step-num">4</div><div class="wt-step-body"><strong>pulse_sig(timer_done)</strong> from GREEN → YELLOW(00011). <code>yellow_led='1'</code>. Test T4 passes.</div></div>
+      <div class="wt-step"><div class="wt-step-num">5</div><div class="wt-step-body"><strong>pulse_sig(timer_done)</strong> from YELLOW → RED(00001). <code>red_led='1'</code>. Normal 3-phase cycle confirmed. Test T5 passes.</div></div>
+    </div>
+  </div>
+  <div class="walkthrough-content hidden" id="wt-traffic-ped-green">
+    <div class="wt-title">Pedestrian from GREEN: GREEN → RED → PED_WAIT → PED_CROSS → RED</div>
+    <div class="wt-steps">
+      <div class="wt-step"><div class="wt-step-num">1</div><div class="wt-step-body"><strong>Setup:</strong> reset → car_sensor → timer_done → FSM now in GREEN. <code>green_led='1'</code>.</div></div>
+      <div class="wt-step"><div class="wt-step-num">2</div><div class="wt-step-body"><strong>pulse_sig(pedestrian_btn)</strong> while GREEN: ROM[00_00010_0000000001]: next_state=<strong>RED</strong>(00001). <code>red_led='1', green_led='0'</code>. Vehicles stop immediately — GREEN → RED direct transition.</div></div>
+      <div class="wt-step"><div class="wt-step-num">3</div><div class="wt-step-body"><strong>pulse_sig(pedestrian_btn)</strong> from RED → PED_WAIT(00100). Pedestrian crossing queued. Red held.</div></div>
+      <div class="wt-step"><div class="wt-step-num">4</div><div class="wt-step-body"><strong>pulse_sig(timer_done)</strong> from PED_WAIT → PED_CROSS(00101). <code>ped_signal='1'</code>. Walk signal ON!</div></div>
+      <div class="wt-step"><div class="wt-step-num">5</div><div class="wt-step-body"><strong>pulse_sig(timer_done)</strong> from PED_CROSS → RED(00001). <code>ped_signal='0'</code>. Crossing complete. Normal cycle resumes.</div></div>
+    </div>
+  </div>
+  <div class="walkthrough-content hidden" id="wt-traffic-ped-red">
+    <div class="wt-title">Pedestrian from RED: RED → PED_WAIT → PED_CROSS → RED (TB Tests 16–19)</div>
+    <div class="wt-steps">
+      <div class="wt-step"><div class="wt-step-num">1</div><div class="wt-step-body"><strong>Setup:</strong> reset → car_sensor → FSM in RED. <code>red_led='1'</code>. T16 passes.</div></div>
+      <div class="wt-step"><div class="wt-step-num">2</div><div class="wt-step-body"><strong>pulse_sig(pedestrian_btn)</strong> from RED(00001) → PED_WAIT(00100). Red held. T17: <code>check_lights('1','0','0','0')</code> passes.</div></div>
+      <div class="wt-step"><div class="wt-step-num">3</div><div class="wt-step-body"><strong>pulse_sig(timer_done)</strong> from PED_WAIT → PED_CROSS(00101). Walk signal asserted. T18: <code>check_lights('1','0','0','1')</code> passes.</div></div>
+      <div class="wt-step"><div class="wt-step-num">4</div><div class="wt-step-body"><strong>pulse_sig(timer_done)</strong> from PED_CROSS → RED(00001). <code>ped_signal='0'</code>. T19 passes. Pedestrian path from RED fully verified.</div></div>
+    </div>
+  </div>
+
+  <!-- State bar -->
+  <div class="current-state-bar">
+    <span class="csb-label">STATE</span>
+    <span class="csb-state" id="csb-state-traffic">IDLE</span>
+    <span class="csb-sep">·</span>
+    <span class="csb-desc"  id="csb-desc-traffic">Press Start to begin the simulation.</span>
+  </div>
+
+  <!-- 3-panel layout -->
+  <div class="fsm-full-layout">
+
+    <!-- Panel 1: States + Events -->
+    <div class="fsm-panel">
+      <div class="fsm-panel-header">States &amp; Events</div>
+      <div class="fsm-panel-body">
+        <div style="font-size:0.7rem;color:var(--txt-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem">States</div>
+        <div class="state-list">
+          <div class="state-item" style="border-color:#6b7280"><span class="state-badge" style="background:#6b7280">S0</span><strong>IDLE</strong> — all lights off</div>
+          <div class="state-item" style="border-color:#ff4f6e"><span class="state-badge" style="background:#ff4f6e">S1</span><strong>RED</strong> — vehicles stopped</div>
+          <div class="state-item" style="border-color:#39ff8f"><span class="state-badge" style="background:#39ff8f">S2</span><strong>GREEN</strong> — vehicles moving</div>
+          <div class="state-item" style="border-color:#ffe84d"><span class="state-badge" style="background:#ffe84d">S3</span><strong>YELLOW</strong> — transition warning</div>
+          <div class="state-item" style="border-color:#4fc3f7"><span class="state-badge" style="background:#4fc3f7">S4</span><strong>PED_WAIT</strong> — ped queued</div>
+          <div class="state-item" style="border-color:#b57bff"><span class="state-badge" style="background:#b57bff">S5</span><strong>PED_CROSS</strong> — ped crossing</div>
+        </div>
+        <div style="font-size:0.7rem;color:var(--txt-3);text-transform:uppercase;letter-spacing:.07em;margin:1rem 0 .5rem">Events</div>
+        <div class="event-list">
+          <div class="event-item"><code>bit[0]</code> → pedestrian_btn (1)</div>
+          <div class="event-item"><code>bit[1]</code> → car_sensor (2)</div>
+          <div class="event-item"><code>bit[2]</code> → timer_expire (4)</div>
+          <div class="event-item"><code>INTERRUPT</code> → emergency override</div>
+        </div>
+        <div style="font-size:0.7rem;color:var(--txt-3);text-transform:uppercase;letter-spacing:.07em;margin:1rem 0 .5rem">Outputs</div>
+        <div class="event-list">
+          <div class="event-item"><code>output[0]</code> → red_led</div>
+          <div class="event-item"><code>output[1]</code> → yellow_led</div>
+          <div class="event-item"><code>output[2]</code> → green_led</div>
+          <div class="event-item"><code>output[3]</code> → ped_signal</div>
+        </div>
+      </div>
+      <!-- 5-button control panel -->
+      <div class="ctrl-panel">
+        <button class="ctrl-btn start"  onclick="fsmStart('traffic')">▶ Start</button>
+        <button class="ctrl-btn pause"  onclick="fsmPause('traffic')"  id="btn-pause-traffic">⏸ Pause</button>
+        <button class="ctrl-btn resume" onclick="fsmResume('traffic')" id="btn-resume-traffic">▷ Resume</button>
+        <button class="ctrl-btn step"   onclick="fsmStep('traffic')">⏭ Step</button>
+        <button class="ctrl-btn reset"  onclick="fsmReset('traffic')">↺ Reset</button>
+        <div class="ctrl-speed">Speed:
+          <select onchange="fsmSpeed('traffic',this.value)">
+            <option value="2800">Slow</option>
+            <option value="1800" selected>Normal</option>
+            <option value="900">Fast</option>
+            <option value="400">Turbo</option>
+          </select>
+        </div>
+        <div class="ctrl-step-label" id="anim-step-traffic">Press Start</div>
+      </div>
+    </div>
+
+    <!-- Panel 2: Animated SVG diagram -->
+    <div class="fsm-panel">
+      <div class="fsm-panel-header">Animated State Diagram</div>
+      <svg id="fsm-svg-traffic" viewBox="0 0 380 460" xmlns="http://www.w3.org/2000/svg" class="state-svg">
+        <defs><marker id="ah2" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#2a3560"/></marker></defs>
+        <!-- IDLE (S0) — outputs: red=0,yellow=0,green=0,ped=0 -->
+        <circle cx="190" cy="40"  r="30" class="state-circle" style="fill:#0c1020;stroke:#6b7280" data-state="0"/>
+        <text x="190" y="35"  class="state-text">IDLE</text>
+        <text x="190" y="47" class="state-text-sm" style="font-size:5.5px">r=0,y=0,g=0,p=0</text>
+        <text x="190" y="57" class="state-text-sm">S0</text>
+        <!-- RED (S1) — outputs: red=1,yellow=0,green=0,ped=0 -->
+        <circle cx="80"  cy="155" r="30" class="state-circle" style="fill:#200008;stroke:#ff4f6e" data-state="1"/>
+        <text x="80"  y="150" class="state-text">RED</text>
+        <text x="80"  y="162" class="state-text-sm" style="font-size:5.5px">r=1,y=0,g=0,p=0</text>
+        <text x="80"  y="172" class="state-text-sm">S1</text>
+        <!-- GREEN (S2) — outputs: red=0,yellow=0,green=1,ped=0 -->
+        <circle cx="300" cy="155" r="30" class="state-circle" style="fill:#001806;stroke:#39ff8f" data-state="2"/>
+        <text x="300" y="150" class="state-text">GREEN</text>
+        <text x="300" y="162" class="state-text-sm" style="font-size:5.5px">r=0,y=0,g=1,p=0</text>
+        <text x="300" y="172" class="state-text-sm">S2</text>
+        <!-- YELLOW (S3) — outputs: red=0,yellow=1,green=0,ped=0 -->
+        <circle cx="300" cy="285" r="30" class="state-circle" style="fill:#1a1200;stroke:#ffe84d" data-state="3"/>
+        <text x="300" y="280" class="state-text">YELLOW</text>
+        <text x="300" y="292" class="state-text-sm" style="font-size:5.5px">r=0,y=1,g=0,p=0</text>
+        <text x="300" y="302" class="state-text-sm">S3</text>
+        <!-- PED_WAIT (S4) — outputs: red=1,yellow=0,green=0,ped=0 -->
+        <circle cx="80"  cy="285" r="30" class="state-circle" style="fill:#07152a;stroke:#4fc3f7" data-state="4"/>
+        <text x="80"  y="279" class="state-text">PED</text>
+        <text x="80"  y="289" class="state-text-sm">WAIT S4</text>
+        <text x="80"  y="300" class="state-text-sm" style="font-size:5px">r=1,y=0,g=0,p=0</text>
+        <!-- PED_CROSS (S5) — outputs: red=1,yellow=0,green=0,ped=1 -->
+        <circle cx="190" cy="415" r="30" class="state-circle" style="fill:#15063a;stroke:#b57bff" data-state="5"/>
+        <text x="190" y="409" class="state-text">PED</text>
+        <text x="190" y="419" class="state-text-sm">CROSS S5</text>
+        <text x="190" y="430" class="state-text-sm" style="font-size:5px">r=1,y=0,g=0,p=1</text>
+
+        <!-- ── TRANSITIONS (matching PDF exactly) ── -->
+
+        <!-- IDLE → RED: car_sensor=1 OR pedestrian_btn=1 -->
+        <line x1="168" y1="58" x2="102" y2="133" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah2)"/>
+        <text x="100" y="88" class="trans-label">car_sensor=1</text>
+        <text x="100" y="97" class="trans-label">OR ped_btn=1</text>
+
+        <!-- RED → GREEN: timer_done=1 -->
+        <line x1="110" y1="155" x2="270" y2="155" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah2)"/>
+        <text x="190" y="148" class="trans-label">timer_done=1</text>
+
+        <!-- GREEN self-loop: timer_done=0 (stay green while timer running) -->
+        <path d="M326,138 Q358,110 358,155 Q358,180 326,172" stroke="#39ff8f" stroke-width="1.2" stroke-dasharray="4,3" fill="none" marker-end="url(#ah2)"/>
+        <text x="362" y="152" class="trans-label" style="fill:#39ff8f;font-size:5.5px">tmr=0</text>
+
+        <!-- GREEN → YELLOW: timer_done=1 (normal) -->
+        <line x1="300" y1="185" x2="300" y2="255" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah2)"/>
+        <text x="310" y="224" class="trans-label">timer_done=1</text>
+
+        <!-- YELLOW self-loop: timer_done=0 -->
+        <path d="M326,272 Q358,252 358,285 Q358,310 326,298" stroke="#ffe84d" stroke-width="1.2" stroke-dasharray="4,3" fill="none" marker-end="url(#ah2)"/>
+        <text x="362" y="288" class="trans-label" style="fill:#ffe84d;font-size:5.5px">tmr=0</text>
+
+        <!-- YELLOW → RED: timer_done=1  (YELLOW cx=300,cy=285 → RED cx=80,cy=155) -->
+        <path d="M272,278 Q185,210 110,162" stroke="#ffe84d" stroke-width="2" fill="none" marker-end="url(#ah2)"/>
+        <text x="170" y="212" class="trans-label" style="fill:#ffe84d;font-weight:700">timer_done=1</text>
+        <text x="170" y="221" class="trans-label" style="fill:#ffe84d;font-size:5.5px">YELLOW→RED</text>
+
+        <!-- PED_WAIT self-loop: timer_done=0 -->
+        <path d="M54,272 Q20,252 20,285 Q20,310 54,300" stroke="#4fc3f7" stroke-width="1.2" stroke-dasharray="4,3" fill="none" marker-end="url(#ah2)"/>
+        <text x="2" y="290" class="trans-label" style="fill:#4fc3f7;font-size:5.5px">tmr=0</text>
+
+        <!-- PED_WAIT → PED_CROSS: timer_done=1 -->
+        <line x1="107" y1="300" x2="163" y2="390" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah2)"/>
+        <text x="102" y="350" class="trans-label">timer_done=1</text>
+
+        <!-- PED_CROSS self-loop: timer_done=0 -->
+        <path d="M216,428 Q250,445 250,415 Q250,393 216,400" stroke="#b57bff" stroke-width="1.2" stroke-dasharray="4,3" fill="none" marker-end="url(#ah2)"/>
+        <text x="252" y="418" class="trans-label" style="fill:#b57bff;font-size:5.5px">tmr=0</text>
+
+        <!-- PED_CROSS → RED: timer_done=1  (PED_CROSS cx=190,cy=415 → RED cx=80,cy=155) -->
+        <path d="M162,400 Q50,340 50,185" stroke="#b57bff" stroke-width="2" fill="none" marker-end="url(#ah2)"/>
+        <text x="26" y="308" class="trans-label" style="fill:#b57bff;font-weight:700">timer_done=1</text>
+        <text x="26" y="318" class="trans-label" style="fill:#b57bff;font-size:5.5px">PED_CROSS→RED</text>
+
+        <!-- GREEN → RED: pedestrian_btn=1 (orange dashed, direct to RED) -->
+        <path d="M272,162 Q200,155 112,158" stroke="#ff9d3d" stroke-width="2" stroke-dasharray="6,3" fill="none" marker-end="url(#ah2)"/>
+        <text x="185" y="150" class="trans-label" style="fill:#ff9d3d;font-weight:700">ped_btn=1</text>
+        <text x="185" y="159" class="trans-label" style="fill:#ff9d3d;font-size:5.5px">GREEN→RED</text>
+
+        <!-- RED → PED_WAIT: pedestrian_btn=1 (dashed cyan, down the left) -->
+        <line x1="80" y1="185" x2="80" y2="255" stroke="#4fc3f7" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#ah2)"/>
+        <text x="14" y="225" class="trans-label" style="fill:#4fc3f7">ped_btn=1</text>
+
+        <!-- Emergency → IDLE (red dashed, from any active state) -->
+        <path d="M55,155 Q18,90 165,44" stroke="#ff4f6e" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#ah2)"/>
+        <text x="22" y="98" class="trans-label" style="fill:#ff4f6e">EMERG!</text>
+      </svg>
+    </div>
+
+    <!-- Panel 3: Live intersection demo -->
+    <div class="fsm-panel">
+      <div class="fsm-panel-header">Live Intersection Demo</div>
+      <div class="fsm-panel-body" style="padding:.75rem">
+        <div class="scenario-canvas" id="traffic-scene">
+          <div class="tl-road"><div class="tl-road-markings"></div></div>
+          <div class="tl-sidewalk"></div>
+          <div class="tl-pole"></div>
+          <div class="tl-box">
+            <div class="tl-light" id="tl-red"></div>
+            <div class="tl-light" id="tl-yellow"></div>
+            <div class="tl-light" id="tl-green"></div>
+          </div>
+          <!-- Car -->
+          <div class="tl-car" id="tl-car" style="left:18%;opacity:0">
+            <svg viewBox="0 0 52 28" width="52" height="28">
+              <rect x="4" y="12" width="44" height="14" rx="4" fill="#1e3a6e"/>
+              <rect x="10" y="4"  width="28" height="12" rx="3" fill="#2563eb"/>
+              <rect x="14" y="6"  width="10" height="8"  rx="2" fill="#93c5fd" opacity=".75"/>
+              <rect x="27" y="6"  width="8"  height="8"  rx="2" fill="#93c5fd" opacity=".75"/>
+              <circle cx="13" cy="26" r="4" fill="#1f2937" stroke="#9ca3af" stroke-width="1"/>
+              <circle cx="39" cy="26" r="4" fill="#1f2937" stroke="#9ca3af" stroke-width="1"/>
+              <rect x="46" y="14" width="5" height="5" rx="1" fill="#fbbf24" opacity=".9"/>
+            </svg>
+          </div>
+          <!-- Pedestrian -->
+          <div class="tl-pedestrian" id="tl-ped" style="opacity:.12">
+            <svg viewBox="0 0 14 32" width="14" height="32">
+              <circle cx="7" cy="4" r="4" fill="#e2e8f0"/>
+              <line x1="7" y1="8"  x2="7"  y2="20" stroke="#e2e8f0" stroke-width="2"/>
+              <line x1="7" y1="12" x2="2"  y2="18" stroke="#e2e8f0" stroke-width="2"/>
+              <line x1="7" y1="12" x2="12" y2="18" stroke="#e2e8f0" stroke-width="2"/>
+              <line x1="7" y1="20" x2="3"  y2="30" stroke="#e2e8f0" stroke-width="2"/>
+              <line x1="7" y1="20" x2="11" y2="30" stroke="#e2e8f0" stroke-width="2"/>
+            </svg>
+          </div>
+          <!-- Ambulance (emergency) -->
+          <div class="tl-ambulance" id="tl-ambulance" style="right:-70px;display:none">
+            <svg viewBox="0 0 60 30" width="60" height="30">
+              <rect x="2"  y="8"  width="56" height="18" rx="4" fill="#ef4444"/>
+              <rect x="12" y="3"  width="28" height="10" rx="2" fill="#ef4444"/>
+              <text x="30" y="20" fill="#fff" font-size="8" font-weight="700" text-anchor="middle">🚑</text>
+              <circle cx="12" cy="26" r="4" fill="#111"/>
+              <circle cx="48" cy="26" r="4" fill="#111"/>
+              <rect x="2"  y="9"  width="8" height="5" rx="1" fill="#fbbf24" opacity=".9"/>
+            </svg>
+          </div>
+        </div>
+        <div class="scenario-desc" id="sc-desc-traffic"><strong style="color:#6b7280">IDLE:</strong> Press Start to begin the simulation.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VHDL snippet -->
+  <div class="section-title">VHDL Connection</div>
+  <div class="code-block"><div class="code-header">traffic_light_wrapper.vhd — Input decoder</div>
+<pre><span class="kw">IF</span> fsm_busy = '0' <span class="kw">THEN</span>
+    <span class="kw">IF</span>    pedestrian_btn = '1' <span class="kw">THEN</span> event_code &lt;= EV_PEDESTRIAN_BTN; <span class="cm">-- 001</span>
+    <span class="kw">ELSIF</span> car_sensor     = '1' <span class="kw">THEN</span> event_code &lt;= EV_CAR_SENSOR;     <span class="cm">-- 010</span>
+    <span class="kw">ELSIF</span> timer_done     = '1' <span class="kw">THEN</span> event_code &lt;= EV_TIMER_DONE;     <span class="cm">-- 100</span>
+    <span class="kw">END IF</span>;
+<span class="kw">END IF</span>;</pre></div>
+  <div class="explain-box">The wrapper is a pure priority encoder. Physical inputs collapse into one 10-bit <code>event_code</code> per cycle. The <code>fsm_busy</code> gate prevents double-firing during the 2-cycle pipeline.</div>
+
+  <!-- Embedded waveform -->
+  <div class="embedded-waveform">
+    <div class="embedded-waveform-header">📊 Traffic Light FSM — GHDL Simulation Waveform</div>
+    <div class="waveform-display" id="wf-embed-traffic" style="min-height:260px;padding:1.1rem;overflow-x:auto"></div>
+    <div class="waveform-explanation"><strong>Reading:</strong> Cycle 2 → <code>event_code=car</code> fires, <code>fsm_busy</code> HIGH. Cycle 3 → <code>state_code</code>=RED, <code>red_led</code> HIGH. Cycle 7 → <code>timer_done</code> → GREEN. Cycle 11 → <code>timer_done</code> → YELLOW. Cycle 22 → <code>timer_done</code> → <strong>RED</strong> (YELLOW→RED). Cycle 14 → <code>ped_btn</code> while GREEN → <strong>RED directly</strong> (GREEN→RED on pedestrian_btn=1). Cycle 15 → <code>ped_btn</code> from RED → PED_WAIT. Cycle 19 → <code>timer_done</code> → PED_CROSS, <code>ped_signal</code> HIGH. Cycle 22 → <code>timer_done</code> → <strong>RED</strong> (PED_CROSS→RED). Cyan cursor = current simulation step.</div>
+    <div class="waveform-legend">
+      <span class="wf-leg-item"><span class="wf-dot high"></span>HIGH</span>
+      <span class="wf-leg-item"><span class="wf-dot low"></span>LOW</span>
+      <span class="wf-leg-item"><span class="wf-dot bus"></span>Bus</span>
+      <span class="wf-leg-item"><span class="wf-dot clk"></span>Clock</span>
+    </div>
+  </div>
+
+  <div class="prof-box" style="margin-top:1.5rem">
+    <div class="prof-title">🎓 Viva / Presentation Summary</div>
+    <p>"The traffic light wrapper maps three physical inputs to a 10-bit event code, sends it to the generic FSM core, which looks up the ROM and returns a 32-bit word. Bits [28:24] give the next state, bits [23:8] give the output bitmask. The wrapper decodes bit [0] as red_led, bit [2] as green_led, etc. Zero traffic-specific logic exists in the FSM core — everything is in the ROM table."</p>
+  </div>
+</section>
+
+<!-- ═══════════ VENDING MACHINE ═══════════ -->
+<section class="tab" id="tab-vending">
+  <div class="page-header"><h2>Vending Machine FSM</h2><p><code>vending_wrapper.vhd</code> · config_id = "01" · 5 states · 16 scenario steps</p></div>
+  <div class="real-world-box"><h3>🥤 Problem Being Solved</h3><p>A vending machine must accept coins, check balance, let the user select an item, check stock, dispense the product, and return change. If cancelled mid-transaction, an interrupt must fire to refund all coins. The machine must never dispense without payment and must handle empty stock gracefully by jumping directly to CHANGE (refund) without dispensing.</p></div>
+
+  <!-- State/Event Explanation -->
+  <div class="fsm-explain-block">
+    <div class="fsm-explain-title">Understanding States, Events &amp; Outputs</div>
+    <div class="fsm-explain-grid">
+      <div class="fee-section">
+        <div class="fee-label">States</div>
+        <div class="fee-items">
+          <div class="fee-item"><span class="fee-badge" style="background:#6b7280">S0 VM_IDLE</span> Waiting for a customer. Display shows "WELCOME INSERT COIN". All motors off.</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#ffe84d;color:#000">S2 VM_COLLECT</span> Counting coins. display_msg=0x01. Can receive multiple coin inserts (hold_state). Stays until balance sufficient for selection.</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#4fc3f7;color:#000">S1 VM_SELECT</span> Item menu active. display_msg=0x02. Waiting for selection_btn with valid item + credit_ok.</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#39ff8f;color:#000">S3 VM_DISPENSE</span> dispense_motor=1. display_msg=0x03. Releasing product from tray. Waiting for dispense_done event.</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#b57bff">S4 VM_CHANGE</span> change_return=1. display_msg=0x04. Returning change coins. Waiting for change_done event.</div>
+        </div>
+      </div>
+      <div class="fee-section">
+        <div class="fee-label">Events &amp; Outputs</div>
+        <div class="fee-items">
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#ffe84d">coin_insert (bit[0]=1)</span> Insert a coin. IDLE→COLLECT. In COLLECT: hold_state (accumulate balance).</div>
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#4fc3f7">selection_btn (bits[2:1])</span> Item selection "01", "10", "11". COLLECT→SELECT (if balance ok). SELECT→DISPENSE (if credit_ok + stock).</div>
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#ff4f6e">item_empty (bit[3]=8)</span> Item out of stock. SELECT→CHANGE directly (skip DISPENSE). Full refund issued.</div>
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#39ff8f">dispense_done (bit[4]=16)</span> Motor finished dispensing. DISPENSE→CHANGE.</div>
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#b57bff">change_done (bit[6]=64)</span> Change returned. CHANGE→IDLE.</div>
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#ff4f6e">cancel_btn ⚠ INTERRUPT</span> VM_INTERRUPT_EVENT="0000100000". Forces FSM→IDLE in 1 cycle. interrupt_return_detect asserts change_return pulse.</div>
+        </div>
+        <div class="fee-label" style="margin-top:.75rem">Outputs</div>
+        <div class="fee-items">
+          <div class="fee-item"><code>dispense_motor</code> HIGH in VM_DISPENSE only</div>
+          <div class="fee-item"><code>change_return</code> HIGH in VM_CHANGE or on cancel interrupt pulse</div>
+          <div class="fee-item"><code>display_msg</code> 8-bit: 0x00=IDLE, 0x01=COLLECT, 0x02=SELECT, 0x03=DISPENSE, 0x04=CHANGE</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guided Walkthroughs -->
+  <div class="section-title">Guided Walkthroughs — from Testbench Cases</div>
+  <div class="walkthrough-tabs">
+    <button class="wt-tab active" onclick="showWT('vending','normal')">TB Tests 1–6: Normal Purchase</button>
+    <button class="wt-tab" onclick="showWT('vending','cancel')">TB Tests 7–10: Cancel Interrupt</button>
+  </div>
+  <div class="walkthrough-content" id="wt-vending-normal">
+    <div class="wt-title">Normal Purchase: IDLE → COLLECT → SELECT → DISPENSE → CHANGE → IDLE (TB Tests 1–6)</div>
+    <div class="wt-steps">
+      <div class="wt-step"><div class="wt-step-num">1</div><div class="wt-step-body"><strong>do_reset</strong>: VM_IDLE. dispense_motor='0', change_return='0', display_msg=0x00. T1 passes.</div></div>
+      <div class="wt-step"><div class="wt-step-num">2</div><div class="wt-step-body"><strong>pulse_sig(coin_insert)</strong>: event_code=1 from IDLE → ROM[01_00000_0000000001]: next_state=VM_COLLECT. display_msg=0x01. T2 passes.</div></div>
+      <div class="wt-step"><div class="wt-step-num">3</div><div class="wt-step-body"><strong>select_sig("01")</strong>: selection event from COLLECT → VM_SELECT. display_msg=0x02. T3: <code>check_vm(VM_SELECT,'0','0',0x02)</code> passes.</div></div>
+      <div class="wt-step"><div class="wt-step-num">4</div><div class="wt-step-body"><strong>select_sig("01") again</strong>: selection + credit_ok from SELECT → VM_DISPENSE. dispense_motor='1'. T4 passes.</div></div>
+      <div class="wt-step"><div class="wt-step-num">5</div><div class="wt-step-body"><strong>pulse_sig(dispense_done)</strong>: DISPENSE → VM_CHANGE. change_return='1'. T5 passes.</div></div>
+      <div class="wt-step"><div class="wt-step-num">6</div><div class="wt-step-body"><strong>pulse_sig(change_done)</strong>: CHANGE → VM_IDLE. All outputs clear. T6 passes. Full transaction confirmed.</div></div>
+    </div>
+  </div>
+  <div class="walkthrough-content hidden" id="wt-vending-cancel">
+    <div class="wt-title">Cancel During Collection (TB Tests 7–10)</div>
+    <div class="wt-steps">
+      <div class="wt-step"><div class="wt-step-num">1</div><div class="wt-step-body"><strong>do_reset</strong> → VM_IDLE. T7 passes.</div></div>
+      <div class="wt-step"><div class="wt-step-num">2</div><div class="wt-step-body"><strong>pulse_sig(coin_insert)</strong> → VM_COLLECT. Customer has inserted coin, balance accumulating. T8 passes.</div></div>
+      <div class="wt-step"><div class="wt-step-num">3</div><div class="wt-step-body"><strong>cancel_btn='1' for 2 cycles</strong>: VM_INTERRUPT_EVENT fires. ROM interrupt_en entry triggers. FSM forced → VM_IDLE in 1 pipeline cycle. T9: <code>state_code = VM_IDLE</code> passes.</div></div>
+      <div class="wt-step"><div class="wt-step-num">4</div><div class="wt-step-body"><strong>seen_change_pulse check</strong>: interrupt_return_detect process detected COLLECT→IDLE transition and asserted change_return for 1 cycle. T10: <code>seen_change_pulse = TRUE</code> passes. Coins refunded via interrupt path.</div></div>
+    </div>
+  </div>
+
+  <div class="current-state-bar">
+    <span class="csb-label">STATE</span>
+    <span class="csb-state" id="csb-state-vending">IDLE</span>
+    <span class="csb-sep">·</span>
+    <span class="csb-desc"  id="csb-desc-vending">Press Start to begin the simulation.</span>
+  </div>
+
+  <div class="fsm-full-layout">
+    <!-- Panel 1 -->
+    <div class="fsm-panel">
+      <div class="fsm-panel-header">States &amp; Events</div>
+      <div class="fsm-panel-body">
+        <div style="font-size:0.7rem;color:var(--txt-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem">States</div>
+        <div class="state-list">
+          <div class="state-item" style="border-color:#6b7280"><span class="state-badge" style="background:#6b7280">S0</span><strong>IDLE</strong> — waiting</div>
+          <div class="state-item" style="border-color:#4fc3f7"><span class="state-badge" style="background:#4fc3f7">S1</span><strong>SELECT</strong> — item menu</div>
+          <div class="state-item" style="border-color:#ffe84d"><span class="state-badge" style="background:#ffe84d">S2</span><strong>COLLECT</strong> — coin counting</div>
+          <div class="state-item" style="border-color:#39ff8f"><span class="state-badge" style="background:#39ff8f">S3</span><strong>DISPENSE</strong> — motor active</div>
+          <div class="state-item" style="border-color:#b57bff"><span class="state-badge" style="background:#b57bff">S4</span><strong>CHANGE</strong> — returning coins</div>
+        </div>
+        <div style="font-size:0.7rem;color:var(--txt-3);text-transform:uppercase;letter-spacing:.07em;margin:1rem 0 .5rem">Events</div>
+        <div class="event-list">
+          <div class="event-item"><code>bit[0]</code> → coin_insert (1)</div>
+          <div class="event-item"><code>bits[2:1]</code> → selection (2–6)</div>
+          <div class="event-item"><code>bit[3]</code> → item_empty (8)</div>
+          <div class="event-item"><code>bit[4]</code> → dispense_done (16)</div>
+          <div class="event-item"><code>bit[5]</code> → cancel_btn ⚠ INTERRUPT</div>
+          <div class="event-item"><code>bit[6]</code> → change_done (64)</div>
+        </div>
+      </div>
+      <div class="ctrl-panel">
+        <button class="ctrl-btn start"  onclick="fsmStart('vending')">▶ Start</button>
+        <button class="ctrl-btn pause"  onclick="fsmPause('vending')"  id="btn-pause-vending">⏸ Pause</button>
+        <button class="ctrl-btn resume" onclick="fsmResume('vending')" id="btn-resume-vending">▷ Resume</button>
+        <button class="ctrl-btn step"   onclick="fsmStep('vending')">⏭ Step</button>
+        <button class="ctrl-btn reset"  onclick="fsmReset('vending')">↺ Reset</button>
+        <div class="ctrl-speed">Speed:
+          <select onchange="fsmSpeed('vending',this.value)">
+            <option value="2800">Slow</option>
+            <option value="1800" selected>Normal</option>
+            <option value="900">Fast</option>
+            <option value="400">Turbo</option>
+          </select>
+        </div>
+        <div class="ctrl-step-label" id="anim-step-vending">Press Start</div>
+      </div>
+    </div>
+
+    <!-- Panel 2: SVG -->
+    <div class="fsm-panel">
+      <div class="fsm-panel-header">Animated State Diagram</div>
+      <svg id="fsm-svg-vending" viewBox="0 0 360 440" xmlns="http://www.w3.org/2000/svg" class="state-svg">
+        <defs><marker id="ah3" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#2a3560"/></marker></defs>
+
+        <!-- VM_IDLE (S0 / 00000) -->
+        <circle cx="180" cy="36"  r="28" class="state-circle" style="fill:#0c1020;stroke:#6b7280" data-state="0"/>
+        <text x="180" y="30"  class="state-text">IDLE</text>
+        <text x="180" y="41" class="state-text-sm" style="font-size:5.5px">00000</text>
+        <text x="180" y="51" class="state-text-sm">S0</text>
+
+        <!-- VM_COLLECT (S2 / 00010) — coin counting active, interrupt_en here -->
+        <circle cx="310" cy="160" r="28" class="state-circle" style="fill:#1a1200;stroke:#ffe84d" data-state="2"/>
+        <text x="310" y="153" class="state-text">COLLECT</text>
+        <text x="310" y="164" class="state-text-sm" style="font-size:5.5px">00010</text>
+        <text x="310" y="174" class="state-text-sm">S2</text>
+
+        <!-- VM_SELECT (S1 / 00001) -->
+        <circle cx="56"  cy="160" r="28" class="state-circle" style="fill:#071828;stroke:#4fc3f7" data-state="1"/>
+        <text x="56"  y="153" class="state-text">SELECT</text>
+        <text x="56"  y="164" class="state-text-sm" style="font-size:5.5px">00001</text>
+        <text x="56"  y="174" class="state-text-sm">S1</text>
+
+        <!-- VM_DISPENSE (S3 / 00011) — dispense_motor=1 -->
+        <circle cx="56"  cy="310" r="28" class="state-circle" style="fill:#001806;stroke:#39ff8f" data-state="3"/>
+        <text x="56"  y="303" class="state-text">DISP</text>
+        <text x="56"  y="314" class="state-text-sm" style="font-size:5.5px">00011</text>
+        <text x="56"  y="325" class="state-text-sm">S3</text>
+
+        <!-- VM_CHANGE (S4 / 00100) — change_return=1 -->
+        <circle cx="310" cy="310" r="28" class="state-circle" style="fill:#150830;stroke:#b57bff" data-state="4"/>
+        <text x="310" y="303" class="state-text">CHANGE</text>
+        <text x="310" y="314" class="state-text-sm" style="font-size:5.5px">00100</text>
+        <text x="310" y="325" class="state-text-sm">S4</text>
+
+        <!-- ── TRANSITIONS (matching PDF exactly) ── -->
+
+        <!-- reset/power-up → VM_IDLE (top entry arrow) -->
+        <line x1="180" y1="2" x2="180" y2="8" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah3)"/>
+
+        <!-- VM_IDLE → VM_COLLECT: coin_insert -->
+        <line x1="205" y1="50" x2="288" y2="138" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah3)"/>
+        <text x="260" y="92" class="trans-label">coin_insert</text>
+
+        <!-- VM_COLLECT → VM_SELECT: selection_btn (01/10/11) -->
+        <line x1="282" y1="160" x2="84" y2="160" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah3)"/>
+        <text x="183" y="152" class="trans-label">selection_btn</text>
+        <text x="183" y="161" class="trans-label" style="font-size:5.5px">(01/10/11)</text>
+
+        <!-- VM_COLLECT hold: coin_insert again (insufficient) -->
+        <path d="M336,148 Q368,128 368,160 Q368,188 336,172" stroke="#ffe84d" stroke-width="1.2" stroke-dasharray="4,3" fill="none" marker-end="url(#ah3)"/>
+        <text x="372" y="162" class="trans-label" style="fill:#ffe84d;font-size:5.5px">coin_insert</text>
+        <text x="372" y="171" class="trans-label" style="fill:#ffe84d;font-size:5.5px">(insuff.)</text>
+
+        <!-- VM_SELECT → VM_DISPENSE: selection_btn + credit_ok -->
+        <line x1="56"  y1="188" x2="56"  y2="282" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah3)"/>
+        <text x="4"   y="238" class="trans-label">sel+credit</text>
+
+        <!-- VM_SELECT → VM_CHANGE: item_empty (out of stock) -->
+        <line x1="84"  y1="172" x2="284" y2="294" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah3)"/>
+        <text x="195" y="226" class="trans-label">item_empty</text>
+
+        <!-- VM_DISPENSE → VM_CHANGE: dispense_done -->
+        <line x1="84"  y1="310" x2="282" y2="310" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah3)"/>
+        <text x="183" y="303" class="trans-label">dispense_done</text>
+
+        <!-- VM_CHANGE → VM_IDLE: change_done -->
+        <path d="M310,282 Q310,228 270,195 Q240,172 208,56" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah3)"/>
+        <text x="316" y="215" class="trans-label">change_done</text>
+
+        <!-- VM_DISPENSE → VM_IDLE (item_empty path from dispense in PDF) -->
+        <path d="M40,288 Q20,230 20,120 Q20,50 152,38" stroke="#2a3560" stroke-width="1.2" stroke-dasharray="4,3" fill="none" marker-end="url(#ah3)"/>
+        <text x="2" y="170" class="trans-label" style="font-size:5.5px">item_empty</text>
+
+        <!-- Cancel interrupt: cancel_btn → VM_INTERRUPT_EVENT → IDLE (dashed red) -->
+        <path d="M290,145 Q260,88 208,52" stroke="#ff4f6e" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#ah3)"/>
+        <text x="220" y="92" class="trans-label" style="fill:#ff4f6e">cancel_btn</text>
+        <text x="216" y="101" class="trans-label" style="fill:#ff4f6e;font-size:5px">INTERRUPT→IDLE</text>
+      </svg>
+    </div>
+
+    <!-- Panel 3: Vending machine demo -->
+    <div class="fsm-panel">
+      <div class="fsm-panel-header">Live Vending Machine Demo</div>
+      <div class="fsm-panel-body" style="padding:.75rem">
+        <div class="scenario-canvas">
+          <div class="vm-machine-box" id="vm-machine-box">
+            <div class="vm-screen" id="vm-screen">WELCOME<br>INSERT COIN</div>
+            <div class="vm-items">
+              <div class="vm-item-cell">🥤</div>
+              <div class="vm-item-cell">🍫</div>
+              <div class="vm-item-cell">🍬</div>
+              <div class="vm-item-cell">🧃</div>
+            </div>
+            <div class="vm-coin-slot">◉ INSERT COIN</div>
+            <div class="vm-slot">— product slot —</div>
+            <div class="vm-empty-badge" id="vm-empty-badge">OUT OF STOCK</div>
+          </div>
+          <!-- Coin stack on right side -->
+          <div class="vm-coin-stack" id="vm-coin-bar"></div>
+          <!-- Product drop -->
+          <div class="vm-product" id="vm-product">🥤</div>
+          <!-- Change return -->
+          <div class="vm-change" id="vm-change">¢ CHANGE</div>
+        </div>
+        <div class="scenario-desc" id="sc-desc-vending"><strong style="color:#6b7280">IDLE:</strong> Press Start to begin the simulation.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancel interrupt explanation -->
+  <div class="section-title">Cancel Interrupt Mechanism</div>
+  <div class="info-box yellow">
+    <div class="info-box-title">🚨 Cancel = Hardware Interrupt</div>
+    <p><code>cancel_btn</code> maps to <code>VM_INTERRUPT_EVENT="0000100000"</code> (bit 5 = 32). When asserted during COLLECT, the <code>interrupt_en='1'</code> ROM entry fires, forcing FSM → IDLE in one pipeline cycle. The wrapper's <code>interrupt_return_detect</code> process detects the COLLECT→IDLE transition and asserts <code>int_change_pulse</code> for one cycle, which is OR'd with the normal <code>change_return</code> output.</p>
+  </div>
+
+  <div class="embedded-waveform">
+    <div class="embedded-waveform-header">📊 Vending Machine FSM — GHDL Simulation Waveform</div>
+    <div class="waveform-display" id="wf-embed-vending" style="min-height:260px;padding:1.1rem;overflow-x:auto"></div>
+    <div class="waveform-explanation"><strong>Reading:</strong> Cycle 2 → coin_insert → COLLECT. Cycle 4 → selection → SELECT. Cycle 8 → sel_btn → DISPENSE, <code>dispense_motor</code> HIGH. Cycle 9 → dispense_done → CHANGE, <code>change_return</code> HIGH. Cycle 12 → change_done → IDLE. Cycle 20 → second coin, cycle 21 → cancel_btn → INTERRUPT → IDLE + <code>change_return</code> pulse. Cyan cursor follows active step.</div>
+  </div>
+</section>
+
+<!-- ═══════════ ELEVATOR ═══════════ -->
+<section class="tab" id="tab-elevator">
+  <div class="page-header"><h2>Elevator FSM</h2><p><code>elevator_wrapper.vhd</code> · config_id = "10" · 5 states · 21 scenario steps</p></div>
+  <div class="real-world-box"><h3>🛗 Problem Being Solved</h3><p>An elevator must travel between 5 floors, open its door safely upon arrival, detect and hold for door obstructions, handle overload (weight sensor), and respond to emergency stop. The FSM prevents movement while doors are open, and ROM HOLD entries guard against pipeline spurious re-entry events when transitioning into MOVE states.</p></div>
+
+  <!-- State/Event Explanation -->
+  <div class="fsm-explain-block">
+    <div class="fsm-explain-title">Understanding States, Events &amp; Outputs</div>
+    <div class="fsm-explain-grid">
+      <div class="fee-section">
+        <div class="fee-label">States</div>
+        <div class="fee-items">
+          <div class="fee-item"><span class="fee-badge" style="background:#6b7280">S0 EL_IDLE</span> Elevator parked. motor_up=0, motor_down=0, door=0, alarm=0. Waiting for floor request.</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#4fc3f7;color:#000">S1 EL_MOVE_UP</span> motor_up=1. Floor counter incrementing. ROM HOLD entry guards against spurious go_up re-entry.</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#b57bff">S2 EL_MOVE_DOWN</span> motor_down=1. Floor counter decrementing. Same HOLD guard pattern as MOVE_UP.</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#39ff8f;color:#000">S3 EL_DOOR_OPEN</span> door=1. Boarding/alighting. door_sensor (obstruction) → HOLD in DOOR_OPEN. door_clear → DOOR_CLOSE.</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#ffe84d;color:#000">S4 EL_DOOR_CLOSE</span> door=0. Closing sequence. Auto-transitions to IDLE after one cycle.</div>
+        </div>
+      </div>
+      <div class="fee-section">
+        <div class="fee-label">Events &amp; Outputs</div>
+        <div class="fee-items">
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#4fc3f7">go_up (bit[0]=1)</span> Floor request above current floor. IDLE→MOVE_UP. HOLD in MOVE_UP (pipeline guard).</div>
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#b57bff">go_down (bit[1]=2)</span> Floor request below current floor. IDLE→MOVE_DOWN.</div>
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#39ff8f">arrived (bit[2]=4)</span> current_floor = target_floor. MOVE_UP or MOVE_DOWN → DOOR_OPEN.</div>
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#ffe84d">door_clear (bit[3]=8)</span> No obstruction. DOOR_OPEN → DOOR_CLOSE.</div>
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#ff4f6e">door_sensor (bit[4]=16)</span> Obstruction detected. HOLD in DOOR_OPEN (door stays open).</div>
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#ff4f6e">emergency_btn ⚠ INTERRUPT</span> EL_INTERRUPT_EVENT. Forces FSM → IDLE. alarm_buzzer=1 asserted by wrapper.</div>
+        </div>
+        <div class="fee-label" style="margin-top:.75rem">Outputs</div>
+        <div class="fee-items">
+          <div class="fee-item"><code>motor_up</code> HIGH in EL_MOVE_UP · <code>motor_down</code> HIGH in EL_MOVE_DOWN</div>
+          <div class="fee-item"><code>door_open</code> HIGH in EL_DOOR_OPEN · <code>alarm_buzzer</code> HIGH on emergency interrupt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guided Walkthroughs -->
+  <div class="section-title">Guided Walkthroughs — from Testbench Cases</div>
+  <div class="walkthrough-tabs">
+    <button class="wt-tab active" onclick="showWT('elevator','up')">Up Trip F1→F5→IDLE</button>
+    <button class="wt-tab" onclick="showWT('elevator','emerg')">Emergency Stop</button>
+  </div>
+  <div class="walkthrough-content" id="wt-elevator-up">
+    <div class="wt-title">Upward Trip: IDLE → MOVE_UP → DOOR_OPEN → DOOR_CLOSE → IDLE</div>
+    <div class="wt-steps">
+      <div class="wt-step"><div class="wt-step-num">1</div><div class="wt-step-body"><strong>reset + floor_req=F5</strong>: IDLE. floor_counter wrapper sets target=5, current=1. go_up event fired.</div></div>
+      <div class="wt-step"><div class="wt-step-num">2</div><div class="wt-step-body"><strong>go_up (bit[0]=1)</strong> → ROM[10_00000_0000000001]: next_state=EL_MOVE_UP(00001). motor_up='1'. Floor counter starts incrementing: F1→F2→F3→F4→F5.</div></div>
+      <div class="wt-step"><div class="wt-step-num">3</div><div class="wt-step-body"><strong>arrived (bit[2]=4)</strong> when current=target=5 → ROM[10_00001_0000000100]: next_state=EL_DOOR_OPEN(00011). motor_up='0', door='1'.</div></div>
+      <div class="wt-step"><div class="wt-step-num">4</div><div class="wt-step-body"><strong>door_clear (bit[3]=8)</strong>: no obstruction → EL_DOOR_CLOSE(00100). door='0'.</div></div>
+      <div class="wt-step"><div class="wt-step-num">5</div><div class="wt-step-body"><strong>Auto-transition</strong>: DOOR_CLOSE → EL_IDLE(00000) next cycle. All outputs clear. Full upward trip verified.</div></div>
+    </div>
+  </div>
+  <div class="walkthrough-content hidden" id="wt-elevator-emerg">
+    <div class="wt-title">Emergency Stop During MOVE_UP</div>
+    <div class="wt-steps">
+      <div class="wt-step"><div class="wt-step-num">1</div><div class="wt-step-body"><strong>FSM in EL_MOVE_UP</strong>: motor_up='1', floor counter running. Normal operation.</div></div>
+      <div class="wt-step"><div class="wt-step-num">2</div><div class="wt-step-body"><strong>emergency_btn fired</strong>: EL_INTERRUPT_EVENT="0001000000" (bit 6=64). ROM interrupt_en entry matches. FSM forced → EL_IDLE in 1 pipeline cycle.</div></div>
+      <div class="wt-step"><div class="wt-step-num">3</div><div class="wt-step-body"><strong>Wrapper detects interrupt</strong>: alarm_buzzer='1' asserted for 1 cycle via output_action decoding. motor_up='0' immediately.</div></div>
+      <div class="wt-step"><div class="wt-step-num">4</div><div class="wt-step-body"><strong>Result</strong>: FSM in IDLE with alarm. Emergency override verified. No door opened, no movement continues. This path is TB test case ~21 in the elevator testbench.</div></div>
+    </div>
+  </div>
+
+  <div class="current-state-bar">
+    <span class="csb-label">STATE</span>
+    <span class="csb-state" id="csb-state-elevator">IDLE</span>
+    <span class="csb-sep">·</span>
+    <span class="csb-desc"  id="csb-desc-elevator">Press Start to begin the simulation.</span>
+  </div>
+
+  <div class="fsm-full-layout">
+    <!-- Panel 1 -->
+    <div class="fsm-panel">
+      <div class="fsm-panel-header">States &amp; Events</div>
+      <div class="fsm-panel-body">
+        <div style="font-size:0.7rem;color:var(--txt-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem">States</div>
+        <div class="state-list">
+          <div class="state-item" style="border-color:#6b7280"><span class="state-badge" style="background:#6b7280">S0</span><strong>IDLE</strong> — parked, waiting</div>
+          <div class="state-item" style="border-color:#4fc3f7"><span class="state-badge" style="background:#4fc3f7">S1</span><strong>MOVE_UP</strong> — motor_up ON</div>
+          <div class="state-item" style="border-color:#b57bff"><span class="state-badge" style="background:#b57bff">S2</span><strong>MOVE_DOWN</strong> — motor_down ON</div>
+          <div class="state-item" style="border-color:#39ff8f"><span class="state-badge" style="background:#39ff8f">S3</span><strong>DOOR_OPEN</strong> — boarding</div>
+          <div class="state-item" style="border-color:#ffe84d"><span class="state-badge" style="background:#ffe84d">S4</span><strong>DOOR_CLOSE</strong> — closing</div>
+        </div>
+        <div style="font-size:0.7rem;color:var(--txt-3);text-transform:uppercase;letter-spacing:.07em;margin:1rem 0 .5rem">Events</div>
+        <div class="event-list">
+          <div class="event-item"><code>bit[0]</code> → go_up (target &gt; current)</div>
+          <div class="event-item"><code>bit[1]</code> → go_down (target &lt; current)</div>
+          <div class="event-item"><code>bit[2]</code> → arrived (target = current)</div>
+          <div class="event-item"><code>bit[3]</code> → door_clear</div>
+          <div class="event-item"><code>bit[4]</code> → door_sensor (obstruction)</div>
+          <div class="event-item"><code>bit[5]</code> → weight_sensor (overload)</div>
+          <div class="event-item"><code>bit[6]</code> → emergency_btn ⚠ INTERRUPT</div>
+        </div>
+        <div style="font-size:0.7rem;color:var(--txt-3);text-transform:uppercase;letter-spacing:.07em;margin:1rem 0 .5rem">Queue</div>
+        <div class="event-item" style="background:var(--bg-2)">Next: <strong id="elev-queue-val" style="color:var(--cyan)">—</strong></div>
+      </div>
+      <div class="ctrl-panel">
+        <button class="ctrl-btn start"  onclick="fsmStart('elevator')">▶ Start</button>
+        <button class="ctrl-btn pause"  onclick="fsmPause('elevator')"  id="btn-pause-elevator">⏸ Pause</button>
+        <button class="ctrl-btn resume" onclick="fsmResume('elevator')" id="btn-resume-elevator">▷ Resume</button>
+        <button class="ctrl-btn step"   onclick="fsmStep('elevator')">⏭ Step</button>
+        <button class="ctrl-btn reset"  onclick="fsmReset('elevator')">↺ Reset</button>
+        <div class="ctrl-speed">Speed:
+          <select onchange="fsmSpeed('elevator',this.value)">
+            <option value="2800">Slow</option>
+            <option value="1800" selected>Normal</option>
+            <option value="900">Fast</option>
+            <option value="400">Turbo</option>
+          </select>
+        </div>
+        <div class="ctrl-step-label" id="anim-step-elevator">Press Start</div>
+      </div>
+    </div>
+
+    <!-- Panel 2: SVG -->
+    <div class="fsm-panel">
+      <div class="fsm-panel-header">Animated State Diagram</div>
+      <svg id="fsm-svg-elevator" viewBox="0 0 400 460" xmlns="http://www.w3.org/2000/svg" class="state-svg">
+        <defs><marker id="ah4" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#2a3560"/></marker></defs>
+
+        <!-- EL_idle (S0) — motor_up=0,motor_down=0,door=0,alarm=0 -->
+        <circle cx="200" cy="36"  r="28" class="state-circle" style="fill:#0c1020;stroke:#6b7280" data-state="0"/>
+        <text x="200" y="31"  class="state-text">IDLE</text>
+        <text x="200" y="42" class="state-text-sm" style="font-size:5px">mu=0,md=0,d=0,alm=0</text>
+        <text x="200" y="52" class="state-text-sm">S0</text>
+
+        <!-- EL_move_up (S1) — motor_up=1,motor_down=0,door=0,alarm=0 -->
+        <circle cx="60"  cy="160" r="28" class="state-circle" style="fill:#071828;stroke:#4fc3f7" data-state="1"/>
+        <text x="60"  y="153" class="state-text">MOVE</text>
+        <text x="60"  y="163" class="state-text-sm">UP S1</text>
+        <text x="60"  y="173" class="state-text-sm" style="font-size:5px">mu=1,md=0</text>
+
+        <!-- EL_move_down (S2) — motor_up=0,motor_down=1,door=0,alarm=0 -->
+        <circle cx="340" cy="160" r="28" class="state-circle" style="fill:#150830;stroke:#b57bff" data-state="2"/>
+        <text x="340" y="153" class="state-text">MOVE</text>
+        <text x="340" y="163" class="state-text-sm">DN S2</text>
+        <text x="340" y="173" class="state-text-sm" style="font-size:5px">mu=0,md=1</text>
+
+        <!-- EL_door_open (S3) — motor_up=0,motor_down=0,door=1,alarm=0 -->
+        <circle cx="200" cy="280" r="28" class="state-circle" style="fill:#001806;stroke:#39ff8f" data-state="3"/>
+        <text x="200" y="274" class="state-text">DOOR</text>
+        <text x="200" y="284" class="state-text-sm">OPEN S3</text>
+        <text x="200" y="295" class="state-text-sm" style="font-size:5px">door=1</text>
+
+        <!-- EL_door_close (S4) — motor_up=0,motor_down=0,door=0,alarm=0 -->
+        <circle cx="200" cy="375" r="28" class="state-circle" style="fill:#1a1200;stroke:#ffe84d" data-state="4"/>
+        <text x="200" y="369" class="state-text">DOOR</text>
+        <text x="200" y="379" class="state-text-sm">CLOSE S4</text>
+        <text x="200" y="390" class="state-text-sm" style="font-size:5px">door=0</text>
+
+        <!-- EL_emergency (S5) — motor_up=0,motor_down=0,door=0,alarm=1 -->
+        <circle cx="360" cy="310" r="28" class="state-circle" style="fill:#1a0008;stroke:#ff4f6e" data-state="5"/>
+        <text x="360" y="303" class="state-text" style="font-size:7.5px">EMERG</text>
+        <text x="360" y="314" class="state-text-sm">S5</text>
+        <text x="360" y="325" class="state-text-sm" style="font-size:5px">alarm=1</text>
+
+        <!-- ── TRANSITIONS (matching PDF) ── -->
+
+        <!-- IDLE → MOVE_UP: up_request (target floor > current) -->
+        <line x1="175" y1="52" x2="82" y2="138" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah4)"/>
+        <text x="90"  y="88"  class="trans-label">up request</text>
+
+        <!-- IDLE → MOVE_DOWN: down_request (target floor < current) -->
+        <line x1="225" y1="52" x2="318" y2="138" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah4)"/>
+        <text x="272" y="88"  class="trans-label">dn request</text>
+
+        <!-- MOVE_UP → DOOR_OPEN: arrived (destination reached) -->
+        <line x1="76"  y1="182" x2="175" y2="262" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah4)"/>
+        <text x="80"  y="232" class="trans-label">arrived</text>
+
+        <!-- MOVE_DOWN → DOOR_OPEN: arrived -->
+        <line x1="324" y1="182" x2="225" y2="262" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah4)"/>
+        <text x="268" y="232" class="trans-label">arrived</text>
+
+        <!-- DOOR_OPEN → DOOR_CLOSE: door_clear / timeout -->
+        <line x1="200" y1="308" x2="200" y2="347" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah4)"/>
+        <text x="208" y="332" class="trans-label">door_clear</text>
+
+        <!-- DOOR_OPEN self-loop (door obstruction / door_sensor) -->
+        <path d="M174,280 Q128,280 128,252 Q128,228 174,252" stroke="#39ff8f" stroke-width="1.2" stroke-dasharray="4,3" fill="none" marker-end="url(#ah4)"/>
+        <text x="80" y="256" class="trans-label" style="fill:#39ff8f">obstruct.</text>
+
+        <!-- DOOR_CLOSE → IDLE: closing complete -->
+        <path d="M228,375 Q330,375 330,205 Q330,36 228,36" stroke="#2a3560" stroke-width="1.5" fill="none" marker-end="url(#ah4)"/>
+        <text x="334" y="200" class="trans-label">auto</text>
+
+        <!-- IDLE → DOOR_OPEN: direct open request (e.g. already at requested floor) -->
+        <path d="M200,64 Q200,140 200,252" stroke="#39ff8f" stroke-width="1.8" stroke-dasharray="6,3" fill="none" marker-end="url(#ah4)"/>
+        <text x="205" y="165" class="trans-label" style="fill:#39ff8f;font-weight:700">open_req</text>
+        <text x="205" y="174" class="trans-label" style="fill:#39ff8f;font-size:5px">(at floor)</text>
+
+        <!-- Emergency path: from any motion/door state → EL_emergency -->
+        <!-- MOVE_UP → EMERGENCY -->
+        <path d="M80,180 Q80,250 340,290" stroke="#ff4f6e" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#ah4)"/>
+        <text x="170" y="252" class="trans-label" style="fill:#ff4f6e">emergency_btn</text>
+
+        <!-- EMERGENCY → IDLE: emergency cleared / reset -->
+        <path d="M340,288 Q200,200 210,58" stroke="#ff4f6e" stroke-width="1.2" stroke-dasharray="4,3" fill="none" marker-end="url(#ah4)"/>
+        <text x="248" y="168" class="trans-label" style="fill:#ff4f6e">cleared</text>
+      </svg>
+    </div>
+
+    <!-- Panel 3: Elevator demo -->
+    <div class="fsm-panel">
+      <div class="fsm-panel-header">Live Elevator Demo</div>
+      <div class="fsm-panel-body" style="padding:.75rem">
+        <div class="scenario-canvas" style="height:280px">
+          <div class="elev-scene">
+            <!-- Building shaft -->
+            <div class="elev-building">
+              <div class="elev-shaft"></div>
+              <!-- Floor lines -->
+              <div class="elev-floor-line" style="bottom:176px"><div class="elev-floor-lbl">F5</div></div>
+              <div class="elev-floor-line" style="bottom:132px"><div class="elev-floor-lbl">F4</div></div>
+              <div class="elev-floor-line" style="bottom:88px" ><div class="elev-floor-lbl">F3</div></div>
+              <div class="elev-floor-line" style="bottom:44px" ><div class="elev-floor-lbl">F2</div></div>
+              <div class="elev-floor-line" style="bottom:0px"  ><div class="elev-floor-lbl">F1</div></div>
+              <!-- Elevator car -->
+              <div class="elev-car" id="elev-car" style="bottom:0px">
+                <div class="elev-door" id="elev-door">
+                  <div class="door-left"></div>
+                  <div class="door-right"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Indicator panel -->
+            <div class="elev-indicator">
+              <div class="elev-floor-lbl2">FLOOR</div>
+              <div class="elev-floor-num" id="elev-floor-num">1</div>
+              <span class="elev-status" id="elev-status-icon">⏸</span>
+            </div>
+            <div class="elev-alarm" id="elev-alarm">🚨</div>
+            <div class="elev-queue-box">Next req:<br><span id="elev-queue-val">—</span></div>
+          </div>
+        </div>
+        <div class="scenario-desc" id="sc-desc-elevator"><strong style="color:#6b7280">IDLE:</strong> Press Start to begin the simulation.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Floor Counter VHDL</div>
+  <div class="code-block"><div class="code-header">elevator_wrapper.vhd — floor_counter process</div>
+<pre>floor_counter : <span class="kw">process</span>(clk)
+<span class="kw">begin</span>
+    <span class="kw">if</span> rising_edge(clk) <span class="kw">then</span>
+        <span class="kw">if</span>    state_code = <span class="str">"00001"</span> <span class="kw">and</span> current_floor &lt; target_floor <span class="kw">then</span>
+            current_floor &lt;= current_floor + <span class="num">1</span>;  <span class="cm">-- MOVE_UP</span>
+        <span class="kw">elsif</span> state_code = <span class="str">"00010"</span> <span class="kw">and</span> current_floor &gt; target_floor <span class="kw">then</span>
+            current_floor &lt;= current_floor - <span class="num">1</span>;  <span class="cm">-- MOVE_DOWN</span>
+        <span class="kw">end if</span>;
+        <span class="kw">if</span> current_floor = target_floor <span class="kw">then</span>
+            arrived_event &lt;= '1';               <span class="cm">-- triggers FSM → DOOR_OPEN</span>
+        <span class="kw">end if</span>;
+    <span class="kw">end if</span>;
+<span class="kw">end process</span>;</pre></div>
+
+  <div class="embedded-waveform">
+    <div class="embedded-waveform-header">📊 Elevator FSM — GHDL Simulation Waveform</div>
+    <div class="waveform-display" id="wf-embed-elevator" style="min-height:260px;padding:1.1rem;overflow-x:auto"></div>
+    <div class="waveform-explanation"><strong>Reading:</strong> Cycle 2 → go_up(F5) → MOVE_UP, <code>motor_up</code> HIGH. <code>floor_display</code> F1→F2→F3→F4→F5 over cycles 3–6. Cycle 9 → arrived → DOOR_OPEN, <code>door_open</code> HIGH. Cycle 11 → DOOR_CLOSE. Cycle 12 → IDLE. Cycle 14 → go_down(F1) → MOVE_DOWN, F5→F4→F3→F2→F1 over cycles 14–17. Cycle 19 → DOOR_OPEN at F1. Cycle 21 → emergency → IDLE, <code>alarm_buzzer</code> HIGH.</div>
+  </div>
+</section>
+
+<!-- ═══════════ SERIAL COMM ═══════════ -->
+<section class="tab" id="tab-serial">
+  <div class="page-header"><h2>Serial Communication FSM</h2><p><code>serial_wrapper.vhd</code> · config_id = "11" · 12 states · 20 scenario steps</p></div>
+  <div class="real-world-box"><h3>📡 Why Serial Needs an FSM</h3><p>Serial communication is inherently sequential: START → BIT0..BIT7 → STOP → COMPLETE — each bit must arrive in order. An FSM enforces this ordering with no possibility of skipping a bit. Each state corresponds to exactly one bit position. Parity checking happens in the STOP state — if it fails, SP_INTERRUPT_EVENT fires immediately, discarding the corrupt frame.</p></div>
+
+  <!-- State/Event Explanation -->
+  <div class="fsm-explain-block">
+    <div class="fsm-explain-title">Understanding States, Events &amp; Outputs</div>
+    <div class="fsm-explain-grid">
+      <div class="fee-section">
+        <div class="fee-label">12 Frame States</div>
+        <div class="fee-items">
+          <div class="fee-item"><span class="fee-badge" style="background:#6b7280">S0 SP_IDLE</span> Waiting for a new frame. rx_valid rising edge triggers → SP_START.</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#4fc3f7;color:#000">S1 SP_START</span> Start bit detected. Next rx_valid → SP_RX_BIT0.</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#b57bff">S2–S9 SP_BIT0..7</span> Each state receives exactly one data bit. rx_valid rising edge advances state. 8 sequential states.</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#ffe84d;color:#000">S10 SP_STOP</span> Stop bit. Parity checked here. Good parity + rx_valid → SP_COMPLETE. Bad parity → SP_INTERRUPT_EVENT fires.</div>
+          <div class="fee-item"><span class="fee-badge" style="background:#39ff8f;color:#000">S11 SP_COMPLETE</span> Full frame received and validated. tx_enable='1'. tx_ready → SP_IDLE. Auto-loops if no tx_ready in 16 cycles (timeout).</div>
+        </div>
+      </div>
+      <div class="fee-section">
+        <div class="fee-label">Events &amp; Outputs</div>
+        <div class="fee-items">
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#4fc3f7">rx_valid rising edge (bit[8]=256)</span> Each rising edge advances the FSM one state. Wrapper uses edge detection (rx_valid AND NOT rx_valid_prev) to fire exactly once per bit.</div>
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#39ff8f">tx_ready rising edge (bit[9]=512)</span> COMPLETE → IDLE. Downstream device acknowledges byte.</div>
+          <div class="fee-item"><span class="fee-ev-badge" style="border-color:#ff4f6e">BAD PARITY ⚠ INTERRUPT</span> SP_INTERRUPT_EVENT="1100000000" fires at STOP if parity check fails. FSM → SP_IDLE. parity_err='1'.</div>
+        </div>
+        <div class="fee-label" style="margin-top:.75rem">Outputs</div>
+        <div class="fee-items">
+          <div class="fee-item"><code>tx_enable</code> HIGH in SP_COMPLETE — signals byte is ready to transmit downstream</div>
+          <div class="fee-item"><code>parity_err</code> HIGH when bad-parity interrupt fires — frame discarded</div>
+        </div>
+        <div class="fee-label" style="margin-top:.75rem">Byte 0xA5 = 1010 0101 Example</div>
+        <div class="fee-items">
+          <div class="fee-item">LSB-first: BIT0=1, BIT1=0, BIT2=1, BIT3=0, BIT4=0, BIT5=1, BIT6=0, BIT7=1</div>
+          <div class="fee-item">XOR parity: 1⊕0⊕1⊕0⊕0⊕1⊕0⊕1 = 0 → EVEN → parity_ok='1' → COMPLETE</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guided Walkthroughs -->
+  <div class="section-title">Guided Walkthroughs — from Testbench Cases</div>
+  <div class="walkthrough-tabs">
+    <button class="wt-tab active" onclick="showWT('serial','goodframe')">Good Frame 0xA5</button>
+    <button class="wt-tab" onclick="showWT('serial','badparity')">Bad Parity Error</button>
+  </div>
+  <div class="walkthrough-content" id="wt-serial-goodframe">
+    <div class="wt-title">Full Good Frame: SP_IDLE → START → BIT0–7 → STOP → COMPLETE → IDLE</div>
+    <div class="wt-steps">
+      <div class="wt-step"><div class="wt-step-num">1</div><div class="wt-step-body"><strong>rx_valid rising edge</strong> from IDLE: SP_INTERRUPT_EVENT checked — not matched. event_code=256 (bit[8]). SP_IDLE → SP_START(00001).</div></div>
+      <div class="wt-step"><div class="wt-step-num">2</div><div class="wt-step-body"><strong>rx_valid ×8</strong>: Each rising edge advances one state. BIT0→BIT1→...→BIT7. Wrapper records each bit in shift register. 8 separate transitions, each through the 2-stage pipeline.</div></div>
+      <div class="wt-step"><div class="wt-step-num">3</div><div class="wt-step-body"><strong>rx_valid at SP_BIT7</strong> → SP_STOP(01010). Parity XOR computed: for 0xA5, parity=0. rx_parity_ok='1'.</div></div>
+      <div class="wt-step"><div class="wt-step-num">4</div><div class="wt-step-body"><strong>rx_valid at SP_STOP</strong> with parity_ok='1': event_code=256 (good). → SP_COMPLETE(01011). tx_enable='1'.</div></div>
+      <div class="wt-step"><div class="wt-step-num">5</div><div class="wt-step-body"><strong>tx_ready rising edge</strong>: event_code=512 (bit[9]). SP_COMPLETE → SP_IDLE. tx_enable='0'. Frame processing complete. Byte 0xA5 forwarded.</div></div>
+    </div>
+  </div>
+  <div class="walkthrough-content hidden" id="wt-serial-badparity">
+    <div class="wt-title">Bad Parity Error Path</div>
+    <div class="wt-steps">
+      <div class="wt-step"><div class="wt-step-num">1</div><div class="wt-step-body"><strong>Frame starts normally</strong>: IDLE → START → BIT0..7 as above. Bits received with odd parity (bit error injected).</div></div>
+      <div class="wt-step"><div class="wt-step-num">2</div><div class="wt-step-body"><strong>rx_valid at SP_STOP</strong>: parity XOR ≠ 0. rx_parity_ok='0'. Wrapper sets event_code = SP_INTERRUPT_EVENT="1100000000" instead of normal rx_valid code.</div></div>
+      <div class="wt-step"><div class="wt-step-num">3</div><div class="wt-step-body"><strong>Interrupt fires</strong>: FSM sees interrupt_event match + interrupt_en='1' in ROM. FSM → SP_IDLE in 1 pipeline cycle. parity_err='1' output asserted.</div></div>
+      <div class="wt-step"><div class="wt-step-num">4</div><div class="wt-step-body"><strong>Frame discarded</strong>: tx_enable never asserts. Corrupt byte silently dropped. FSM immediately ready for next frame from SP_IDLE.</div></div>
+    </div>
+  </div>
+
+  <div class="current-state-bar">
+    <span class="csb-label">STATE</span>
+    <span class="csb-state" id="csb-state-serial">SP_IDLE</span>
+    <span class="csb-sep">·</span>
+    <span class="csb-desc"  id="csb-desc-serial">Press Start to begin the simulation.</span>
+  </div>
+
+  <div class="fsm-full-layout">
+    <!-- Panel 1 -->
+    <div class="fsm-panel">
+      <div class="fsm-panel-header">12 Frame States</div>
+      <div class="fsm-panel-body">
+        <div class="serial-states-grid" style="grid-template-columns:repeat(2,1fr);gap:4px">
+          <div class="serial-state s-idle">SP_IDLE<br><span>"00000"</span></div>
+          <div class="serial-state">SP_START<br><span>"00001"</span></div>
+          <div class="serial-state">SP_BIT0<br><span>"00010"</span></div>
+          <div class="serial-state">SP_BIT1<br><span>"00011"</span></div>
+          <div class="serial-state">SP_BIT2<br><span>"00100"</span></div>
+          <div class="serial-state">SP_BIT3<br><span>"00101"</span></div>
+          <div class="serial-state">SP_BIT4<br><span>"00110"</span></div>
+          <div class="serial-state">SP_BIT5<br><span>"00111"</span></div>
+          <div class="serial-state">SP_BIT6<br><span>"01000"</span></div>
+          <div class="serial-state">SP_BIT7<br><span>"01001"</span></div>
+          <div class="serial-state">SP_STOP<br><span>"01010"</span></div>
+          <div class="serial-state s-complete">SP_COMPLETE<br><span>"01011"</span></div>
+        </div>
+        <div style="font-size:0.7rem;color:var(--txt-3);text-transform:uppercase;letter-spacing:.07em;margin:1rem 0 .5rem">Events</div>
+        <div class="event-list">
+          <div class="event-item"><code>bit[8]</code> → rx_valid ↑ (good parity)</div>
+          <div class="event-item"><code>bit[9]</code> → tx_ready ↑</div>
+          <div class="event-item"><code>INTERRUPT</code> → bad parity → IDLE</div>
+        </div>
+      </div>
+      <div class="ctrl-panel">
+        <button class="ctrl-btn start"  onclick="fsmStart('serial')">▶ Start</button>
+        <button class="ctrl-btn pause"  onclick="fsmPause('serial')"  id="btn-pause-serial">⏸ Pause</button>
+        <button class="ctrl-btn resume" onclick="fsmResume('serial')" id="btn-resume-serial">▷ Resume</button>
+        <button class="ctrl-btn step"   onclick="fsmStep('serial')">⏭ Step</button>
+        <button class="ctrl-btn reset"  onclick="fsmReset('serial')">↺ Reset</button>
+        <div class="ctrl-speed">Speed:
+          <select onchange="fsmSpeed('serial',this.value)">
+            <option value="2800">Slow</option>
+            <option value="1800" selected>Normal</option>
+            <option value="900">Fast</option>
+            <option value="400">Turbo</option>
+          </select>
+        </div>
+        <div class="ctrl-step-label" id="anim-step-serial">Press Start</div>
+      </div>
+    </div>
+
+    <!-- Panel 2: SVG (vertical chain) -->
+    <div class="fsm-panel">
+      <div class="fsm-panel-header">Animated State Flow</div>
+      <svg id="fsm-svg-serial" viewBox="0 0 320 530" xmlns="http://www.w3.org/2000/svg" class="state-svg">
+        <defs><marker id="ah5" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#2a3560"/></marker></defs>
+
+        <!-- SP_IDLE (S0/00000) — tx_enable=0, parity_err=0 -->
+        <circle cx="150" cy="28"  r="22" class="state-circle" style="fill:#0c1020;stroke:#6b7280"  data-state="0"/>
+        <text x="150" y="24"  class="state-text">IDLE</text>
+        <text x="150" y="35" class="state-text-sm" style="font-size:5px">00000</text>
+        <text x="150" y="43" class="state-text-sm">S0</text>
+
+        <line x1="150" y1="50" x2="150" y2="62" stroke="#2a3560" stroke-width="1.5" marker-end="url(#ah5)"/>
+        <text x="163" y="59"  class="trans-label">rx_valid</text>
+
+        <!-- SP_START (S1/00001) -->
+        <circle cx="150" cy="84"  r="22" class="state-circle" style="fill:#071828;stroke:#4fc3f7"  data-state="1"/>
+        <text x="150" y="80"  class="state-text">START</text>
+        <text x="150" y="91" class="state-text-sm" style="font-size:5px">00001</text>
+
+        <line x1="150" y1="106" x2="150" y2="118" stroke="#2a3560" stroke-width="1.5" marker-end="url(#ah5)"/>
+        <text x="163" y="115" class="trans-label">rx_valid</text>
+
+        <!-- SP_RX_BIT0 (S2/00010) -->
+        <circle cx="150" cy="140" r="22" class="state-circle" style="fill:#100820;stroke:#b57bff"  data-state="2"/>
+        <text x="150" y="136" class="state-text">BIT0</text>
+        <text x="150" y="147" class="state-text-sm" style="font-size:5px">00010</text>
+
+        <line x1="150" y1="162" x2="150" y2="174" stroke="#2a3560" stroke-width="1.5" marker-end="url(#ah5)"/>
+        <text x="163" y="171" class="trans-label">rx_valid</text>
+
+        <!-- SP_RX_BIT1 (S3/00011) -->
+        <circle cx="150" cy="196" r="22" class="state-circle" style="fill:#100820;stroke:#b57bff"  data-state="3"/>
+        <text x="150" y="192" class="state-text">BIT1</text>
+        <text x="150" y="203" class="state-text-sm" style="font-size:5px">00011</text>
+
+        <line x1="150" y1="218" x2="150" y2="228" stroke="#2a3560" stroke-width="1.5" marker-end="url(#ah5)"/>
+        <text x="163" y="226" class="trans-label">rx_valid ×6…</text>
+
+        <!-- BIT2–BIT6 collapsed block (S4–S9) -->
+        <circle cx="150" cy="252" r="20" class="state-circle" style="fill:#100820;stroke:#b57bff"  data-state="4"/>
+        <circle cx="150" cy="252" r="20" class="state-circle" style="fill:#100820;stroke:#b57bff" data-state="5"/>
+        <circle cx="150" cy="252" r="20" class="state-circle" style="fill:#100820;stroke:#b57bff" data-state="6"/>
+        <circle cx="150" cy="252" r="20" class="state-circle" style="fill:#100820;stroke:#b57bff" data-state="7"/>
+        <circle cx="150" cy="252" r="20" class="state-circle" style="fill:#100820;stroke:#b57bff" data-state="8"/>
+        <circle cx="150" cy="252" r="20" class="state-circle" style="fill:#100820;stroke:#b57bff" data-state="9"/>
+        <text x="150" y="248" class="state-text" style="font-size:6px">BIT2-6</text>
+        <text x="150" y="259" class="state-text-sm">S4-8</text>
+        <text x="150" y="267" class="state-text-sm" style="font-size:4.5px">6 states same struct</text>
+
+        <line x1="150" y1="272" x2="150" y2="284" stroke="#2a3560" stroke-width="1.5" marker-end="url(#ah5)"/>
+        <text x="163" y="281" class="trans-label">rx_valid</text>
+
+        <!-- SP_RX_BIT7 (S9/01001) — last data bit -->
+        <circle cx="150" cy="308" r="22" class="state-circle" style="fill:#100820;stroke:#b57bff"  data-state="10"/>
+        <text x="150" y="303" class="state-text">BIT7</text>
+        <text x="150" y="314" class="state-text-sm" style="font-size:5px">01001</text>
+        <text x="150" y="322" class="state-text-sm">S9</text>
+
+        <line x1="150" y1="330" x2="150" y2="342" stroke="#2a3560" stroke-width="1.5" marker-end="url(#ah5)"/>
+        <text x="163" y="339" class="trans-label">rx_valid</text>
+
+        <!-- SP_STOP (S10/01010) — parity checked here -->
+        <circle cx="150" cy="366" r="22" class="state-circle" style="fill:#1a1200;stroke:#ffe84d"  data-state="11"/>
+        <text x="150" y="361" class="state-text">STOP</text>
+        <text x="150" y="372" class="state-text-sm" style="font-size:5px">01010</text>
+        <text x="150" y="380" class="state-text-sm">S10</text>
+
+        <line x1="150" y1="388" x2="150" y2="400" stroke="#2a3560" stroke-width="1.5" marker-end="url(#ah5)"/>
+        <text x="163" y="397" class="trans-label">rx_valid</text>
+
+        <!-- SP_COMPLETE (S11/01011) — tx_enable=1 -->
+        <circle cx="150" cy="424" r="22" class="state-circle" style="fill:#001806;stroke:#39ff8f"  data-state="11"/>
+        <text x="150" y="418" class="state-text">DONE</text>
+        <text x="150" y="429" class="state-text-sm" style="font-size:5px">01011</text>
+        <text x="150" y="437" class="state-text-sm">S11 tx=1</text>
+
+        <!-- SP_COMPLETE → SP_IDLE: tx_ready (normal handshake) -->
+        <path d="M128,424 Q40,424 40,220 Q40,28 128,28" stroke="#39ff8f" stroke-width="1.5" fill="none" marker-end="url(#ah5)"/>
+        <text x="5" y="220" class="trans-label" style="fill:#39ff8f">tx_ready</text>
+
+        <!-- SP_COMPLETE → Timeout → SP_IDLE: no tx_ready after 16 cycles -->
+        <path d="M172,424 Q240,424 240,350 Q240,200 172,35" stroke="#ff9d3d" stroke-width="1.2" stroke-dasharray="5,3" fill="none" marker-end="url(#ah5)"/>
+        <text x="244" y="300" class="trans-label" style="fill:#ff9d3d">timeout</text>
+        <text x="244" y="310" class="trans-label" style="fill:#ff9d3d;font-size:5px">16 cyc</text>
+        <text x="244" y="319" class="trans-label" style="fill:#ff9d3d;font-size:5px">no tx_rdy</text>
+
+        <!-- Parity error interrupt: any BIT–STOP state → SP_IDLE -->
+        <path d="M100,308 Q40,308 40,200 Q40,100 128,34" stroke="#ff4f6e" stroke-width="1.5" stroke-dasharray="4,3" fill="none" marker-end="url(#ah5)"/>
+        <text x="2" y="175" class="trans-label" style="fill:#ff4f6e">parity</text>
+        <text x="2" y="185" class="trans-label" style="fill:#ff4f6e">error!</text>
+        <text x="2" y="194" class="trans-label" style="fill:#ff4f6e;font-size:5px">INTERRUPT</text>
+      </svg>
+    </div>
+
+    <!-- Panel 3: Serial demo -->
+    <div class="fsm-panel">
+      <div class="fsm-panel-header">Live Serial Frame Demo</div>
+      <div class="fsm-panel-body" style="padding:.75rem">
+        <div class="scenario-canvas" style="height:290px">
+          <div class="serial-scene">
+            <!-- Bit frame -->
+            <div class="serial-frame">
+              <div class="serial-bit-cell"><div class="serial-bit-val">-</div><div class="serial-bit-lbl">START</div></div>
+              <div class="serial-bit-cell"><div class="serial-bit-val">-</div><div class="serial-bit-lbl">BIT0</div></div>
+              <div class="serial-bit-cell"><div class="serial-bit-val">-</div><div class="serial-bit-lbl">BIT1</div></div>
+              <div class="serial-bit-cell"><div class="serial-bit-val">-</div><div class="serial-bit-lbl">BIT2</div></div>
+              <div class="serial-bit-cell"><div class="serial-bit-val">-</div><div class="serial-bit-lbl">BIT3</div></div>
+              <div class="serial-bit-cell"><div class="serial-bit-val">-</div><div class="serial-bit-lbl">BIT4</div></div>
+              <div class="serial-bit-cell"><div class="serial-bit-val">-</div><div class="serial-bit-lbl">BIT5</div></div>
+              <div class="serial-bit-cell"><div class="serial-bit-val">-</div><div class="serial-bit-lbl">BIT6</div></div>
+              <div class="serial-bit-cell"><div class="serial-bit-val">-</div><div class="serial-bit-lbl">BIT7</div></div>
+              <div class="serial-bit-cell"><div class="serial-bit-val">1</div><div class="serial-bit-lbl">STOP</div></div>
+              <div class="serial-bit-cell"><div class="serial-bit-val">✓</div><div class="serial-bit-lbl">DONE</div></div>
+            </div>
+            <!-- Signal waveform canvas -->
+            <div class="serial-wire-row">
+              <canvas class="serial-wave-canvas" id="serial-wave-canvas" width="260" height="36"></canvas>
+            </div>
+            <!-- Devices -->
+            <div class="serial-devices">
+              <div class="serial-device active-dev">TX<br><span style="font-size:.65rem;color:var(--cyan)">0xA5</span></div>
+              <div class="serial-conn">
+                <div class="serial-dot" id="serial-dot"></div>
+              </div>
+              <div class="serial-device" id="serial-rx">RX<br><span style="font-size:.65rem;color:var(--txt-3)">—</span></div>
+            </div>
+            <!-- Byte display -->
+            <div class="serial-byte-display">
+              <div class="serial-byte-label">RX BYTE</div>
+              <div id="serial-byte-val">0x--</div>
+            </div>
+            <!-- Badges -->
+            <div class="serial-badge" id="serial-err-badge">🚨 PARITY ERROR — frame discarded</div>
+            <div class="serial-badge" id="serial-done-badge">✅ BYTE FORWARDED</div>
+          </div>
+        </div>
+        <div class="scenario-desc" id="sc-desc-serial"><strong style="color:#6b7280">SP_IDLE:</strong> Press Start to begin the simulation.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Edge Detection &amp; Parity VHDL</div>
+  <div class="code-block"><div class="code-header">serial_wrapper.vhd — edge detect + parity check</div>
+<pre>input_encoder: <span class="kw">PROCESS</span>(rx_valid, rx_valid_prev, rx_parity_ok)
+<span class="kw">BEGIN</span>
+    event_code &lt;= (<span class="kw">OTHERS</span> =&gt; '0');
+    <span class="kw">IF</span> rx_valid = '1' <span class="kw">AND</span> rx_valid_prev = '0' <span class="kw">THEN</span>   <span class="cm">-- rising edge only</span>
+        <span class="kw">IF</span> rx_parity_ok = '1' <span class="kw">THEN</span>
+            event_code &lt;= <span class="str">"0100000000"</span>;     <span class="cm">-- bit8: good</span>
+        <span class="kw">ELSE</span>
+            event_code &lt;= SP_INTERRUPT_EVENT; <span class="cm">-- bad parity → IDLE</span>
+        <span class="kw">END IF</span>;
+    <span class="kw">ELSIF</span> tx_ready = '1' <span class="kw">AND</span> tx_ready_prev = '0' <span class="kw">THEN</span>
+        event_code &lt;= <span class="str">"1000000000"</span>;         <span class="cm">-- bit9: tx_ready</span>
+    <span class="kw">END IF</span>;
+<span class="kw">END PROCESS</span>;</pre></div>
+
+  <div class="embedded-waveform">
+    <div class="embedded-waveform-header">📊 Serial Comm FSM — GHDL Simulation Waveform</div>
+    <div class="waveform-display" id="wf-embed-serial" style="min-height:260px;padding:1.1rem;overflow-x:auto"></div>
+    <div class="waveform-explanation"><strong>Reading:</strong> Each pair of cycles: <code>rx_valid</code> pulses → <code>fsm_busy</code> responds → <code>state_code</code> advances one state. IDLE→START at cycle 3; BIT0 at 5; BIT1 at 7; through BIT7 at 19; STOP at 21; COMPLETE at 22 with <code>tx_enable</code> HIGH. Byte 0xA5 = bits [1,0,1,0,0,1,0,1] LSB-first. Parity XOR = 0 → PASS. The demo also shows the error path where an odd-parity byte fires SP_INTERRUPT_EVENT.</div>
+  </div>
+</section>
+
+<!-- ═══════════ SIMULATION ═══════════ -->
+<section class="tab" id="tab-simulation">
+  <div class="page-header"><h2>Simulation &amp; GHDL</h2><p>Run your real VHDL testbenches via the backend — or read the workflow guide below</p></div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       REAL VHDL SIMULATION PANEL
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="sim-real-panel">
+
+    <!-- Header bar -->
+    <div class="sim-real-header">
+      <div class="sim-real-title">
+        <span class="sim-chip-icon">⚡</span>
+        <span>REAL VHDL SIMULATION</span>
+        <span class="sim-backend-badge" id="sim-backend-badge">Checking…</span>
+      </div>
+      <div class="sim-real-subtitle">Powered by GHDL · Results from actual hardware simulation</div>
+    </div>
+
+    <!-- FSM selector + run button row -->
+    <div class="sim-selector-row">
+      <div class="sim-selector-label">Select FSM to simulate:</div>
+      <div class="sim-fsm-btns" id="sim-fsm-btns">
+        <button type="button" class="sim-fsm-btn active" data-fsm="traffic">🚦 Traffic Light</button>
+        <button type="button" class="sim-fsm-btn"        data-fsm="vending">🥤 Vending Machine</button>
+        <button type="button" class="sim-fsm-btn"        data-fsm="elevator">🛗 Elevator</button>
+        <button type="button" class="sim-fsm-btn"        data-fsm="serial">📡 Serial Comm</button>
+        <button type="button" class="sim-fsm-btn"        data-fsm="fsm_core">⚙️ FSM Core</button>
+      </div>
+      <button type="button" class="sim-run-vhdl-btn" id="sim-run-vhdl-btn">
+        ▶ RUN VHDL
+      </button>
+    </div>
+
+    <!-- Selected FSM info bar -->
+    <div class="sim-info-bar" id="sim-info-bar">
+      <span class="sib-item">FSM: <strong id="sib-fsm">Traffic Light</strong></span>
+      <span class="sib-sep">·</span>
+      <span class="sib-item">config_id: <code id="sib-cfg">00</code></span>
+      <span class="sib-sep">·</span>
+      <span class="sib-item">Testbench: <code id="sib-tb">tb_traffic_light.vhd</code></span>
+      <span class="sib-sep">·</span>
+      <span class="sib-item">VCD: <code id="sib-vcd">tb_traffic_light.vcd</code></span>
+    </div>
+
+    <!-- Main body: console + inspector -->
+    <div class="sim-main-body">
+
+      <!-- Left: Live console -->
+      <div class="sim-console-panel">
+        <div class="sim-console-hdr">
+          <span>GHDL Console Output</span>
+          <div class="sim-console-actions">
+            <span class="sim-status-dot" id="sim-status-dot"></span>
+            <span class="sim-status-text" id="sim-status-text">Idle</span>
+            <button type="button" class="sim-console-clear" onclick="simClearConsole()">✕ Clear</button>
+          </div>
+        </div>
+        <div class="sim-console" id="sim-console">
+          <div class="sim-console-placeholder">Click <strong>▶ RUN VHDL</strong> to launch a real GHDL simulation.<br><br>The backend server must be running:<br><code>cd configurable_fsm &amp;&amp; python sim_server.py</code></div>
+        </div>
+        <div class="sim-console-footer" id="sim-console-footer">
+          <span id="sim-pass-count" class="sim-pass">— passes</span>
+          <span id="sim-fail-count" class="sim-fail">— fails</span>
+          <span id="sim-cycle-count" class="sim-cycles">— cycles</span>
+          <button type="button" class="sim-vcd-dl-btn" id="sim-vcd-dl-btn" onclick="simDownloadVCD()" disabled>⬇ Download VCD</button>
+        </div>
+      </div>
+
+      <!-- Right: Cycle inspector -->
+      <div class="sim-inspector-panel">
+        <div class="sim-inspector-hdr">Cycle-by-Cycle Inspector</div>
+        <!-- Playback controls -->
+        <div class="sim-play-controls">
+          <button type="button" class="sim-play-btn" onclick="simInspectorStart()" title="Play through all cycles">▶</button>
+          <button type="button" class="sim-play-btn" onclick="simInspectorPause()" title="Pause">⏸</button>
+          <button type="button" class="sim-play-btn" onclick="simInspectorStep(-1)" title="Previous cycle">⏮</button>
+          <button type="button" class="sim-play-btn" onclick="simInspectorStep(1)"  title="Next cycle (one clock)">⏭</button>
+          <button type="button" class="sim-play-btn" onclick="simInspectorReset()" title="Reset to cycle 0">↺</button>
+          <select class="sim-play-speed" id="sim-play-speed">
+            <option value="800">Slow</option>
+            <option value="350" selected>Normal</option>
+            <option value="120">Fast</option>
+            <option value="40">Turbo</option>
+          </select>
+        </div>
+        <!-- Cycle slider -->
+        <div class="sim-cycle-row">
+          <span class="sim-cycle-lbl">Cycle</span>
+          <input type="range" class="sim-cycle-slider" id="sim-cycle-slider"
+                 min="0" max="0" value="0" oninput="simInspectorGoto(this.value)"/>
+          <span class="sim-cycle-val" id="sim-cycle-val">0 / 0</span>
+        </div>
+        <!-- Signal cards -->
+        <div class="sim-signal-cards" id="sim-signal-cards">
+          <div class="sim-signal-placeholder">Run a simulation to inspect cycle data.</div>
+        </div>
+        <!-- State transition log -->
+        <div class="sim-trans-log-hdr">State Transitions</div>
+        <div class="sim-trans-log" id="sim-trans-log">
+          <div class="sim-signal-placeholder">Transitions appear after simulation.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom: live waveform from real VCD -->
+    <div class="sim-waveform-panel">
+      <div class="sim-waveform-hdr">
+        <span>📊 Live Waveform — from Real GHDL VCD</span>
+        <div class="sim-wf-controls">
+          <span class="sim-wf-lbl">Signals:</span>
+          <label class="sim-wf-chk"><input type="checkbox" id="wf-chk-clk"   checked onchange="simRedrawWaveform()"> clk</label>
+          <label class="sim-wf-chk"><input type="checkbox" id="wf-chk-state" checked onchange="simRedrawWaveform()"> state_code</label>
+          <label class="sim-wf-chk"><input type="checkbox" id="wf-chk-event" checked onchange="simRedrawWaveform()"> event_code</label>
+          <label class="sim-wf-chk"><input type="checkbox" id="wf-chk-busy"  checked onchange="simRedrawWaveform()"> fsm_busy</label>
+          <label class="sim-wf-chk"><input type="checkbox" id="wf-chk-valid" checked onchange="simRedrawWaveform()"> output_valid</label>
+          <label class="sim-wf-chk"><input type="checkbox" id="wf-chk-out"   checked onchange="simRedrawWaveform()"> outputs</label>
+        </div>
+      </div>
+      <div class="sim-waveform-live" id="sim-waveform-live">
+        <div class="sim-wf-placeholder">Waveform renders here after a successful GHDL run.</div>
+      </div>
+      <div class="sim-waveform-legend">
+        <span class="wf-leg-item"><span class="wf-dot clk"></span>Clock</span>
+        <span class="wf-leg-item"><span class="wf-dot bus"></span>Bus</span>
+        <span class="wf-leg-item"><span class="wf-dot high"></span>HIGH</span>
+        <span class="wf-leg-item"><span class="wf-dot low"></span>LOW</span>
+        <span class="wf-leg-item" style="margin-left:1rem;color:var(--cyan)">▏ = current cycle cursor</span>
+      </div>
+    </div>
+
+  </div><!-- end sim-real-panel -->
+
+  <!-- ══════════════════════════════════════════════════════════════
+       EDUCATIONAL WORKFLOW GUIDE (preserved exactly)
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="section-title" style="margin-top:2rem">How to Set Up the Backend</div>
+  <div class="sim-setup-steps">
+    <div class="sim-setup-step">
+      <div class="sim-setup-num">1</div>
+      <div><strong>Install GHDL</strong><br>
+        <code>sudo apt install ghdl</code> &nbsp;or&nbsp; <code>brew install ghdl</code><br>
+        Verify: <code>ghdl --version</code>
+      </div>
+    </div>
+    <div class="sim-setup-step">
+      <div class="sim-setup-num">2</div>
+      <div><strong>Install Python deps</strong><br>
+        <code>pip install flask flask-cors</code>
+      </div>
+    </div>
+    <div class="sim-setup-step">
+      <div class="sim-setup-num">3</div>
+      <div><strong>Start the server</strong><br>
+        <code>cd configurable_fsm</code><br>
+        <code>python sim_server.py</code><br>
+        Should print: <em>Listening on http://localhost:5000</em>
+      </div>
+    </div>
+    <div class="sim-setup-step">
+      <div class="sim-setup-num">4</div>
+      <div><strong>Click RUN VHDL</strong><br>
+        Select any FSM above and click the button. Real GHDL output streams live into the console.
+      </div>
+    </div>
+  </div>
+
+  <div class="card-grid two-col" style="margin-top:1.5rem">
+    <div class="card"><div class="card-icon">🔧</div><h3>What is GHDL?</h3><p>GHDL is a free, open-source VHDL simulator. It compiles VHDL into a native binary, runs the simulation, and produces VCD waveform files. Use <code>--std=08</code> for VHDL-2008 compliance.</p></div>
+    <div class="card"><div class="card-icon">🧪</div><h3>What is a Testbench?</h3><p>A VHDL file with no ports that instantiates your design, drives stimulus signals in a <code>process</code>, and checks outputs using <code>assert</code>. It is the VHDL equivalent of a unit test.</p></div>
+    <div class="card"><div class="card-icon">📊</div><h3>GTKWave</h3><p>Free waveform viewer that reads VCD files from GHDL. This panel now also renders VCD data directly so you can see real hardware timing in the browser without GTKWave.</p></div>
+    <div class="card"><div class="card-icon">📡</div><h3>Backend Bridge</h3><p><code>sim_server.py</code> wraps GHDL with a Flask REST API + SSE stream. The frontend polls for results and renders cycle-by-cycle state, events, ROM addresses, and decoded outputs.</p></div>
+  </div>
+
+  <div class="section-title">GHDL Three-Step Workflow</div>
+  <div class="ghdl-steps">
+    <div class="ghdl-step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Analyze (<code>-a</code>)</div><p>Parses and type-checks each VHDL file. Files must be analyzed in dependency order.</p><div class="code-block mini"><pre>ghdl -a --std=08 src/config_rom.vhd
+ghdl -a --std=08 src/generic_fsm.vhd
+ghdl -a --std=08 src/traffic_light_wrapper.vhd
+ghdl -a --std=08 tb/tb_traffic_light.vhd</pre></div></div></div>
+    <div class="ghdl-step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Elaborate (<code>-e</code>)</div><p>Links analyzed units for a specific top-level testbench entity.</p><div class="code-block mini"><pre>ghdl -e --std=08 tb_traffic_light</pre></div></div></div>
+    <div class="ghdl-step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Run (<code>-r</code>) + VCD output</div><p>Executes simulation and writes a VCD waveform file.</p><div class="code-block mini"><pre>ghdl -r --std=08 tb_traffic_light --vcd=traffic_light.vcd
+ghdl -r --std=08 tb_vending       --vcd=vending.vcd
+ghdl -r --std=08 tb_elevator      --vcd=elevator.vcd
+ghdl -r --std=08 tb_serial        --vcd=serial.vcd</pre></div></div></div>
+  </div>
+  <div class="section-title">Testbench Summary</div>
+  <div class="port-table-wrap"><table class="port-table">
+    <thead><tr><th>Testbench</th><th>Tests</th><th>Expected</th><th>VCD</th></tr></thead>
+    <tbody>
+      <tr><td><code>tb_fsm</code></td><td>Generic FSM core</td><td>Pipeline latency, hold/interrupt/normal transitions, reset</td><td><code>fsm.vcd</code></td></tr>
+      <tr><td><code>tb_traffic_light</code></td><td>Traffic wrapper</td><td>T1–25: IDLE→RED→GREEN→YELLOW cycle; ped path from GREEN/RED; emergency; hold guards</td><td><code>traffic_light.vcd</code></td></tr>
+      <tr><td><code>tb_vending</code></td><td>Vending wrapper</td><td>T1–6: Full purchase; T7–10: cancel interrupt + refund pulse; item_empty path</td><td><code>vending.vcd</code></td></tr>
+      <tr><td><code>tb_elevator</code></td><td>Elevator wrapper</td><td>Up trip F1→F5; down trip; door obstruction hold; overload; emergency interrupt</td><td><code>elevator.vcd</code></td></tr>
+      <tr><td><code>tb_serial</code></td><td>Serial wrapper</td><td>Full 8-bit frame 0xA5; bad parity interrupt; edge detection; 16-cycle timeout</td><td><code>serial.vcd</code></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ═══════════ WAVEFORM VIEWER ═══════════ -->
+<section class="tab" id="tab-waveform">
+  <div class="page-header"><h2>Waveform Viewer</h2><p>Interactive waveforms derived from GHDL/VCD simulation output</p></div>
+
+  <div class="section-title">Select FSM &amp; Testbench Case</div>
+  <div class="waveform-container">
+    <!-- FSM selector -->
+    <div class="waveform-controls">
+      <button class="wf-btn active" onclick="selectWaveform('traffic',this)">🚦 Traffic Light</button>
+      <button class="wf-btn"       onclick="selectWaveform('vending',this)">🥤 Vending Machine</button>
+      <button class="wf-btn"       onclick="selectWaveform('elevator',this)">🛗 Elevator</button>
+      <button class="wf-btn"       onclick="selectWaveform('serial',this)">📡 Serial Comm</button>
+    </div>
+
+    <!-- Testbench case selector row -->
+    <div class="tb-case-row" id="tb-case-row">
+      <span class="tb-case-label">Testbench case:</span>
+      <div class="tb-case-btns" id="tb-case-btns">
+        <!-- populated by JS based on selected FSM -->
+      </div>
+    </div>
+
+    <!-- Case description -->
+    <div class="tb-case-desc" id="tb-case-desc"></div>
+
+    <div class="waveform-display" id="waveform-display"></div>
+    <div class="waveform-legend">
+      <span class="wf-leg-item"><span class="wf-dot high"></span>HIGH (1)</span>
+      <span class="wf-leg-item"><span class="wf-dot low"></span>LOW (0)</span>
+      <span class="wf-leg-item"><span class="wf-dot bus"></span>Bus value</span>
+      <span class="wf-leg-item"><span class="wf-dot clk"></span>Clock</span>
+    </div>
+  </div>
+
+  <div class="section-title">How to Read Digital Waveforms</div>
+  <div class="card-grid two-col">
+    <div class="card"><h3><code>clk</code></h3><p>Square-wave clock. Count <strong>rising edges</strong> to measure latency in clock cycles. Purple segments in the waveform.</p></div>
+    <div class="card"><h3><code>fsm_busy</code></h3><p>Pulses HIGH for exactly 1 cycle during pipeline processing. Proves the 2-stage pipeline is functioning.</p></div>
+    <div class="card"><h3><code>state_code</code></h3><p>Changes <strong>2 cycles after</strong> event_code fires — the pipeline latency. This is the primary correctness check.</p></div>
+    <div class="card"><h3><code>output_action</code></h3><p>16-bit bitmask decoded per wrapper: traffic=LEDs [3:0], elevator=motor bits, etc. Changes with state_code.</p></div>
+  </div>
+
+  <div class="section-title">Key Takeaways</div>
+  <div class="takeaway-list">
+    <div class="takeaway"><span class="ta-num">1</span><strong>Table-driven FSM separates behavior from structure.</strong> generic_fsm.vhd never changes; only the ROM data changes per application.</div>
+    <div class="takeaway"><span class="ta-num">2</span><strong>2-stage pipeline is essential.</strong> ROM lookup takes one full cycle; Stage 2 registers the data so Stage 3 can update state with correct setup timing.</div>
+    <div class="takeaway"><span class="ta-num">3</span><strong>hold_state prevents silent resets.</strong> Without it, any unmapped event hits the OTHERS=&gt;0 default and sends the FSM to IDLE unexpectedly.</div>
+    <div class="takeaway"><span class="ta-num">4</span><strong>Interrupts provide safe emergency returns.</strong> Any application can define a "cancel everything" event without special FSM logic.</div>
+    <div class="takeaway"><span class="ta-num">5</span><strong>Wrappers are thin adapters, not logic.</strong> Each wrapper only encodes inputs → event_code and decodes output_action → physical signals.</div>
+    <div class="takeaway"><span class="ta-num">6</span><strong>Edge detection prevents double-sampling.</strong> Level-based events fire multiple times through a pipelined FSM; edge detection fires exactly once per physical event.</div>
+  </div>
+
+  <div class="prof-box" style="margin-top:1.5rem">
+    <div class="prof-title">🎓 One-Sentence Project Summary</div>
+    <p>"We designed a single reusable FSM core in VHDL whose behavior is entirely determined by a ROM lookup table — enabling traffic light, vending machine, elevator, and serial communication controllers to share the same hardware logic, differing only in their ROM configuration data."</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span>BCS-307 · Digital Systems Project · Configurable FSM-Based Controller</span>
+    <span>VHDL 2008 · GHDL · GTKWave · v4</span>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
