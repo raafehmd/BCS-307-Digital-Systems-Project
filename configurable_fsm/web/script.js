@@ -45,7 +45,7 @@ const WAVEFORM_DATA = {
       { name:'reset',        type:'bit',   values:[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] },
       { name:'event_code',   type:'bus',
         values:['0','0','2','0','0','0','4','0','0','0','4','0','0','0','1','0','0','0','4','0','0','4','0','0'],
-        labels:['0','0','car','0','0','0','tmr','0','0','0','tmr','0','0','0','ped','0','0','0','tmr','0','0','tmr','0','0'] },
+        labels:['—','—','car','—','—','—','tmr','—','—','—','tmr','—','—','—','ped_GRN','—','—','—','tmr','—','—','tmr','—','—'] },
       { name:'fsm_busy',     type:'bit',   values:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1,0,0] },
       { name:'state_code',   type:'bus',
         values:['0','0','0','1','1','1','1','2','2','2','2','3','3','3','3','4','4','4','4','5','5','5','1','1'],
@@ -67,10 +67,13 @@ const WAVEFORM_DATA = {
       { name:'coin_insert',   type:'bit',   values:[0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0] },
       { name:'selection_btn', type:'bus',
         values:['0','0','0','0','2','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0'],
-        labels:['0','0','0','0','B','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0'] },
+        labels:['—','—','—','—','B','—','—','—','—','—','—','—','—','—','—','—','—','—','—','—','—','—'] },
       { name:'cancel_btn',    type:'bit',   values:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1] },
       { name:'dispense_done', type:'bit',   values:[0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0] },
       { name:'change_done',   type:'bit',   values:[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0] },
+      { name:'event_code',    type:'bus',
+        values:['0','0','1','0','2','0','0','0','0','16','0','0','64','0','0','0','0','0','0','0','1','32'],
+        labels:['—','—','coin','—','sel','—','—','—','—','disp_dn','—','—','chg_dn','—','—','—','—','—','—','—','coin','CANCEL'] },
       { name:'fsm_busy',      type:'bit',   values:[0,0,1,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,1,1] },
       { name:'state_code',    type:'bus',
         values:['0','0','0','2','2','1','1','1','3','3','4','4','4','0','0','0','0','0','0','0','0','0'],
@@ -90,7 +93,10 @@ const WAVEFORM_DATA = {
         values:['1','1','5','5','5','5','5','5','5','5','0','0','0','1','1','1','1','1','1','0','0','0','0','0','0','0'],
         labels:['F1','F1','→F5','→F5','→F5','→F5','→F5','→F5','→F5','→F5','—','—','—','→F1','→F1','→F1','→F1','→F1','→F1','—','—','—','—','—','—','—'] },
       { name:'emergency_btn', type:'bit',   values:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0] },
-      { name:'fsm_busy',      type:'bit',   values:[0,0,1,0,0,0,0,0,1,0,1,0,1,1,0,0,0,0,1,0,0,1,0,0,0,0] },
+      { name:'event_code',    type:'bus',
+        values:['0','0','1','0','0','0','0','0','4','0','8','0','0','2','0','0','0','0','4','0','8','64','0','0','0','0'],
+        labels:['—','—','go↑','—','—','—','—','—','arr','—','clr','—','—','go↓','—','—','—','—','arr','—','clr','EMRG','—','—','—','—'] },
+      { name:'fsm_busy',      type:'bit',   values:[0,0,1,0,0,0,0,0,1,0,1,0,0,1,0,0,0,0,1,0,1,1,0,0,0,0] },
       { name:'state_code',    type:'bus',
         values:['0','0','0','1','1','1','1','1','1','3','3','4','0','0','2','2','2','2','2','3','4','0','0','0','0','0'],
         labels:['IDLE','IDLE','IDLE','MV↑','MV↑','MV↑','MV↑','MV↑','MV↑','D.OPN','D.OPN','D.CLS','IDLE','IDLE','MV↓','MV↓','MV↓','MV↓','MV↓','D.OPN','D.CLS','IDLE!','IDLE','IDLE','IDLE','IDLE'] },
@@ -111,6 +117,9 @@ const WAVEFORM_DATA = {
       { name:'clk',          type:'clock', cycles:26 },
       { name:'reset',        type:'bit',   values:[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] },
       { name:'rx_valid',     type:'bit',   values:[0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0,0,0] },
+      { name:'event_code',   type:'bus',
+        values:['0','0','256','0','256','0','256','0','256','0','256','0','256','0','256','0','256','0','256','0','256','0','512','0','0','0'],
+        labels:['—','—','rx↑','—','rx↑','—','rx↑','—','rx↑','—','rx↑','—','rx↑','—','rx↑','—','rx↑','—','rx↑','—','rx↑','—','tx_rdy','—','—','—'] },
       { name:'rx_data[0]',   type:'bus',
         values:['0','0','1','1','0','0','1','1','0','0','1','1','0','0','1','1','0','0','1','1','0','0','0','0','0','0'],
         labels:['0','0','1','','0','','1','','0','','1','','0','','1','','0','','1','','0','','','','',''] },
@@ -120,8 +129,7 @@ const WAVEFORM_DATA = {
       { name:'rx_parity_ok', type:'bit',   values:[0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0] },
       { name:'tx_enable',    type:'bit',   values:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0] },
       { name:'parity_err',   type:'bit',   values:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] },
-      { name:'fsm_busy',     type:'bit',   values:[0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0] },
-      { name:'output_valid', type:'bit',   values:[0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1,0,0,0] },
+      { name:'fsm_busy',     type:'bit',   values:[0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0] },      { name:'output_valid', type:'bit',   values:[0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1,0,0,0] },
     ]
   }
 };
@@ -155,7 +163,7 @@ function renderWaveformInContainer(name, container, highlightCycle) {
   ruler.className = 'wf-signal-row';
   let rulerTrack = '';
   for (let i = 0; i < N; i++) {
-    const hl = (highlightCycle !== undefined && i === highlightCycle) ? 'background:rgba(0,245,255,0.1);' : '';
+    const hl = (highlightCycle !== undefined && i === highlightCycle) ? 'background:rgba(0,245,255,0.12);' : '';
     rulerTrack += `<div class="wf-segment" style="left:${i*W}%;width:${W}%;${hl}border-right:1px solid rgba(71,85,105,0.2)"><span style="font-size:0.5rem;color:var(--text-muted);position:absolute;top:1px;left:2px">${i}</span></div>`;
   }
   ruler.innerHTML = `<div class="wf-signal-name" style="font-size:0.6rem;color:var(--text-muted)">CYCLE</div><div class="wf-signal-track" style="min-width:560px;position:relative">${rulerTrack}</div>`;
@@ -169,33 +177,52 @@ function renderWaveformInContainer(name, container, highlightCycle) {
     if (sig.type === 'clock') {
       for (let i = 0; i < N; i++) {
         const l = i * W, hw = W / 2;
-        track += `<div class="wf-segment wf-clock-high" style="left:${l}%;width:${hw}%"></div>`;
-        track += `<div class="wf-segment wf-clock-low"  style="left:${l+hw}%;width:${hw}%"></div>`;
+        const isCur = (highlightCycle !== undefined && i === highlightCycle);
+        const glow = isCur ? 'filter:brightness(1.8);' : '';
+        track += `<div class="wf-segment wf-clock-high" style="left:${l}%;width:${hw}%;${glow}"></div>`;
+        track += `<div class="wf-segment wf-clock-low"  style="left:${l+hw}%;width:${hw}%;${glow}"></div>`;
       }
     } else if (sig.type === 'bit') {
       for (let i = 0; i < N; i++) {
-        const hl = (highlightCycle !== undefined && i === highlightCycle) ? 'filter:brightness(2);' : '';
-        track += `<div class="wf-segment ${sig.values[i] ? 'wf-seg-high' : 'wf-seg-low'}" style="left:${i*W}%;width:${W}%;${hl}"></div>`;
+        const isCur = (highlightCycle !== undefined && i === highlightCycle);
+        const changed = i > 0 && sig.values[i] !== sig.values[i-1];
+        const hl = isCur ? 'filter:brightness(2.2);box-shadow:0 0 6px rgba(0,245,255,0.6);' : '';
+        const chMark = changed ? 'border-left:2px solid rgba(255,232,77,0.9);' : '';
+        track += `<div class="wf-segment ${sig.values[i] ? 'wf-seg-high' : 'wf-seg-low'}" style="left:${i*W}%;width:${W}%;${hl}${chMark}"></div>`;
       }
     } else {
       let s = 0, cv = sig.values[0], cl = (sig.labels || sig.values)[0];
       for (let i = 1; i <= N; i++) {
         if (i === N || sig.values[i] !== cv) {
-          const hl = (highlightCycle !== undefined && highlightCycle >= s && highlightCycle < i) ? 'filter:brightness(1.6);' : '';
-          track += `<div class="wf-segment wf-seg-bus" style="left:${s*W}%;width:${(i-s)*W}%;${hl}"><span class="wf-seg-bus-label">${cl}</span></div>`;
+          const isCurSpan = (highlightCycle !== undefined && highlightCycle >= s && highlightCycle < i);
+          const hl = isCurSpan ? 'filter:brightness(1.8);box-shadow:inset 0 0 8px rgba(0,245,255,0.25);' : '';
+          const borderLeft = s > 0 ? 'border-left:2px solid rgba(255,232,77,0.7);' : '';
+          track += `<div class="wf-segment wf-seg-bus" style="left:${s*W}%;width:${(i-s)*W}%;${hl}${borderLeft}"><span class="wf-seg-bus-label">${cl}</span></div>`;
           if (i < N) { cv = sig.values[i]; cl = (sig.labels || sig.values)[i]; s = i; }
         }
       }
     }
 
-    // Cursor
+    // Cursor line with stronger glow
     if (highlightCycle !== undefined) {
       const cx = highlightCycle * W + W / 2;
-      track += `<div style="position:absolute;left:${cx}%;top:0;width:2px;height:100%;background:rgba(0,245,255,0.7);pointer-events:none;z-index:5;box-shadow:0 0 6px rgba(0,245,255,0.8)"></div>`;
+      track += `<div style="position:absolute;left:${cx}%;top:0;width:2px;height:100%;background:rgba(0,245,255,0.9);pointer-events:none;z-index:5;box-shadow:0 0 10px rgba(0,245,255,1),0 0 20px rgba(0,245,255,0.5)"></div>`;
     }
     row.innerHTML = `<div class="wf-signal-name">${sig.name}</div><div class="wf-signal-track" style="min-width:560px;position:relative">${track}</div>`;
     container.appendChild(row);
   });
+
+  // ── Auto-append legend at bottom of every waveform ──
+  const legend = document.createElement('div');
+  legend.className = 'wf-auto-legend';
+  legend.innerHTML =
+    `<span class="wf-leg-item"><span class="wf-dot clk"></span>Clock</span>` +
+    `<span class="wf-leg-item"><span class="wf-dot high"></span>HIGH&nbsp;(1)</span>` +
+    `<span class="wf-leg-item"><span class="wf-dot low"></span>LOW&nbsp;(0)</span>` +
+    `<span class="wf-leg-item"><span class="wf-dot bus"></span>Bus&nbsp;value</span>` +
+    `<span class="wf-leg-item wf-leg-cursor"><span class="wf-dot cursor"></span>Active&nbsp;cycle&nbsp;cursor</span>` +
+    `<span class="wf-leg-item wf-leg-change"><span class="wf-dot change"></span>Signal&nbsp;transition</span>`;
+  container.appendChild(legend);
 }
 
 /* ─────────────────────────────────────────────
@@ -214,46 +241,34 @@ const FSM_SEQUENCES = {
     ],
     wfName: 'traffic',
     sequence: [
-      // ── Step 1: Reset / IDLE ──
       { state:0, event:'power_on',      wfCycle:0,  desc:'Power on. FSM → IDLE. All lights off — intersection inactive.',
         out:{red:0,yel:0,grn:0,ped:0}, carPos:'off', pedVis:false, emergency:false },
-      // ── Step 2: IDLE → RED via car_sensor ──
       { state:1, event:'car_sensor',    wfCycle:3,  desc:'Car sensor triggered. FSM → RED. Red light ON — all vehicles must stop immediately.',
         out:{red:1,yel:0,grn:0,ped:0}, carPos:'stopped', pedVis:false, emergency:false },
-      // ── Step 3: RED → GREEN via timer_done=1 ──
-      { state:2, event:'timer_done=1',  wfCycle:7,  desc:'Red phase timer expired (timer_done=1). FSM → GREEN. Green light ON — vehicles may proceed.',
+      { state:2, event:'timer_expire',  wfCycle:7,  desc:'Red phase timer expired. FSM → GREEN. Green light ON — vehicles may proceed through intersection.',
         out:{red:0,yel:0,grn:1,ped:0}, carPos:'moving', pedVis:false, emergency:false },
-      // ── Step 4: GREEN → YELLOW via timer_done=1 ──
-      { state:3, event:'timer_done=1',  wfCycle:11, desc:'Green phase timer expired (timer_done=1). FSM → YELLOW. Warning — vehicles should begin stopping.',
+      { state:3, event:'timer_expire',  wfCycle:11, desc:'Green phase timer expired. FSM → YELLOW. Warning signal — vehicles should begin stopping.',
         out:{red:0,yel:1,grn:0,ped:0}, carPos:'slowing', pedVis:false, emergency:false },
-      // ── Step 5: YELLOW → RED via timer_done=1 ──
-      { state:1, event:'timer_done=1',  wfCycle:22, desc:'Yellow timer expired (timer_done=1). FSM → RED. Normal 3-phase cycle: RED→GREEN→YELLOW→RED repeats.',
+      { state:1, event:'timer_expire',  wfCycle:15, desc:'Yellow timer expired. FSM → RED again. Normal 3-phase cycle repeats continuously.',
         out:{red:1,yel:0,grn:0,ped:0}, carPos:'stopped', pedVis:false, emergency:false },
-      // ── Step 6: RED → PED_WAIT via pedestrian_btn ──
-      { state:4, event:'ped_btn=1',     wfCycle:15, desc:'Pedestrian button pressed while RED. FSM → PED_WAIT. Red held — vehicles still stopped. Ped crossing queued.',
+      { state:4, event:'ped_btn(RED)',  wfCycle:15, desc:'Pedestrian button pressed while RED. FSM → PED_WAIT. Red held, pedestrian crossing queued.',
         out:{red:1,yel:0,grn:0,ped:0}, carPos:'stopped', pedVis:true, emergency:false },
-      // ── Step 7: PED_WAIT → PED_CROSS via timer_done=1 ──
-      { state:5, event:'timer_done=1',  wfCycle:19, desc:'PED_WAIT timer expired (timer_done=1). FSM → PED_CROSS. Walk signal ON — pedestrians crossing. Red remains on.',
+      { state:5, event:'timer_expire',  wfCycle:19, desc:'PED_WAIT timer expired. FSM → PED_CROSS. Walk signal ON — pedestrians crossing now. Red stays on for vehicles.',
         out:{red:1,yel:0,grn:0,ped:1}, carPos:'stopped', pedVis:true, emergency:false },
-      // ── Step 8: PED_CROSS → RED via timer_done=1 ──
-      { state:1, event:'timer_done=1',  wfCycle:22, desc:'Pedestrian crossing timer expired (timer_done=1). FSM → RED. Walk signal OFF. Vehicles stopped. Ped path complete.',
-        out:{red:1,yel:0,grn:0,ped:0}, carPos:'stopped', pedVis:false, emergency:false },
-      // ── Step 9: RED → GREEN (cycle continues) ──
-      { state:2, event:'timer_done=1',  wfCycle:7,  desc:'Red timer expires. FSM → GREEN again. Normal cycle resumes. Intersection fully operational.',
-        out:{red:0,yel:0,grn:1,ped:0}, carPos:'moving', pedVis:false, emergency:false },
-      // ── Step 10: GREEN → PED_WAIT via ped_btn while green ──
-      { state:4, event:'ped_btn=1(GRN)',wfCycle:15, desc:'Pedestrian button pressed while GREEN. FSM → PED_WAIT. Green ends early; red asserted; walk phase queued.',
+      // ── Step 9: GREEN → RED via pedestrian_btn ──
+      { state:1, event:'ped_btn=1(GRN)', wfCycle:14, desc:'Pedestrian button pressed while GREEN. FSM → RED directly (GREEN→RED on ped_btn=1). Green ends immediately; vehicles stop.',
+        out:{red:1,yel:0,grn:0,ped:0}, carPos:'stopped', pedVis:true, emergency:false },
+      // ── Step 10: RED → PED_WAIT via pedestrian_btn ──
+      { state:4, event:'ped_btn=1',      wfCycle:15, desc:'Now in RED. Pedestrian button again → PED_WAIT. Walk phase queued.',
         out:{red:1,yel:0,grn:0,ped:0}, carPos:'stopped', pedVis:true, emergency:false },
       // ── Step 11: PED_WAIT → PED_CROSS ──
-      { state:5, event:'timer_done=1',  wfCycle:19, desc:'PED_WAIT timer expires. FSM → PED_CROSS. Walk signal ON. Ped crossing from GREEN branch verified.',
+      { state:5, event:'timer_done=1',   wfCycle:19, desc:'PED_WAIT timer expires → PED_CROSS. Walk signal ON. Ped crossing from GREEN→RED→PED_WAIT path verified.',
         out:{red:1,yel:0,grn:0,ped:1}, carPos:'stopped', pedVis:true, emergency:false },
       // ── Step 12: PED_CROSS → RED ──
-      { state:1, event:'timer_done=1',  wfCycle:22, desc:'PED_CROSS timer expires (timer_done=1). FSM → RED. Walk signal OFF. Back to normal red phase.',
+      { state:1, event:'timer_done=1',   wfCycle:22, desc:'PED_CROSS timer expires → RED. Walk signal OFF. Back to normal red phase.',
         out:{red:1,yel:0,grn:0,ped:0}, carPos:'stopped', pedVis:false, emergency:false },
-      // ── Step 13: Emergency interrupt ──
-      { state:0, event:'emergency!',    wfCycle:0,  desc:'🚨 EMERGENCY VEHICLE approaching. ROM interrupt_en entry forces FSM → IDLE. All lights OFF immediately.',
+      { state:0, event:'emergency!',    wfCycle:0,  desc:'🚨 EMERGENCY VEHICLE approaching. ROM interrupt entry forces FSM → IDLE. All lights OFF immediately.',
         out:{red:0,yel:0,grn:0,ped:0}, carPos:'off', pedVis:false, emergency:true },
-      // ── Step 14: Resume from emergency ──
       { state:1, event:'clear+car',     wfCycle:3,  desc:'Emergency cleared. Car sensor fires. Normal operation resumes from RED phase.',
         out:{red:1,yel:0,grn:0,ped:0}, carPos:'stopped', pedVis:false, emergency:false },
     ]
@@ -548,12 +563,14 @@ function _svgHighlight(fsm, activeIdx) {
   const svg = document.getElementById(`fsm-svg-${fsm}`);
   if (!svg) return;
   svg.querySelectorAll('.state-circle').forEach((c, i) => {
-    const col = FSM_SEQUENCES[fsm].states[i] ? FSM_SEQUENCES[fsm].states[i].color : '#fff';
+    const col = FSM_SEQUENCES[fsm] && FSM_SEQUENCES[fsm].states[i] ? FSM_SEQUENCES[fsm].states[i].color : '#fff';
     if (i === activeIdx) {
       c.style.strokeWidth = '4.5'; c.style.stroke = col;
-      c.style.filter = `drop-shadow(0 0 12px ${col}) drop-shadow(0 0 24px ${col}55)`;
+      c.style.filter = `drop-shadow(0 0 14px ${col}) drop-shadow(0 0 28px ${col}88)`;
+      c.classList.add('active-state');
     } else {
       c.style.strokeWidth = '2'; c.style.filter = ''; c.style.stroke = '';
+      c.classList.remove('active-state');
     }
   });
 }
@@ -776,27 +793,24 @@ function _drawSerialWave(canvas, bits, stateIdx) {
    INIT
 ───────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-  // Hero fade — only on first load, not when restoring from sessionStorage
-  const isRestore = (() => { try { return !!sessionStorage.getItem('fsmActiveTab'); } catch(_){ return false; } })();
-  if (!isRestore) {
-    const hero = document.querySelector('.hero');
-    if (hero) {
-      hero.style.opacity = '0'; hero.style.transform = 'translateY(24px)';
-      requestAnimationFrame(() => {
-        hero.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
-        hero.style.opacity = '1'; hero.style.transform = 'translateY(0)';
-      });
-    }
-
-    // Stagger cards only on first load
-    document.querySelectorAll('.card, .app-card').forEach((c, i) => {
-      c.style.opacity = '0'; c.style.transform = 'translateY(16px)';
-      setTimeout(() => {
-        c.style.transition = 'opacity 0.45s ease, transform 0.45s ease';
-        c.style.opacity = '1'; c.style.transform = 'translateY(0)';
-      }, 100 + i * 50);
+  // Hero fade
+  const hero = document.querySelector('.hero');
+  if (hero) {
+    hero.style.opacity = '0'; hero.style.transform = 'translateY(24px)';
+    requestAnimationFrame(() => {
+      hero.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+      hero.style.opacity = '1'; hero.style.transform = 'translateY(0)';
     });
   }
+
+  // Stagger cards
+  document.querySelectorAll('.card, .app-card').forEach((c, i) => {
+    c.style.opacity = '0'; c.style.transform = 'translateY(16px)';
+    setTimeout(() => {
+      c.style.transition = 'opacity 0.45s ease, transform 0.45s ease';
+      c.style.opacity = '1'; c.style.transform = 'translateY(0)';
+    }, 100 + i * 50);
+  });
 
   // Init FSMs
   ['traffic','vending','elevator','serial'].forEach(fsm => { initA(fsm); _updateBtns(fsm); });
@@ -809,8 +823,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const el = document.getElementById(`wf-embed-${fsm}`);
     if (el) renderWaveformInContainer(fsm, el);
   });
-});
-/* ================================================================
+});/* ================================================================
    ADDITIONS v4
    - showWT() — walkthrough tab switcher
    - TB_CASES — testbench case data aligned to waveform data
@@ -847,7 +860,7 @@ const TB_CASES = {
     { label: 'T1: Reset→IDLE',       desc: 'do_reset: All lights off. Checks all outputs = 0 after synchronous reset.', cycle: 0 },
     { label: 'T2–5: Car cycle',       desc: 'IDLE→RED (car_sensor) → GREEN (timer) → YELLOW (timer) → RED (timer). Normal 3-phase cycle.', cycle: 3 },
     { label: 'T6–7: Car ignored RED', desc: 'Already in RED, car_sensor fires again — HOLD entry: state stays RED. output_valid pulses but state unchanged.', cycle: 3 },
-    { label: 'T12–15: Ped from GREEN',desc: 'GREEN + pedestrian_btn → PED_WAIT (red held) → PED_CROSS (ped_signal ON) → RED.', cycle: 15 },
+    { label: 'T12–15: Ped from GREEN',desc: 'GREEN + ped_btn=1 → RED directly (GREEN→RED). Then ped_btn from RED → PED_WAIT → PED_CROSS → RED.', cycle: 14 },
     { label: 'T16–19: Ped from RED',  desc: 'RED + pedestrian_btn → PED_WAIT → PED_CROSS (ped_signal ON) → RED.', cycle: 15 },
     { label: 'T20–23: Ped from IDLE', desc: 'IDLE + pedestrian_btn → RED → GREEN → YELLOW → RED. Ped button triggers initial red phase.', cycle: 0 },
     { label: 'T24–25: Reset active',  desc: 'FSM in GREEN, reset asserted mid-operation → returns to IDLE. All outputs clear.', cycle: 7 },
@@ -928,30 +941,25 @@ selectWaveform = function(name, buttonEl) {
   initTBCases(name);
 };
 
-/* ─────────────────────────────────────────────
-   DOM READY — augment existing init
-───────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize TB cases for default waveform tab selection (traffic)
   setTimeout(() => initTBCases('traffic'), 0);
 });
 
-
 /* ================================================================
-   REAL VHDL SIMULATION FRONTEND  v3
+   REAL VHDL SIMULATION FRONTEND  v4 — definitive fix
    ================================================================
-   DEFINITIVE FIX NOTES:
-   - The full page reload is caused by fetch() to http://localhost:5000
-     from a file:// origin triggering a CORS pre-flight that some
-     Chromium versions handle as a navigation in certain states.
-   - Fix: ALL fetch calls are wrapped in a try/catch at the
-     SYNCHRONOUS callsite (not just inside async), and a hard
-     _simRunning guard prevents any re-entry.
-   - Health check moved to ONE-SHOT, triggered only by the button,
-     not by a background setInterval (which was the source of
-     uncatchable rejections even with .catch()).
-   - simClearConsole() moved to AFTER server confirms run started.
-   - Hero animation guard added so it does NOT re-run on tab switch.
+   Root cause of page reload: ANY fetch() that rejects (network error,
+   AbortController abort, CORS failure) while called from a script
+   loaded via file:// can trigger a browser navigation in Chromium
+   versions <112. Even with .catch(), the network stack fires first.
+
+   Solution:
+   - ZERO automatic fetching. No health check on load. No polling.
+   - The badge is set to "Manual — click RUN VHDL" by default.
+   - When button clicked: ONE fetch to /api/run. If it fails, we catch
+     it as a plain Error and show the message. No AbortController used.
+   - No async/await anywhere in the click-handler call chain.
+   - The running guard (_sim.running) blocks all re-entry.
    ================================================================ */
 
 const SIM_API = 'http://localhost:5000/api';
@@ -974,400 +982,307 @@ const SIM_STATE_COLORS = {
   SP_IDLE:'#6b7280', SP_START:'#4fc3f7', SP_COMPLETE:'#39ff8f', SP_STOP:'#ffe84d',
 };
 
-/* ── State object ── */
-const _sim = {
-  fsm:       'traffic',
-  runId:     null,
-  cycles:    [],
-  inspIdx:   0,
-  inspTimer: null,
-  online:    false,
-  evtSrc:    null,
-  running:   false,   /* ← hard guard: prevents button double-fire */
-  initDone:  false,
+var _sim = {
+  fsm:'traffic', runId:null, cycles:[], inspIdx:0,
+  inspTimer:null, evtSrc:null, running:false, initDone:false,
 };
 
-/* ══════════════════════════════════════════════════════════════════
-   SETUP — single entry point, runs once
-══════════════════════════════════════════════════════════════════ */
+/* ── Keep simulation tab active ── */
+function _simKeepTab() {
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
+  var t=document.getElementById('tab-simulation'), b=document.querySelector('[data-tab="simulation"]');
+  if(t) t.classList.add('active');
+  if(b) b.classList.add('active');
+}
+
+/* ── One-time setup ── */
 function _simSetup() {
   if (_sim.initDone) return;
   _sim.initDone = true;
 
-  /* Restore last active tab from sessionStorage */
+  /* Restore tab from sessionStorage */
   try {
     var saved = sessionStorage.getItem('fsmActiveTab');
     if (saved) {
-      var t = document.getElementById('tab-' + saved);
-      var b = document.querySelector('[data-tab="' + saved + '"]');
-      if (t && b) {
-        document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
-        document.querySelectorAll('.nav-btn').forEach(function(x){ x.classList.remove('active'); });
-        t.classList.add('active');
-        b.classList.add('active');
+      var tt=document.getElementById('tab-'+saved), bb=document.querySelector('[data-tab="'+saved+'"]');
+      if(tt && bb) {
+        document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active');});
+        document.querySelectorAll('.nav-btn').forEach(function(x){x.classList.remove('active');});
+        tt.classList.add('active'); bb.classList.add('active');
       }
     }
-  } catch(e) {}
+  } catch(e){}
 
-  /* Save tab on every nav click */
-  document.querySelectorAll('.nav-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      try { sessionStorage.setItem('fsmActiveTab', btn.dataset.tab || 'home'); } catch(e) {}
+  /* Save tab on nav clicks */
+  document.querySelectorAll('.nav-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      try{ sessionStorage.setItem('fsmActiveTab', btn.dataset.tab||'home'); }catch(e){}
     });
   });
 
   /* FSM selector buttons */
-  document.querySelectorAll('.sim-fsm-btn').forEach(function(btn) {
-    btn.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      document.querySelectorAll('.sim-fsm-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.sim-fsm-btn').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      document.querySelectorAll('.sim-fsm-btn').forEach(function(b){b.classList.remove('active');});
       btn.classList.add('active');
       _sim.fsm = btn.dataset.fsm;
       _simInfoBar(btn.dataset.fsm);
     });
   });
 
-  /* RUN VHDL button — no onclick in HTML, wired only here */
+  /* RUN VHDL button — synchronous handler only, no async, no fetch here */
   var runBtn = document.getElementById('sim-run-vhdl-btn');
   if (runBtn) {
     runBtn.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
       e.stopImmediatePropagation();
-      if (_sim.running) return;          /* hard guard: ignore if already running */
-      try { sessionStorage.setItem('fsmActiveTab', 'simulation'); } catch(e2) {}
+      if (_sim.running) return;             /* re-entry guard */
+      try{ sessionStorage.setItem('fsmActiveTab','simulation'); }catch(ex){}
       _simKeepTab();
-      _simLaunch();                      /* synchronous wrapper — never throws */
+      _simLaunch();                         /* synchronous entry point */
     });
   }
 
+  /* Set badge to manual mode — no auto fetch */
+  var badge = document.getElementById('sim-backend-badge');
+  if (badge) {
+    badge.textContent = '⚡ Click RUN VHDL to connect';
+    badge.className = 'sim-backend-badge';
+  }
+
   _simInfoBar('traffic');
-  _simOneShot();                         /* single health check on init */
 }
 
-/* Guard: keep simulation tab visible */
-function _simKeepTab() {
-  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
-  document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
-  var t = document.getElementById('tab-simulation');
-  var b = document.querySelector('[data-tab="simulation"]');
-  if (t) t.classList.add('active');
-  if (b) b.classList.add('active');
-}
-
-/* Run setup once DOM is ready */
+/* Boot */
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', _simSetup);
 } else {
   _simSetup();
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   BACKEND HEALTH CHECK  (one-shot, no setInterval)
-══════════════════════════════════════════════════════════════════ */
-function _simOneShot() {
-  var badge = document.getElementById('sim-backend-badge');
-  if (badge) { badge.textContent = 'Checking…'; badge.className = 'sim-backend-badge'; }
-
-  var ctrl = new AbortController();
-  var tid  = setTimeout(function(){ ctrl.abort(); }, 2500);
-
-  fetch(SIM_API + '/status', { signal: ctrl.signal })
-    .then(function(r){
-      clearTimeout(tid);
-      if (!r.ok) throw new Error('bad');
-      return r.json();
-    })
-    .then(function(d){
-      _sim.online = true;
-      if (badge) {
-        var v = d.ghdl_version ? d.ghdl_version.split(' ')[0] : '';
-        badge.textContent = d.ghdl ? '🟢 Online · GHDL ' + v : '🟡 Online (no GHDL)';
-        badge.className = 'sim-backend-badge online';
-      }
-    })
-    .catch(function(){
-      clearTimeout(tid);
-      _sim.online = false;
-      if (badge) {
-        badge.textContent = '🔴 Offline — run sim_server.py';
-        badge.className = 'sim-backend-badge offline';
-      }
-    });
-}
-
-/* Re-check when user clicks RUN VHDL and we're offline */
-function _simRecheck(cb) {
-  var ctrl = new AbortController();
-  var tid  = setTimeout(function(){ ctrl.abort(); }, 2000);
-  fetch(SIM_API + '/status', { signal: ctrl.signal })
-    .then(function(r){ clearTimeout(tid); _sim.online = r.ok; cb(); })
-    .catch(function(){ clearTimeout(tid); _sim.online = false; cb(); });
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   INFO BAR
-══════════════════════════════════════════════════════════════════ */
+/* ── Info bar ── */
 function _simInfoBar(key) {
-  var m = SIM_FSM_META[key]; if (!m) return;
-  function s(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; }
-  s('sib-fsm', m.label); s('sib-cfg', m.config_id);
-  s('sib-tb',  m.tb);    s('sib-vcd', m.vcd);
+  var m=SIM_FSM_META[key]; if(!m) return;
+  function s(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
+  s('sib-fsm',m.label); s('sib-cfg',m.config_id); s('sib-tb',m.tb); s('sib-vcd',m.vcd);
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   CONSOLE
-══════════════════════════════════════════════════════════════════ */
+/* ── Console ── */
 function _simLog(line, cls) {
-  var con = document.getElementById('sim-console'); if (!con) return;
-  var ph = con.querySelector('.sim-console-placeholder'); if (ph) ph.remove();
-  var d = document.createElement('div');
-  if (cls) {
-    d.className = cls;
-  } else {
-    var lc = line.toLowerCase();
-    if      (lc.indexOf('pass:')    >= 0)                                  d.className = 'sim-log-pass';
-    else if (lc.indexOf('fail:')   >= 0 ||
-             (lc.indexOf('error:') >= 0 && lc.indexOf('simulation') < 0)) d.className = 'sim-log-fail';
-    else if (lc.indexOf('warning:') >= 0)                                  d.className = 'sim-log-warn';
-    else if (lc.indexOf('===')     >= 0 || lc.indexOf('---') >= 0 ||
-             lc.indexOf('  [')     === 0)                                  d.className = 'sim-log-info';
-    else if (lc.indexOf('  $')     === 0)                                  d.className = 'sim-log-cmd';
+  var con=document.getElementById('sim-console'); if(!con) return;
+  var ph=con.querySelector('.sim-console-placeholder'); if(ph) ph.remove();
+  var d=document.createElement('div');
+  if(cls) { d.className=cls; } else {
+    var lc=line.toLowerCase();
+    if     (lc.indexOf('pass:')>=0)                                  d.className='sim-log-pass';
+    else if(lc.indexOf('fail:')>=0||(lc.indexOf('error:')>=0&&lc.indexOf('simulation')<0)) d.className='sim-log-fail';
+    else if(lc.indexOf('warning:')>=0)                               d.className='sim-log-warn';
+    else if(lc.indexOf('==='  )>=0||lc.indexOf('---')>=0||lc.indexOf('  [')==0) d.className='sim-log-info';
+    else if(lc.indexOf('  $' )==0)                                   d.className='sim-log-cmd';
   }
-  d.textContent = line;
-  con.appendChild(d);
-  con.scrollTop = con.scrollHeight;
+  d.textContent=line; con.appendChild(d); con.scrollTop=con.scrollHeight;
 }
 
 function simClearConsole() {
-  var con = document.getElementById('sim-console');
-  if (con) con.innerHTML = '<div class="sim-console-placeholder">Console cleared. Click ▶ RUN VHDL to simulate.</div>';
+  var con=document.getElementById('sim-console');
+  if(con) con.innerHTML='<div class="sim-console-placeholder">Console cleared. Click ▶ RUN VHDL to simulate.</div>';
   _simFooter(null);
 }
 
 function _simStatus(st) {
-  var dot = document.getElementById('sim-status-dot');
-  var txt = document.getElementById('sim-status-text');
-  var btn = document.getElementById('sim-run-vhdl-btn');
-  if (dot) dot.className = 'sim-status-dot ' + st;
-  if (txt) txt.textContent = st.charAt(0).toUpperCase() + st.slice(1);
-  if (btn) {
-    if (st === 'running') {
-      btn.textContent = '⟳ Running…'; btn.classList.add('running'); btn.disabled = true;
-    } else {
-      btn.textContent = '▶ RUN VHDL'; btn.classList.remove('running'); btn.disabled = false;
-    }
+  var dot=document.getElementById('sim-status-dot'),
+      txt=document.getElementById('sim-status-text'),
+      btn=document.getElementById('sim-run-vhdl-btn'),
+      badge=document.getElementById('sim-backend-badge');
+  if(dot) dot.className='sim-status-dot '+st;
+  if(txt) txt.textContent=st.charAt(0).toUpperCase()+st.slice(1);
+  if(btn) {
+    if(st==='running'){btn.textContent='⟳ Running…';btn.classList.add('running');btn.disabled=true;}
+    else{btn.textContent='▶ RUN VHDL';btn.classList.remove('running');btn.disabled=false;}
   }
+  if(badge && st==='running') { badge.textContent='🟡 Connecting…'; badge.className='sim-backend-badge'; }
+  if(badge && st==='done')    { badge.textContent='🟢 Simulation complete'; badge.className='sim-backend-badge online'; }
+  if(badge && st==='error')   { badge.textContent='🔴 Error — check console'; badge.className='sim-backend-badge offline'; }
 }
 
 function _simFooter(s) {
-  var p=document.getElementById('sim-pass-count'),
-      f=document.getElementById('sim-fail-count'),
-      c=document.getElementById('sim-cycle-count'),
-      d=document.getElementById('sim-vcd-dl-btn');
-  if (!s) {
-    if(p) p.textContent='— passes'; if(f) f.textContent='— fails';
-    if(c) c.textContent='— cycles'; if(d) d.disabled=true; return;
-  }
-  if(p) p.textContent=(s.passes||0)+' passes';
-  if(f) f.textContent=(s.fails||0)+' fails';
-  if(c) c.textContent=(s.cycle_count||0)+' cycles';
-  if(d) d.disabled=(s.status!=='done');
+  var p=document.getElementById('sim-pass-count'),f=document.getElementById('sim-fail-count'),
+      c=document.getElementById('sim-cycle-count'),d=document.getElementById('sim-vcd-dl-btn');
+  if(!s){if(p)p.textContent='— passes';if(f)f.textContent='— fails';if(c)c.textContent='— cycles';if(d)d.disabled=true;return;}
+  if(p)p.textContent=(s.passes||0)+' passes';
+  if(f)f.textContent=(s.fails||0)+' fails';
+  if(c)c.textContent=(s.cycle_count||0)+' cycles';
+  if(d)d.disabled=(s.status!=='done');
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   LAUNCH — synchronous wrapper called from button click handler.
-   Never throws. Never navigates. Never causes reload.
-══════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   LAUNCH — called synchronously from button click.
+   Uses plain fetch().then().catch() — NO async/await, NO AbortController.
+   All error paths go through _simFinish() which releases the guard.
+═══════════════════════════════════════════════════════════════ */
 function _simLaunch() {
-  /* Recheck backend status, then start (avoids stale cached state) */
-  _simRecheck(function() {
-    if (!_sim.online) {
-      _simLog('⚠ Backend offline — run:  python sim_server.py', 'sim-log-warn');
-      _simLog('  from the configurable_fsm/ directory', 'sim-log-cmd');
-      _simStatus('error');
-      return;
+  _sim.running = true;
+  simClearConsole();
+  _simStatus('running');
+  _sim.cycles = []; _sim.runId = null;
+
+  /* Close stale SSE */
+  if(_sim.evtSrc){try{_sim.evtSrc.close();}catch(e){}_sim.evtSrc=null;}
+
+  var label = (SIM_FSM_META[_sim.fsm]||{label:_sim.fsm}).label;
+  _simLog('▶ RUN VHDL — ' + label, 'sim-log-header');
+  _simLog('  Connecting to sim_server.py on localhost:5000…', 'sim-log-cmd');
+  _simKeepTab();
+
+  /* Single fetch — no AbortController, timeout handled by server */
+  fetch(SIM_API + '/run', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({fsm: _sim.fsm}),
+  })
+  .then(function(resp) {
+    return resp.json().then(function(data){ return {ok:resp.ok, data:data}; });
+  })
+  .then(function(rd) {
+    if (!rd.ok || rd.data.error) {
+      _simLog('✗ ' + (rd.data.error || 'Server returned error'), 'sim-log-fail');
+      if (rd.data.hint) _simLog('  ' + rd.data.hint, 'sim-log-warn');
+      _simFinish('error'); return;
     }
-    /* Only NOW clear console (server confirmed reachable) */
-    simClearConsole();
-    _simStatus('running');
-    _sim.running  = true;
-    _sim.cycles   = [];
-    _sim.runId    = null;
-
-    /* Close stale SSE */
-    if (_sim.evtSrc) { try { _sim.evtSrc.close(); } catch(e){} _sim.evtSrc = null; }
-
-    _simLog('▶ Launching: ' + (SIM_FSM_META[_sim.fsm]||{label:_sim.fsm}).label, 'sim-log-header');
+    _sim.runId = rd.data.run_id;
+    _simLog('  Run ID: ' + _sim.runId, 'sim-log-cmd');
     _simKeepTab();
-
-    /* POST /api/run */
-    var ctrl = new AbortController();
-    var tid  = setTimeout(function(){ ctrl.abort(); }, 30000);
-
-    fetch(SIM_API + '/run', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fsm: _sim.fsm }),
-      signal: ctrl.signal,
-    })
-    .then(function(r){ clearTimeout(tid); return r.json().then(function(d){ return {ok:r.ok, d:d}; }); })
-    .then(function(rd) {
-      if (!rd.ok || rd.d.error) {
-        _simLog('✗ ' + (rd.d.error || 'Server error'), 'sim-log-fail');
-        if (rd.d.hint) _simLog('  Hint: ' + rd.d.hint, 'sim-log-warn');
-        _simDone('error'); return;
-      }
-      _sim.runId = rd.d.run_id;
-      _simLog('  Run ID: ' + _sim.runId, 'sim-log-cmd');
-      _simKeepTab();
-      _simOpenStream(_sim.runId);
-    })
-    .catch(function(err) {
-      clearTimeout(tid);
-      var msg = (err && err.name === 'AbortError') ? 'Request timed out (30 s)' : (err && err.message) || 'Network error';
-      _simLog('✗ ' + msg, 'sim-log-fail');
-      _simLog('  Is sim_server.py running on localhost:5000?', 'sim-log-warn');
-      _simDone('error');
-    });
+    _simOpenStream(_sim.runId);
+  })
+  .catch(function(err) {
+    var msg = (err && err.message) ? err.message : 'Network error (is sim_server.py running?)';
+    _simLog('✗ Cannot reach backend: ' + msg, 'sim-log-fail');
+    _simLog('  Start the server:  cd configurable_fsm && python sim_server.py', 'sim-log-warn');
+    _simFinish('error');
   });
 }
 
-/* Open SSE stream */
+/* Open SSE — plain callbacks, no async */
 function _simOpenStream(runId) {
-  var evtSrc = new EventSource(SIM_API + '/stream/' + runId);
-  _sim.evtSrc = evtSrc;
+  var es = new EventSource(SIM_API + '/stream/' + runId);
+  _sim.evtSrc = es;
 
-  evtSrc.onmessage = function(e) {
-    var msg; try { msg = JSON.parse(e.data); } catch(_){ return; }
+  es.onmessage = function(e) {
+    var msg; try{ msg=JSON.parse(e.data); }catch(_){ return; }
+    _simKeepTab();
     if (msg.type === 'log') {
       _simLog(msg.line);
     } else if (msg.type === 'done') {
-      try { evtSrc.close(); } catch(_){}
-      _sim.evtSrc = null;
+      try{es.close();}catch(_){} _sim.evtSrc=null;
       _simFooter(msg.summary);
-      var st = (msg.summary && msg.summary.status === 'done') ? 'done' : 'error';
-      _simDone(st);
-      if (st === 'done') _simFetchResults(runId);
+      var st = (msg.summary && msg.summary.status==='done') ? 'done' : 'error';
+      _simFinish(st);
+      if (st==='done') _simGetResults(runId);
     }
   };
 
-  evtSrc.onerror = function() {
-    try { evtSrc.close(); } catch(_){}
-    _sim.evtSrc = null;
-    _simLog('✗ SSE stream closed — check backend terminal.', 'sim-log-warn');
-    _simDone('error');
+  es.onerror = function() {
+    try{es.close();}catch(_){} _sim.evtSrc=null;
+    _simLog('✗ Stream closed — check backend terminal', 'sim-log-warn');
+    _simFinish('error');
   };
 }
 
-/* Always called to release the running lock */
-function _simDone(st) {
+/* Always release the running lock here */
+function _simFinish(st) {
   _sim.running = false;
-  _simStatus(st || 'error');
+  _simStatus(st||'error');
   _simKeepTab();
 }
 
-/* Fetch cycle results */
-function _simFetchResults(runId) {
+/* Fetch parsed cycle results */
+function _simGetResults(runId) {
   fetch(SIM_API + '/results/' + runId)
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
-      _sim.cycles = data.cycles || [];
-      _simLog('\n  ✓ ' + _sim.cycles.length + ' cycles loaded from GHDL', 'sim-log-pass');
-      _simInspInit();
-      _simBuildTransLog();
-      simRedrawWaveform();
-      _simFooter({ passes:data.passes, fails:data.fails, cycle_count:data.cycle_count, status:'done' });
-    })
-    .catch(function(err){
-      _simLog('✗ Results load failed: ' + (err&&err.message||'unknown'), 'sim-log-fail');
-    });
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    _sim.cycles = data.cycles || [];
+    _simLog('\n  ✓ ' + _sim.cycles.length + ' real GHDL cycles loaded', 'sim-log-pass');
+    _simInspInit();
+    _simBuildTransLog();
+    simRedrawWaveform();
+    _simFooter({passes:data.passes,fails:data.fails,cycle_count:data.cycle_count,status:'done'});
+  })
+  .catch(function(err){
+    _simLog('✗ Results error: '+(err&&err.message||'unknown'), 'sim-log-fail');
+  });
 }
 
-/* VCD download — blob URL, never navigates */
+/* VCD download — blob URL only, never navigates */
 function simDownloadVCD() {
   if (!_sim.runId) return;
   fetch(SIM_API + '/vcd/' + _sim.runId)
-    .then(function(r){ return r.text(); })
-    .then(function(txt){
-      var blob = new Blob([txt], {type:'text/plain'});
-      var url  = URL.createObjectURL(blob);
-      var a    = document.createElement('a');
-      a.href = url; a.download = 'sim_' + _sim.runId + '.vcd';
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(function(){ URL.revokeObjectURL(url); document.body.removeChild(a); }, 1000);
-    })
-    .catch(function(err){ _simLog('✗ VCD download: ' + (err&&err.message||'error'), 'sim-log-fail'); });
+  .then(function(r){ return r.text(); })
+  .then(function(txt){
+    var blob=new Blob([txt],{type:'text/plain'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url; a.download='sim_'+_sim.runId+'.vcd'; a.style.display='none';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){URL.revokeObjectURL(url);document.body.removeChild(a);},1000);
+  })
+  .catch(function(err){ _simLog('✗ VCD download: '+(err&&err.message||'error'),'sim-log-fail'); });
 }
 
-/* ══════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
    CYCLE INSPECTOR
-══════════════════════════════════════════════════════════════════ */
+═══════════════════════════════════════════════════════════════ */
 function _simInspInit() {
-  _sim.inspIdx = 0;
-  var sl = document.getElementById('sim-cycle-slider');
-  if (sl) { sl.min=0; sl.max=Math.max(0,_sim.cycles.length-1); sl.value=0; }
+  _sim.inspIdx=0;
+  var sl=document.getElementById('sim-cycle-slider');
+  if(sl){sl.min=0;sl.max=Math.max(0,_sim.cycles.length-1);sl.value=0;}
   _simInspRender(0);
 }
-
-function simInspectorGoto(v) {
-  var n = parseInt(v,10); _sim.inspIdx = n; _simInspRender(n);
-}
-
-function simInspectorStep(d) {
-  var n = Math.max(0, Math.min(_sim.cycles.length-1, _sim.inspIdx+d));
-  _sim.inspIdx = n;
-  var sl = document.getElementById('sim-cycle-slider'); if(sl) sl.value=n;
+function simInspectorGoto(v){ var n=parseInt(v,10); _sim.inspIdx=n; _simInspRender(n); }
+function simInspectorStep(d){
+  var n=Math.max(0,Math.min(_sim.cycles.length-1,_sim.inspIdx+d));
+  _sim.inspIdx=n;
+  var sl=document.getElementById('sim-cycle-slider'); if(sl) sl.value=n;
   _simInspRender(n);
 }
-
-function simInspectorStart() {
-  if (_sim.inspTimer) clearInterval(_sim.inspTimer);
-  var sp = document.getElementById('sim-play-speed');
-  var ms = sp ? parseInt(sp.value,10) : 350;
-  _sim.inspTimer = setInterval(function(){
-    if (_sim.inspIdx >= _sim.cycles.length-1) { clearInterval(_sim.inspTimer); _sim.inspTimer=null; return; }
+function simInspectorStart(){
+  if(_sim.inspTimer) clearInterval(_sim.inspTimer);
+  var sp=document.getElementById('sim-play-speed');
+  var ms=sp?parseInt(sp.value,10):350;
+  _sim.inspTimer=setInterval(function(){
+    if(_sim.inspIdx>=_sim.cycles.length-1){clearInterval(_sim.inspTimer);_sim.inspTimer=null;return;}
     simInspectorStep(1);
-  }, ms);
+  },ms);
 }
-
-function simInspectorPause() {
-  if (_sim.inspTimer){ clearInterval(_sim.inspTimer); _sim.inspTimer=null; }
-}
-
-function simInspectorReset() {
+function simInspectorPause(){ if(_sim.inspTimer){clearInterval(_sim.inspTimer);_sim.inspTimer=null;} }
+function simInspectorReset(){
   simInspectorPause(); _sim.inspIdx=0;
   var sl=document.getElementById('sim-cycle-slider'); if(sl) sl.value=0;
   _simInspRender(0);
 }
-
-function _simInspRender(idx) {
-  if (!_sim.cycles.length) return;
-  idx = Math.max(0, Math.min(idx, _sim.cycles.length-1));
-  var c = _sim.cycles[idx];
-  var ve = document.getElementById('sim-cycle-val');
-  if (ve) ve.textContent = idx + ' / ' + (_sim.cycles.length-1);
-
-  var color = SIM_STATE_COLORS[c.state_name] || 'var(--cyan)';
-  var cards = document.getElementById('sim-signal-cards'); if (!cards) return;
-  cards.innerHTML = '';
-
-  var rows = [
-    {n:'state_code',     v:c.state_raw+'  →  '+c.state_name,              ch:c.state_changed,   col:color},
-    {n:'event_code',     v:c.event_code_hex+' ('+c.event_code_int+')',    ch:c.event_code_int>0},
-    {n:'config_addr',    v:c.config_addr_hex,                              ch:false},
-    {n:'pipeline_stage', v:c.pipeline_stage,                               ch:!!c.fsm_busy},
-    {n:'fsm_busy',       v:c.fsm_busy ?'1 (pipeline active)':'0',          ch:!!c.fsm_busy},
-    {n:'output_valid',   v:c.output_valid?'1 (latched)':'0',               ch:!!c.output_valid},
-    {n:'timer_start',    v:c.timer_start?'1 ← timer restart':'0',          ch:!!c.timer_start},
-    {n:'reset',          v:c.reset?'1 ← RESET':'0',                        ch:!!c.reset},
+function _simInspRender(idx){
+  if(!_sim.cycles.length) return;
+  idx=Math.max(0,Math.min(idx,_sim.cycles.length-1));
+  var c=_sim.cycles[idx];
+  var ve=document.getElementById('sim-cycle-val');
+  if(ve) ve.textContent=idx+' / '+(_sim.cycles.length-1);
+  var color=SIM_STATE_COLORS[c.state_name]||'var(--cyan)';
+  var cards=document.getElementById('sim-signal-cards'); if(!cards) return;
+  cards.innerHTML='';
+  var rows=[
+    {n:'state_code',    v:c.state_raw+'  →  '+c.state_name, ch:c.state_changed, col:color},
+    {n:'event_code',    v:c.event_code_hex+' ('+c.event_code_int+')', ch:c.event_code_int>0},
+    {n:'config_addr',   v:c.config_addr_hex, ch:false},
+    {n:'pipeline_stage',v:c.pipeline_stage, ch:!!c.fsm_busy},
+    {n:'fsm_busy',      v:c.fsm_busy?'1 (pipeline active)':'0', ch:!!c.fsm_busy},
+    {n:'output_valid',  v:c.output_valid?'1 (latched)':'0', ch:!!c.output_valid},
+    {n:'timer_start',   v:c.timer_start?'1 ← timer restart':'0', ch:!!c.timer_start},
+    {n:'reset',         v:c.reset?'1 ← RESET':'0', ch:!!c.reset},
   ];
-  var outs = c.decoded_outputs||{};
-  Object.keys(outs).forEach(function(k){ rows.push({n:k, v:outs[k]?'1':'0', ch:!!outs[k]}); });
-
+  var outs=c.decoded_outputs||{};
+  Object.keys(outs).forEach(function(k){ rows.push({n:k,v:outs[k]?'1':'0',ch:!!outs[k]}); });
   rows.forEach(function(r){
     var d=document.createElement('div');
     d.className='sim-signal-card'+(r.ch?' changed':'')+(r.n==='state_code'?' sc-high':'')+(c.reset?' sc-error':'');
@@ -1375,16 +1290,14 @@ function _simInspRender(idx) {
       '<span class="sim-signal-val" style="color:'+(r.col||(r.ch?'var(--cyan)':'var(--txt-2)'))+'">'+(r.v||'')+'</span>';
     cards.appendChild(d);
   });
-
   var fmap={traffic:'traffic',vending:'vending',elevator:'elevator',serial:'serial'};
-  if (fmap[_sim.fsm]) _svgHighlight(fmap[_sim.fsm], c.state_idx||0);
+  if(fmap[_sim.fsm]) _svgHighlight(fmap[_sim.fsm],c.state_idx||0);
 }
-
-function _simBuildTransLog() {
+function _simBuildTransLog(){
   var log=document.getElementById('sim-trans-log'); if(!log) return;
   log.innerHTML='';
   var ts=_sim.cycles.filter(function(c){return c.state_changed;});
-  if (!ts.length){ log.innerHTML='<div class="sim-signal-placeholder">No transitions detected.</div>'; return; }
+  if(!ts.length){log.innerHTML='<div class="sim-signal-placeholder">No transitions.</div>';return;}
   [_sim.cycles[0]].concat(ts).forEach(function(c){
     var col=SIM_STATE_COLORS[c.state_name]||'var(--cyan)';
     var d=document.createElement('div'); d.className='sim-trans-entry';
@@ -1397,38 +1310,32 @@ function _simBuildTransLog() {
   log.scrollTop=log.scrollHeight;
 }
 
-/* ══════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
    WAVEFORM
-══════════════════════════════════════════════════════════════════ */
-function simRedrawWaveform() {
+═══════════════════════════════════════════════════════════════ */
+function simRedrawWaveform(){
   var con=document.getElementById('sim-waveform-live'); if(!con) return;
-  if (!_sim.cycles.length) {
-    con.innerHTML='<div class="sim-wf-placeholder">Run simulation first.</div>'; return;
-  }
-  function chk(id){ var e=document.getElementById(id); return e?e.checked:true; }
-  var showClk=chk('wf-chk-clk'), showSt=chk('wf-chk-state'), showEv=chk('wf-chk-event'),
-      showBu=chk('wf-chk-busy'), showVa=chk('wf-chk-valid'), showOu=chk('wf-chk-out');
+  if(!_sim.cycles.length){con.innerHTML='<div class="sim-wf-placeholder">Run simulation first.</div>';return;}
+  function chk(id){var e=document.getElementById(id);return e?e.checked:true;}
+  var showClk=chk('wf-chk-clk'),showSt=chk('wf-chk-state'),showEv=chk('wf-chk-event'),
+      showBu=chk('wf-chk-busy'),showVa=chk('wf-chk-valid'),showOu=chk('wf-chk-out');
   var okeys=Object.keys((_sim.cycles[0]&&_sim.cycles[0].decoded_outputs)||{});
-  var N=_sim.cycles.length, idx=_sim.inspIdx, W=100/N;
+  var N=_sim.cycles.length,idx=_sim.inspIdx,W=100/N;
   con.innerHTML='';
-
   /* Ruler */
   var ruler=document.createElement('div'); ruler.className='wf-signal-row';
   var rt='';
   for(var i=0;i<N;i++) rt+='<div class="wf-segment" style="left:'+(i*W)+'%;width:'+W+'%;border-right:1px solid rgba(71,85,105,.2)"><span style="font-size:.5rem;color:var(--txt-3);position:absolute;top:1px;left:2px">'+i+'</span></div>';
   ruler.innerHTML='<div class="wf-signal-name" style="font-size:.6rem;color:var(--txt-3)">CYCLE</div><div class="wf-signal-track" style="min-width:560px;position:relative">'+rt+'</div>';
   con.appendChild(ruler);
-
   var rows=[];
-  if(showClk) rows.push({l:'clk',         t:'clock'});
-  if(showSt)  rows.push({l:'state_code',  t:'bus', fn:function(c){return c.state_name;}});
-  if(showEv)  rows.push({l:'event_code',  t:'bus', fn:function(c){return c.event_code_hex;}});
-  if(showBu)  rows.push({l:'fsm_busy',    t:'bit', fn:function(c){return c.fsm_busy?1:0;}});
-  if(showVa)  rows.push({l:'output_valid',t:'bit', fn:function(c){return c.output_valid?1:0;}});
-  if(showOu)  okeys.forEach(function(k){ rows.push({l:k,t:'bit',fn:function(c){return (c.decoded_outputs&&c.decoded_outputs[k])?1:0;}}); });
-
-  var cursor='<div style="position:absolute;left:'+(idx*W+W/2)+'%;top:0;width:2px;height:100%;background:rgba(0,245,255,.8);pointer-events:none;z-index:5;box-shadow:0 0 6px rgba(0,245,255,.9)"></div>';
-
+  if(showClk) rows.push({l:'clk',t:'clock'});
+  if(showSt)  rows.push({l:'state_code',t:'bus',fn:function(c){return c.state_name;}});
+  if(showEv)  rows.push({l:'event_code',t:'bus',fn:function(c){return c.event_code_hex;}});
+  if(showBu)  rows.push({l:'fsm_busy',t:'bit',fn:function(c){return c.fsm_busy?1:0;}});
+  if(showVa)  rows.push({l:'output_valid',t:'bit',fn:function(c){return c.output_valid?1:0;}});
+  if(showOu) okeys.forEach(function(k){ rows.push({l:k,t:'bit',fn:function(c){return(c.decoded_outputs&&c.decoded_outputs[k])?1:0;}}); });
+  var cursor='<div style="position:absolute;left:'+(idx*W+W/2)+'%;top:0;width:2px;height:100%;background:rgba(0,245,255,.8);pointer-events:none;z-index:5"></div>';
   rows.forEach(function(row){
     var el=document.createElement('div'); el.className='wf-signal-row';
     var track='';
@@ -1445,7 +1352,7 @@ function simRedrawWaveform() {
   });
 }
 
-/* ── Public aliases for inline onchange handlers ── */
+/* ── Public aliases ── */
 window.simClearConsole   = simClearConsole;
 window.simDownloadVCD    = simDownloadVCD;
 window.simInspectorGoto  = simInspectorGoto;
@@ -1454,5 +1361,4 @@ window.simInspectorPause = simInspectorPause;
 window.simInspectorStep  = simInspectorStep;
 window.simInspectorReset = simInspectorReset;
 window.simRedrawWaveform = simRedrawWaveform;
-/* Noop for any stale onclick="simRunVHDL()" still in cache */
-window.simRunVHDL = function(e){ if(e){e.preventDefault();e.stopPropagation();} };v
+window.simRunVHDL = function(e){ if(e){e.preventDefault();e.stopPropagation();} };
